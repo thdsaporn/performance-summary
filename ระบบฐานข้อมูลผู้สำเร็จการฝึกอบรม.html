@@ -146,6 +146,7 @@ tbody tr:hover td{background:#f1f5f9;}
       </select>
       <button type="button" id="btn-add" class="primary">+ เพิ่มรายชื่อ</button>
       <button type="button" id="btn-course">+ เพิ่มรุ่นใหม่</button>
+      <button type="button" id="btn-toggle-id" title="คลิกเพื่อใส่รหัสปลดล็อคดูเลขบัตรประชาชน 13 หลักฉบับเต็ม">🔒 แสดงเลขบัตรเต็ม (ใส่รหัส)</button>
       <button type="button" id="btn-export">ส่งออก CSV</button>
       <button type="button" id="btn-sync">รีเฟรชข้อมูล</button>
       <button type="button" id="btn-pin">ตั้ง/เปลี่ยนรหัสยืนยัน</button>
@@ -225,6 +226,45 @@ let editingRid = null;
 let sessionUnlocked = false;
 let pinModalBlocking = false;
 let archiveMode = false;
+let isIdCardRevealed = false;
+
+function maskIdCard(id){
+  if(!id) return '-';
+  const clean = String(id).trim();
+  if(clean.length < 7) return clean;
+  return clean.slice(0, 5) + '••••••' + clean.slice(-2);
+}
+
+function formatIdCard(id){
+  if(!id) return '-';
+  if(isIdCardRevealed) return id;
+  return maskIdCard(id);
+}
+
+function toggleIdReveal(){
+  if(isIdCardRevealed){
+    isIdCardRevealed = false;
+    updateIdRevealUI();
+    renderTable();
+    toast('ซ่อนเลขบัตรประชาชนแล้ว (ตามมาตรฐานคุ้มครองข้อมูลส่วนบุคคล)');
+  } else {
+    verifyPin(()=>{
+      isIdCardRevealed = true;
+      updateIdRevealUI();
+      renderTable();
+      toast('ปลดล็อคแสดงเลขบัตรประชาชนฉบับเต็มแล้ว');
+    });
+  }
+}
+
+function updateIdRevealUI(){
+  const btn = document.getElementById('btn-toggle-id');
+  if(btn){
+    btn.innerHTML = isIdCardRevealed ? '🔓 ซ่อนเลขบัตร' : '🔒 แสดงเลขบัตรเต็ม (ใส่รหัส)';
+    btn.className = isIdCardRevealed ? 'primary' : '';
+    btn.title = isIdCardRevealed ? 'คลิกเพื่อซ่อน/เซ็นเซอร์เลขบัตรประชาชน' : 'คลิกเพื่อใส่รหัสปลดล็อคดูเลขบัตรประชาชน 13 หลักฉบับเต็ม';
+  }
+}
 
 function toArabicDigits(str){
   if(str===undefined || str===null) return '';
@@ -426,7 +466,7 @@ function renderTable(){
     tr.innerHTML =
       '<td style="text-align:center;font-weight:600;color:var(--text-2);">'+(start+i+1)+'</td>'+
       '<td><strong style="color:var(--text);">'+esc(r.rank)+' '+esc(r.first_name)+' '+esc(r.last_name)+'</strong></td>'+
-      '<td style="white-space:nowrap;font-family:monospace;font-size:12px;">'+esc(r.id_card||'-')+dupBadge+'</td>'+
+      '<td style="white-space:nowrap;font-family:monospace;font-size:12px;">'+esc(formatIdCard(r.id_card))+dupBadge+'</td>'+
       '<td style="white-space:nowrap;color:var(--text-2);font-size:12px;">'+esc(r.birth_date||'-')+'</td>'+
       '<td><div>'+esc(r.position||'-')+'</div>'+posDetail+'</td>'+
       '<td><div>'+esc(r.affiliation||'-')+'</div>'+affilDetail+'</td>'+
@@ -466,6 +506,11 @@ function showPersonProfile(rid){
     ? '<span class="badge pass" style="font-size:13px;padding:3px 10px;">ผ่านการทดสอบ</span>'
     : (r.test_result === 'ไม่ผ่าน' ? '<span class="badge fail" style="font-size:13px;padding:3px 10px;">ไม่ผ่าน</span>' : '<span class="badge neutral" style="font-size:13px;padding:3px 10px;">'+esc(r.test_result||'-')+'</span>');
 
+  const idDisplay = formatIdCard(r.id_card);
+  const unlockBtn = (!isIdCardRevealed && r.id_card)
+    ? ' <button type="button" class="small" id="btn-unlock-id-prof" style="font-size:11px;padding:2px 8px;margin-left:6px;height:22px;" title="ใส่รหัสเพื่อดูเลขบัตรเต็ม">🔒 ปลดล็อค</button>'
+    : '';
+
   root.innerHTML =
     '<div class="modal-overlay"><div class="modal" style="max-width:640px;">'+
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:14px;">'+
@@ -476,7 +521,7 @@ function showPersonProfile(rid){
       '<div>'+resBadge+'</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;font-size:13px;">'+
-      '<div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);"><div style="font-size:11px;color:var(--text-mute);">เลขประจำตัวประชาชน</div><div style="font-weight:600;font-family:monospace;font-size:14px;">'+esc(r.id_card||'-')+'</div></div>'+
+      '<div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);"><div style="font-size:11px;color:var(--text-mute);">เลขประจำตัวประชาชน</div><div style="font-weight:600;font-family:monospace;font-size:14px;display:flex;align-items:center;justify-content:space-between;"><span>'+esc(idDisplay)+'</span>'+unlockBtn+'</div></div>'+
       '<div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);"><div style="font-size:11px;color:var(--text-mute);">วันเดือนปีเกิด</div><div style="font-weight:600;">'+esc(r.birth_date||'-')+'</div></div>'+
       '<div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);"><div style="font-size:11px;color:var(--text-mute);">ตำแหน่ง</div><div style="font-weight:600;">'+esc(r.position||'-')+'</div></div>'+
       '<div style="background:#f8fafc;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border);"><div style="font-size:11px;color:var(--text-mute);">รายละเอียด/เลขที่ตำแหน่ง</div><div style="font-weight:600;">'+esc(r.position_detail||'-')+'</div></div>'+
@@ -504,10 +549,22 @@ function showPersonProfile(rid){
     closeModal();
     openRecordModal(r.rid);
   };
+  const unlockProfBtn = document.getElementById('btn-unlock-id-prof');
+  if(unlockProfBtn){
+    unlockProfBtn.onclick = ()=>{
+      verifyPin(()=>{
+        isIdCardRevealed = true;
+        updateIdRevealUI();
+        renderTable();
+        showPersonProfile(r.rid);
+        toast('ปลดล็อคแสดงเลขบัตรประชาชนฉบับเต็มแล้ว');
+      });
+    };
+  }
   document.getElementById('btn-copy-prof').onclick = ()=>{
     const txt = [
       'ชื่อ-สกุล: ' + r.rank + ' ' + r.first_name + ' ' + r.last_name,
-      'เลขบัตรประชาชน: ' + (r.id_card || '-'),
+      'เลขบัตรประชาชน: ' + (formatIdCard(r.id_card) || '-'),
       'วันเกิด: ' + (r.birth_date || '-'),
       'ตำแหน่ง: ' + (r.position || '-') + ' (' + (r.position_detail || '-') + ')',
       'สังกัด: ' + (r.affiliation || '-') + ' จว.' + (r.province || '-'),
@@ -1189,7 +1246,7 @@ function openCourseModal(){
 function exportCSV(){
   const headers = ['ลำดับ','ยศ','ชื่อ','ชื่อสกุล','เลขบัตรประจำตัวประชาชน','ตำแหน่ง','สังกัด','จังหวัด','รุ่น/หลักสูตร','ห้วงเวลา','ผลการทดสอบ','คะแนน','หมายเหตุ'];
   const rows = filtered.map((r,i)=>[
-    i+1, r.rank, r.first_name, r.last_name, r.id_card, r.position, r.affiliation,
+    i+1, r.rank, r.first_name, r.last_name, isIdCardRevealed ? r.id_card : maskIdCard(r.id_card), r.position, r.affiliation,
     r.province, r.course_name, r.period, r.test_result, r.score, r.remark
   ]);
   let csv = '\uFEFF' + headers.join(',') + '\n';
@@ -1211,6 +1268,7 @@ document.getElementById('f-result').addEventListener('change', applyFilters);
 document.getElementById('f-dup').addEventListener('change', applyFilters);
 document.getElementById('btn-add').addEventListener('click', ()=>openRecordModal(null));
 document.getElementById('btn-course').addEventListener('click', openCourseModal);
+document.getElementById('btn-toggle-id').addEventListener('click', toggleIdReveal);
 document.getElementById('btn-export').addEventListener('click', exportCSV);
 document.getElementById('btn-sync').addEventListener('click', loadDB);
 document.getElementById('btn-pin').addEventListener('click', ()=>{

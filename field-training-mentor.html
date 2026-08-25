@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจประเมินการฝึกหัดปฏิบัติราชการ (สำหรับ ครูพี่เลี้ยง) | กก.๕ บก.กฝ.บช.ตชด.</title>
+  <title>ระบบตรวจประเมินการฝึกหัดปฏิบัติราชการ (สำหรับ ครูพี่เลี้ยง) | กก.5 บก.กฝ.บช.ตชด.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -190,7 +190,7 @@
         <div class="badge-icon">👨‍✈️</div>
         <div>
           <h1>ระบบตรวจประเมินและออกรายงาน (สำหรับ ครูพี่เลี้ยง)</h1>
-          <p>ตรวจบันทึกรายวัน · แบบประเมินรายเดือน (แบบที่ ๒) · แบบสรุปผล (แบบที่ ๓) · กก.๕ บก.กฝ.บช.ตชด.</p>
+          <p>ตรวจบันทึกรายวัน · แบบประเมินรายเดือน (แบบที่ 2) · แบบสรุปผล (แบบที่ 3) · กก.5 บก.กฝ.บช.ตชด.</p>
         </div>
       </div>
       
@@ -202,13 +202,13 @@
     <!-- Mentor Mode Tabs: Daily Evaluation vs Monthly/Summary Forms -->
     <div class="mentor-tabs no-print">
       <button type="button" class="mentor-tab-btn active" id="btn_tab_daily" onclick="switchMentorTab('daily')">
-        📝 ๑. ตรวจประเมินบันทึกรายวัน (แบบที่ ๑)
+        📝 1. ตรวจประเมินบันทึกรายวัน (แบบที่ 1)
       </button>
       <button type="button" class="mentor-tab-btn" id="btn_tab_monthly" onclick="switchMentorTab('monthly')">
-        📅 ๒. แบบประเมินรายเดือน (แบบที่ ๒)
+        📅 2. แบบประเมินรายเดือน (แบบที่ 2)
       </button>
       <button type="button" class="mentor-tab-btn" id="btn_tab_summary" onclick="switchMentorTab('summary')">
-        🎖️ ๓. แบบสรุปผลการประเมินของครูพี่เลี้ยง (แบบที่ ๓)
+        🎖️ 3. แบบสรุปผลการประเมินของครูพี่เลี้ยง (แบบที่ 3)
       </button>
     </div>
 
@@ -217,7 +217,7 @@
       <div class="card" style="border-top:4px solid #7c3aed;">
         <div class="card-header">
           <div class="card-title">
-            <span>📋 รายการบันทึกการปฏิบัติงานประจำวันของ นสต. (แบบประเมินแบบที่ ๑)</span>
+            <span>📋 รายการบันทึกการปฏิบัติงานประจำวันของ นสต. (แบบประเมินแบบที่ 1)</span>
           </div>
           <div style="font-size:13px;color:var(--text-muted);">
             รอตรวจ: <strong id="lbl_pending_count" style="color:var(--amber);">0</strong> รายการ | ตรวจแล้ว: <strong id="lbl_done_count" style="color:var(--success);">0</strong> รายการ
@@ -244,8 +244,8 @@
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">ภาคเรียน:</label>
             <select id="filter_semester" onchange="renderDailyTable()">
               <option value="">ทั้งหมด</option>
-              <option value="1">ภาคเรียนที่ ๑</option>
-              <option value="2">ภาคเรียนที่ ๒</option>
+              <option value="1">ภาคเรียนที่ 1</option>
+              <option value="2">ภาคเรียนที่ 2</option>
             </select>
           </div>
         </div>
@@ -272,12 +272,12 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 2: MONTHLY EVALUATION FORM (แบบที่ ๒) ==================== -->
+    <!-- ==================== TAB 2: MONTHLY EVALUATION FORM (แบบที่ 2) ==================== -->
     <div id="tab_monthly_view" style="display:none;">
       <div class="card" style="border-top:4px solid var(--blue);">
         <div class="card-header">
           <div class="card-title">
-            <span>📅 แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ ๒)</span>
+            <span>📅 แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ 2)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
             <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบประเมินรายเดือน (PDF)</button>
@@ -299,8 +299,8 @@
 
         <!-- Official Form 2 Preview Header -->
         <div style="text-align:center;margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ ๒)</h3>
-          <p style="font-size:13px;color:var(--text-muted);">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.)  · กก.๕ บก.กฝ.บช.ตชด.</p>
+          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ 2)</h3>
+          <p style="font-size:13px;color:var(--text-muted);">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.)  · กก.5 บก.กฝ.บช.ตชด.</p>
         </div>
 
         <div style="background:#f8fafc;padding:12px 16px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
@@ -355,12 +355,12 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 3: EVALUATION SUMMARY FORM (แบบที่ ๓) ==================== -->
+    <!-- ==================== TAB 3: EVALUATION SUMMARY FORM (แบบที่ 3) ==================== -->
     <div id="tab_summary_view" style="display:none;">
       <div class="card" style="border-top:4px solid var(--gold-deep);">
         <div class="card-header">
           <div class="card-title">
-            <span>🎖️ แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการรวม (แบบประเมินแบบที่ ๓)</span>
+            <span>🎖️ แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการรวม (แบบประเมินแบบที่ 3)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
             <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบสรุปผลรวม (PDF)</button>
@@ -377,27 +377,27 @@
         </div>
 
         <div style="text-align:center;margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ ๓)</h3>
-          <p style="font-size:13px;color:var(--text-muted);">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
+          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ 3)</h3>
+          <p style="font-size:13px;color:var(--text-muted);">ตามหนังสือ กองบัญชาการศึกษา ที่ 0038.24/1629 ลง 18 พฤศจิกายน 2567</p>
         </div>
 
         <!-- Summary Score Card Box -->
         <div style="background:#fef9e7;border:1.5px solid #fde68a;border-radius:10px;padding:16px;margin-bottom:16px;">
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;text-align:center;">
             <div>
-              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ ๑ (เต็ม ๓๔๐)</div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ 1 (เต็ม 340)</div>
               <div style="font-size:22px;font-weight:700;color:var(--blue);"><span id="m_rep3_s1_val">340</span> คะแนน</div>
             </div>
             <div>
-              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ ๒ (เต็ม ๘๒๐)</div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ 2 (เต็ม 820)</div>
               <div style="font-size:22px;font-weight:700;color:#7c3aed;"><span id="m_rep3_s2_val">820</span> คะแนน</div>
             </div>
             <div>
-              <div style="font-size:12px;color:#92400e;font-weight:600;">รวมคะแนนการฝึก (เต็ม ๑,๑๖๐)</div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">รวมคะแนนการฝึก (เต็ม 1,160)</div>
               <div style="font-size:22px;font-weight:700;color:var(--gold-deep);"><span id="m_rep3_total_val">1,160</span> คะแนน</div>
             </div>
             <div>
-              <div style="font-size:12px;color:#92400e;font-weight:600;">ค่าน้ำหนัก ๑๐% (เต็ม ๓๘๗)</div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ค่าน้ำหนัก 10% (เต็ม 387)</div>
               <div style="font-size:22px;font-weight:700;color:var(--success);"><span id="m_rep3_weight_val">387.00</span> คะแนน</div>
             </div>
           </div>
@@ -424,7 +424,7 @@
   <div id="evalModal" class="modal-overlay" style="display:none;">
     <div class="modal">
       <div class="modal-hdr">
-        <h3 id="modal_title">👨‍✈️ ตรวจประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ ๑)</h3>
+        <h3 id="modal_title">👨‍✈️ ตรวจประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ 1)</h3>
         <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
       </div>
 
@@ -445,7 +445,7 @@
 
         <!-- 1. ก่อนปฏิบัติงาน -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">๑. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกาย/จิตใจ)</label>
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">1. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกาย/จิตใจ)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_prep_pass">
               <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles()">
@@ -461,7 +461,7 @@
 
         <!-- 2. การปฏิบัติงาน -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">๒. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">2. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_work_pass">
               <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles()">
@@ -477,7 +477,7 @@
 
         <!-- 3. หลังปฏิบัติงาน -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">๓. หลังปฏิบัติงาน (การบำรุงรักษาอุปกรณ์/ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">3. หลังปฏิบัติงาน (การบำรุงรักษาอุปกรณ์/ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_post_pass">
               <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles()">
@@ -493,7 +493,7 @@
 
         <!-- ข้อเสนอแนะ -->
         <div style="margin-bottom:16px;">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">ส่วนที่ ๓ : ข้อเสนอแนะประจำวันของครูพี่เลี้ยง</label>
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">ส่วนที่ 3 : ข้อเสนอแนะประจำวันของครูพี่เลี้ยง</label>
           <textarea id="eval_mentor_feedback" placeholder="ให้คำแนะนำ ชี้แนะแนวทาง หรือข้อคิดเห็นแก่ นสต. ..." style="width:100%;min-height:75px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"></textarea>
         </div>
 
@@ -736,7 +736,7 @@
       });
     }
 
-    // ================= Monthly Report (แบบที่ ๒) =================
+    // ================= Monthly Report (แบบที่ 2) =================
     function renderMonthlyReport() {
       const selectedName = document.getElementById('m_monthly_trainee').value;
       const selectedMonth = document.getElementById('m_monthly_month').value; // 'YYYY-MM'
@@ -749,7 +749,7 @@
       
       
 
-      // Format month text (e.g. สิงหาคม ๒๕๖๗)
+      // Format month text (e.g. สิงหาคม 2567)
       const [year, month] = selectedMonth.split('-');
       const thaiMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
       const thaiYear = parseInt(year) + 543;
@@ -806,7 +806,7 @@
       document.getElementById('m_rep2_tot_result').textContent = (totalPass >= totalFail && totalEval > 0) ? 'ผ่านเกณฑ์' : 'ไม่ผ่านเกณฑ์';
     }
 
-    // ================= Summary Report (แบบที่ ๓) =================
+    // ================= Summary Report (แบบที่ 3) =================
     function renderSummaryReport() {
       const selectedName = document.getElementById('m_summary_trainee').value;
       if (!selectedName) return;

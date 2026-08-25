@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (งานการฝึกและวิชาการ) | บช.ศ. & กก.๕ บก.กฝ.บช.ตชด.</title>
+  <title>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (งานการฝึกและวิชาการ) | บช.ศ. & กก.5 บก.กฝ.บช.ตชด.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -225,7 +225,7 @@
         <div class="badge-icon">📊</div>
         <div>
           <h1>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (งานการฝึกและวิชาการ)</h1>
-          <p>สูตร บช.ศ. ๑,๑๖๐ คะแนน · ค่าน้ำหนัก ๑๐% (๓๘๗ คะแนน) · ดูรายคน / ดูทุกคนทั้งรุ่น · กก.๕ บก.กฝ.บช.ตชด.</p>
+          <p>สูตร บช.ศ. 1,160 คะแนน · ค่าน้ำหนัก 10% (387 คะแนน) · ดูรายคน / ดูทุกคนทั้งรุ่น · กก.5 บก.กฝ.บช.ตชด.</p>
         </div>
       </div>
       <div class="header-actions">
@@ -241,10 +241,10 @@
     <!-- Mode Switcher Tabs (Individual vs Batch Summary) -->
     <div class="mode-tabs no-print">
       <button type="button" class="mode-tab active" id="btn_mode_individual" onclick="switchAdminMode('individual')">
-        👤 ๑. ดูผลคะแนนรายบุคคล (Individual View)
+        👤 1. ดูผลคะแนนรายบุคคล (Individual View)
       </button>
       <button type="button" class="mode-tab" id="btn_mode_batch" onclick="switchAdminMode('batch')">
-        👥 ๒. ดูบัญชีรวมคะแนนทุกคนทั้งรุ่น (Batch Ranking Summary)
+        👥 2. ดูบัญชีรวมคะแนนทุกคนทั้งรุ่น (Batch Ranking Summary)
       </button>
     </div>
 
@@ -269,10 +269,10 @@
       <!-- Individual Score Summary Dashboard -->
       <div class="summary-grid">
         <div class="stat-box s1">
-          <div class="stat-label">ภาคเรียนที่ ๑ (๔ หัวข้อปฏิบัติ)</div>
+          <div class="stat-label">ภาคเรียนที่ 1 (4 หัวข้อปฏิบัติ)</div>
           <div class="stat-value">
             <span id="ind_sum_sem1">340</span>
-            <small>/ ๓๔๐ คะแนน</small>
+            <small>/ 340 คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>คิดเป็นร้อยละ</span>
@@ -281,10 +281,10 @@
         </div>
 
         <div class="stat-box s2">
-          <div class="stat-label">ภาคเรียนที่ ๒ (๑๐ หัวข้อปฏิบัติ)</div>
+          <div class="stat-label">ภาคเรียนที่ 2 (10 หัวข้อปฏิบัติ)</div>
           <div class="stat-value">
             <span id="ind_sum_sem2">820</span>
-            <small>/ ๘๒๐ คะแนน</small>
+            <small>/ 820 คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>คิดเป็นร้อยละ</span>
@@ -296,19 +296,19 @@
           <div class="stat-label">คะแนนรวมการฝึกหัดปฏิบัติราชการ</div>
           <div class="stat-value" style="color:var(--gold-deep);">
             <span id="ind_sum_total">1,160</span>
-            <small>/ ๑,๑๖๐ คะแนน</small>
+            <small>/ 1,160 คะแนน</small>
           </div>
           <div class="stat-footer">
-            <span>ผลรวมทั้ง ๒ ภาคเรียน</span>
+            <span>ผลรวมทั้ง 2 ภาคเรียน</span>
             <strong id="ind_pct_total">100.00%</strong>
           </div>
         </div>
 
         <div class="stat-box weight">
-          <div class="stat-label">คะแนนแปรผันค่าน้ำหนัก บช.ศ. (๑๐%)</div>
+          <div class="stat-label">คะแนนแปรผันค่าน้ำหนัก บช.ศ. (10%)</div>
           <div class="stat-value" style="color:var(--success);">
             <span id="ind_sum_weighted">387.00</span>
-            <small>/ ๓๘๗ คะแนน</small>
+            <small>/ 387 คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>สำหรับจัดลำดับเลือกตำแหน่ง</span>
@@ -321,8 +321,8 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">
-            <span>📘 ภาคเรียนที่ ๑ : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
-            <span class="tag">เต็ม ๓๔๐ คะแนน</span>
+            <span>📘 ภาคเรียนที่ 1 : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
+            <span class="tag">เต็ม 340 คะแนน</span>
           </div>
           <div style="font-size:13px;color:var(--navy);font-weight:600;">
             คะแนนที่ได้: <span id="ind_tbl_sem1_score" style="color:var(--blue);font-size:15px;">340</span> / 340 คะแนน
@@ -344,11 +344,11 @@
             <tbody id="ind_tbody_sem1"></tbody>
             <tfoot>
               <tr class="row-total">
-                <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๑</td>
+                <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ 1</td>
                 <td style="text-align:center;" id="ind_tot_s1_eval">-</td>
                 <td style="text-align:center;" id="ind_tot_s1_pass">-</td>
                 <td style="text-align:center;" id="ind_tot_s1_fail">-</td>
-                <td style="text-align:center;">๓๔๐</td>
+                <td style="text-align:center;">340</td>
                 <td class="score-cell" id="ind_tot_s1_score">340</td>
               </tr>
             </tfoot>
@@ -360,8 +360,8 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">
-            <span>📗 ภาคเรียนที่ ๒ : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
-            <span class="tag">เต็ม ๘๒๐ คะแนน</span>
+            <span>📗 ภาคเรียนที่ 2 : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
+            <span class="tag">เต็ม 820 คะแนน</span>
           </div>
           <div style="font-size:13px;color:var(--navy);font-weight:600;">
             คะแนนที่ได้: <span id="ind_tbl_sem2_score" style="color:var(--purple);font-size:15px;">820</span> / 820 คะแนน
@@ -383,11 +383,11 @@
             <tbody id="ind_tbody_sem2"></tbody>
             <tfoot>
               <tr class="row-total">
-                <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๒</td>
+                <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ 2</td>
                 <td style="text-align:center;" id="ind_tot_s2_eval">-</td>
                 <td style="text-align:center;" id="ind_tot_s2_pass">-</td>
                 <td style="text-align:center;" id="ind_tot_s2_fail">-</td>
-                <td style="text-align:center;">๘๒๐</td>
+                <td style="text-align:center;">820</td>
                 <td class="score-cell" id="ind_tot_s2_score">820</td>
               </tr>
             </tfoot>
@@ -431,7 +431,7 @@
         <div class="stat-box s1">
           <div class="stat-label">จำนวน นสต. ในรุ่นทั้งหมด</div>
           <div class="stat-value"><span id="batch_count_trainees">0</span> <small>นาย</small></div>
-          <div class="stat-footer"><span>กก.๕ บก.กฝ.บช.ตชด.</span></div>
+          <div class="stat-footer"><span>กก.5 บก.กฝ.บช.ตชด.</span></div>
         </div>
         <div class="stat-box s2">
           <div class="stat-label">จำนวนบันทึกประจำวันทั้งหมด</div>
@@ -444,7 +444,7 @@
           <div class="stat-footer"><span>เกณฑ์ผ่าน >= 60%</span></div>
         </div>
         <div class="stat-box weight">
-          <div class="stat-label">คะแนนเฉลี่ยทั้งรุ่น (เต็ม ๑,๑๖๐)</div>
+          <div class="stat-label">คะแนนเฉลี่ยทั้งรุ่น (เต็ม 1,160)</div>
           <div class="stat-value" style="color:var(--success);"><span id="batch_avg_score">0</span> <small>คะแนน</small></div>
           <div class="stat-footer"><span>คะแนนเฉลี่ยค่าน้ำหนัก: <strong id="batch_avg_weighted">0</strong></span></div>
         </div>
@@ -471,10 +471,10 @@
                 <th class="col-desc" style="min-width:140px;">สภ. ที่ฝึกปฏิบัติ</th>
                 <th class="col-desc" style="min-width:140px;">ครูพี่เลี้ยง</th>
                 <th style="width:85px;">บันทึก (วัน)</th>
-                <th style="width:95px;">ภาค ๑<br>(๓๔๐)</th>
-                <th style="width:95px;">ภาค ๒<br>(๘๒๐)</th>
-                <th style="width:110px;">คะแนนรวม<br>(๑,๑๖๐)</th>
-                <th style="width:115px;">ค่าน้ำหนัก ๑๐%<br>(๓๘๗ คะแนน)</th>
+                <th style="width:95px;">ภาค 1<br>(340)</th>
+                <th style="width:95px;">ภาค 2<br>(820)</th>
+                <th style="width:110px;">คะแนนรวม<br>(1,160)</th>
+                <th style="width:115px;">ค่าน้ำหนัก 10%<br>(387 คะแนน)</th>
                 <th style="width:95px;">ผลการฝึก</th>
                 <th style="width:85px;" class="no-print">ดูคะแนน</th>
               </tr>
@@ -490,8 +490,8 @@
     <div class="card print-only">
       <div style="text-align:center;margin-bottom:14pt;">
         <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. </h2>
-        <p style="font-size:11.5pt;">กองกำกับการ ๕ กองบังคับการฝึกพิเศษ กองบัญชาการตำรวจตระเวนชายแดน (ค่ายนเรศวรมหาราช)</p>
-        <p style="font-size:10.5pt;color:#444;">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
+        <p style="font-size:11.5pt;">กองกำกับการ 5 กองบังคับการฝึกพิเศษ กองบัญชาการตำรวจตระเวนชายแดน (ค่ายนเรศวรมหาราช)</p>
+        <p style="font-size:10.5pt;color:#444;">ตามหนังสือ กองบัญชาการศึกษา ที่ 0038.24/1629 ลง 18 พฤศจิกายน 2567</p>
       </div>
 
       </div>
@@ -541,27 +541,27 @@
 
   <script>
     const SEMESTER_1_CALC_ITEMS = [
-      { id: 's1_1', no: '๑.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
-      { id: 's1_2_1', no: '๒.๑', title: 'ความรู้ด้านงานสารบรรณ', sub: 'รับ-ส่ง หนังสือ, ร่างหนังสือ, ชั้นความลับ, เลขหนังสือ', maxScore: 80 },
-      { id: 's1_2_2', no: '๒.๒', title: 'การเขียนบันทึกต่างๆ', sub: 'บันทึกจับกุม/ตรวจค้น, รายงานประจำวัน, ใบสั่ง, รายงานสืบสวน', maxScore: 80 },
-      { id: 's1_2_3', no: '๒.๓', title: 'ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', sub: 'Polis, E-cop, วิทยุสื่อสาร, สมุดคุมรับแจ้งเหตุ', maxScore: 80 },
-      { id: 's1_2_4', no: '๒.๔', title: 'การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', sub: 'การให้คำแนะนำ ปรึกษา, มวลชนสัมพันธ์', maxScore: 80 },
-      { id: 's1_3', no: '๓.', title: 'หลังปฏิบัติงาน', sub: 'เก็บ/บำรุงรักษาอุปกรณ์ ยานพาหนะ, สรุปรายงานผล', maxScore: 10 }
+      { id: 's1_1', no: '1.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
+      { id: 's1_2_1', no: '2.1', title: 'ความรู้ด้านงานสารบรรณ', sub: 'รับ-ส่ง หนังสือ, ร่างหนังสือ, ชั้นความลับ, เลขหนังสือ', maxScore: 80 },
+      { id: 's1_2_2', no: '2.2', title: 'การเขียนบันทึกต่างๆ', sub: 'บันทึกจับกุม/ตรวจค้น, รายงานประจำวัน, ใบสั่ง, รายงานสืบสวน', maxScore: 80 },
+      { id: 's1_2_3', no: '2.3', title: 'ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', sub: 'Polis, E-cop, วิทยุสื่อสาร, สมุดคุมรับแจ้งเหตุ', maxScore: 80 },
+      { id: 's1_2_4', no: '2.4', title: 'การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', sub: 'การให้คำแนะนำ ปรึกษา, มวลชนสัมพันธ์', maxScore: 80 },
+      { id: 's1_3', no: '3.', title: 'หลังปฏิบัติงาน', sub: 'เก็บ/บำรุงรักษาอุปกรณ์ ยานพาหนะ, สรุปรายงานผล', maxScore: 10 }
     ];
 
     const SEMESTER_2_CALC_ITEMS = [
-      { id: 's2_1', no: '๑.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
-      { id: 's2_2_5', no: '๒.๕', title: 'ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม', sub: 'อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา ๕ กลุ่ม', maxScore: 80 },
-      { id: 's2_2_6', no: '๒.๖', title: 'การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา', sub: 'ค้นตัว, พันธนาการ, ทรัพย์สิน/อาหารญาติ, พิมพ์ลายนิ้วมือ', maxScore: 80 },
-      { id: 's2_2_7', no: '๒.๗', title: 'การเผชิญเหตุ/ตรวจค้น/จับกุม', sub: 'รับแจ้งเหตุ, บันทึกจับกุม, ตรวจค้นบุคคล/ยานพาหนะ', maxScore: 80 },
-      { id: 's2_2_8', no: '๒.๘', title: 'การปฏิบัติงานสายตรวจ', sub: 'สายตรวจเดินเท้า, รถจักรยานยนต์, รถยนต์, สายตรวจตำบล', maxScore: 80 },
-      { id: 's2_2_9', no: '๒.๙', title: 'การปฏิบัติงานด้านชุมชนสัมพันธ์', sub: 'มวลชนสัมพันธ์, ลงพื้นที่ชุมชน, ประสานงานผู้นำชุมชน', maxScore: 80 },
-      { id: 's2_2_10', no: '๒.๑๐', title: 'ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ', sub: 'การรักษาความปลอดภัยขบวนเสด็จ, บุคคลสำคัญ', maxScore: 80 },
-      { id: 's2_2_11', no: '๒.๑๑', title: 'ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น', sub: 'พ.ร.บ.จราจรทางบก, พ.ร.บ.รถยนต์, กฎหมายขนส่ง', maxScore: 80 },
-      { id: 's2_2_12', no: '๒.๑๒', title: 'การปฏิบัติงานด้านการจราจร', sub: 'อำนวยการจราจร, เขียนใบสั่ง, ตรวจจับความเร็ว', maxScore: 80 },
-      { id: 's2_2_13', no: '๒.๑๓', title: 'ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน', sub: 'ข้อมูลท้องถิ่น, บุคคล, แผนประทุษกรรม, สมุดภาพคนร้าย', maxScore: 80 },
-      { id: 's2_2_14', no: '๒.๑๔', title: 'การปฏิบัติงานด้านสืบสวน/สอบสวน', sub: 'เฝ้าจุด, สะกดรอย, ล่อซื้อ, ข่าวกรอง, ซักถามบุคคล, จับกุม', maxScore: 80 },
-      { id: 's2_3', no: '๓.', title: 'หลังปฏิบัติงาน', sub: 'เก็บ/บำรุงรักษาอุปกรณ์ ยานพาหนะ, สรุปรายงานผล', maxScore: 10 }
+      { id: 's2_1', no: '1.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
+      { id: 's2_2_5', no: '2.5', title: 'ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม', sub: 'อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา 5 กลุ่ม', maxScore: 80 },
+      { id: 's2_2_6', no: '2.6', title: 'การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา', sub: 'ค้นตัว, พันธนาการ, ทรัพย์สิน/อาหารญาติ, พิมพ์ลายนิ้วมือ', maxScore: 80 },
+      { id: 's2_2_7', no: '2.7', title: 'การเผชิญเหตุ/ตรวจค้น/จับกุม', sub: 'รับแจ้งเหตุ, บันทึกจับกุม, ตรวจค้นบุคคล/ยานพาหนะ', maxScore: 80 },
+      { id: 's2_2_8', no: '2.8', title: 'การปฏิบัติงานสายตรวจ', sub: 'สายตรวจเดินเท้า, รถจักรยานยนต์, รถยนต์, สายตรวจตำบล', maxScore: 80 },
+      { id: 's2_2_9', no: '2.9', title: 'การปฏิบัติงานด้านชุมชนสัมพันธ์', sub: 'มวลชนสัมพันธ์, ลงพื้นที่ชุมชน, ประสานงานผู้นำชุมชน', maxScore: 80 },
+      { id: 's2_2_10', no: '2.10', title: 'ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ', sub: 'การรักษาความปลอดภัยขบวนเสด็จ, บุคคลสำคัญ', maxScore: 80 },
+      { id: 's2_2_11', no: '2.11', title: 'ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น', sub: 'พ.ร.บ.จราจรทางบก, พ.ร.บ.รถยนต์, กฎหมายขนส่ง', maxScore: 80 },
+      { id: 's2_2_12', no: '2.12', title: 'การปฏิบัติงานด้านการจราจร', sub: 'อำนวยการจราจร, เขียนใบสั่ง, ตรวจจับความเร็ว', maxScore: 80 },
+      { id: 's2_2_13', no: '2.13', title: 'ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน', sub: 'ข้อมูลท้องถิ่น, บุคคล, แผนประทุษกรรม, สมุดภาพคนร้าย', maxScore: 80 },
+      { id: 's2_2_14', no: '2.14', title: 'การปฏิบัติงานด้านสืบสวน/สอบสวน', sub: 'เฝ้าจุด, สะกดรอย, ล่อซื้อ, ข่าวกรอง, ซักถามบุคคล, จับกุม', maxScore: 80 },
+      { id: 's2_3', no: '3.', title: 'หลังปฏิบัติงาน', sub: 'เก็บ/บำรุงรักษาอุปกรณ์ ยานพาหนะ, สรุปรายงานผล', maxScore: 10 }
     ];
 
     const STORAGE_KEY = 'police_field_training_logs_v1';
@@ -1010,20 +1010,20 @@
       roster = DEFAULT_ROSTER;
       logs = [
         // นสต. ทศพร สุมาลี
-        { id: 'l1', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '๒.๑ ความรู้ด้านงานสารบรรณ', traineeNote: 'รับ-ส่งหนังสือราชการผ่านระบบสารบรรณอิเล็กทรอนิกส์ ร่างหนังสือขอรับการสนับสนุน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความละเอียดรอบคอบดีมาก' },
-        { id: 'l2', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-04', semester: '1', topicCode: 's1_2_2', topicName: '๒.๒ การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกเขียนบันทึกรายงานประจำวันรับแจ้งเหตุเอกสารหาย และบันทึกเปรียบเทียบปรับ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เข้าใจขั้นตอนการลง ปจว.' },
-        { id: 'l3', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-05', semester: '1', topicCode: 's1_2_3', topicName: '๒.๓ ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', traineeNote: 'ฝึกใช้งานระบบ POLIS ตรวจสอบข้อมูลหมายจับ และสมุดคุมรับแจ้งเหตุ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ใช้ระบบคอมพิวเตอร์ได้อย่างคล่องแคล่ว' },
-        { id: 'l4', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-06', semester: '1', topicCode: 's1_2_4', topicName: '๒.๔ การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', traineeNote: 'ปฏิบัติหน้าที่ประจำจุด One Stop Service ให้คำแนะนำประชาชนที่มาติดต่อราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'กิริยาวาจาสุภาพเรียบร้อยดีมาก' },
-        { id: 'l5', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '๒.๘ การปฏิบัติงานสายตรวจ', traineeNote: 'ออกตรวจพื้นที่เขตรับผิดชอบร่วมกับสายตรวจ จยย. ตรวจตู้แดงร้านทอง ธนาคาร', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ปฏิบัติตามหลักยุทธวิธีตำรวจได้ดี' },
-        { id: 'l6', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-11', semester: '2', topicCode: 's2_2_12', topicName: '๒.๑๒ การปฏิบัติงานด้านการจราจร', traineeNote: 'อำนวยความสะดวกการจราจรบริเวณสี่แยกหน้าโรงเรียนช่วงเวลาเร่งด่วน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ให้สัญญาณมือและนกหวีดได้ถูกต้อง' },
-        { id: 'l7', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-12', semester: '2', topicCode: 's2_2_14', topicName: '๒.๑๔ การปฏิบัติงานด้านสืบสวน/สอบสวน', traineeNote: 'ร่วมกับชุดสืบสวนตรวจสอบกล้องวงจรปิด CCTV ติดตามเส้นทางหลบหนีคนร้าย', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความช่างสังเกตเป็นอย่างดี' },
+        { id: 'l1', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '2.1 ความรู้ด้านงานสารบรรณ', traineeNote: 'รับ-ส่งหนังสือราชการผ่านระบบสารบรรณอิเล็กทรอนิกส์ ร่างหนังสือขอรับการสนับสนุน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความละเอียดรอบคอบดีมาก' },
+        { id: 'l2', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-04', semester: '1', topicCode: 's1_2_2', topicName: '2.2 การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกเขียนบันทึกรายงานประจำวันรับแจ้งเหตุเอกสารหาย และบันทึกเปรียบเทียบปรับ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เข้าใจขั้นตอนการลง ปจว.' },
+        { id: 'l3', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-05', semester: '1', topicCode: 's1_2_3', topicName: '2.3 ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', traineeNote: 'ฝึกใช้งานระบบ POLIS ตรวจสอบข้อมูลหมายจับ และสมุดคุมรับแจ้งเหตุ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ใช้ระบบคอมพิวเตอร์ได้อย่างคล่องแคล่ว' },
+        { id: 'l4', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-06', semester: '1', topicCode: 's1_2_4', topicName: '2.4 การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', traineeNote: 'ปฏิบัติหน้าที่ประจำจุด One Stop Service ให้คำแนะนำประชาชนที่มาติดต่อราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'กิริยาวาจาสุภาพเรียบร้อยดีมาก' },
+        { id: 'l5', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '2.8 การปฏิบัติงานสายตรวจ', traineeNote: 'ออกตรวจพื้นที่เขตรับผิดชอบร่วมกับสายตรวจ จยย. ตรวจตู้แดงร้านทอง ธนาคาร', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ปฏิบัติตามหลักยุทธวิธีตำรวจได้ดี' },
+        { id: 'l6', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-11', semester: '2', topicCode: 's2_2_12', topicName: '2.12 การปฏิบัติงานด้านการจราจร', traineeNote: 'อำนวยความสะดวกการจราจรบริเวณสี่แยกหน้าโรงเรียนช่วงเวลาเร่งด่วน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ให้สัญญาณมือและนกหวีดได้ถูกต้อง' },
+        { id: 'l7', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-12', semester: '2', topicCode: 's2_2_14', topicName: '2.14 การปฏิบัติงานด้านสืบสวน/สอบสวน', traineeNote: 'ร่วมกับชุดสืบสวนตรวจสอบกล้องวงจรปิด CCTV ติดตามเส้นทางหลบหนีคนร้าย', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความช่างสังเกตเป็นอย่างดี' },
 
         // นสต. สมชาย ใจดี
-        { id: 'l8', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '๒.๑ ความรู้ด้านงานสารบรรณ', traineeNote: 'ลงทะเบียนรับหนังสือราชการและจัดส่งต่อให้ผู้บังคับบัญชา', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เรียบร้อยดี' },
-        { id: 'l9', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '๒.๘ การปฏิบัติงานสายตรวจ', traineeNote: 'ตรวจตู้แดงตลาดแม่แตง และประสานงานชุมชน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความกระตือรือร้น' },
+        { id: 'l8', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '2.1 ความรู้ด้านงานสารบรรณ', traineeNote: 'ลงทะเบียนรับหนังสือราชการและจัดส่งต่อให้ผู้บังคับบัญชา', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เรียบร้อยดี' },
+        { id: 'l9', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '2.8 การปฏิบัติงานสายตรวจ', traineeNote: 'ตรวจตู้แดงตลาดแม่แตง และประสานงานชุมชน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความกระตือรือร้น' },
 
         // นสต. วิชัย รักชาติ
-        { id: 'l10', traineeName: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา', date: '2026-08-03', semester: '1', topicCode: 's1_2_2', topicName: '๒.๒ การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกร่างบันทึกข้อความราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ภาษาเขียนถูกต้อง' }
+        { id: 'l10', traineeName: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา', date: '2026-08-03', semester: '1', topicCode: 's1_2_2', topicName: '2.2 การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกร่างบันทึกข้อความราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ภาษาเขียนถูกต้อง' }
       ];
 
       saveData();

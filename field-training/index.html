@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบบันทึกและประเมินผลการฝึกหัดปฏิบัติราชการ นสต. | บช.ศ. & กฝ.บช.ตชด.</title>
+  <title>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (ฝ่ายฝึกฯ และวิชาการ) | บช.ศ. & กก.๕ บก.กฝ.บช.ตชด.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -29,22 +29,21 @@
       --blue-bg: #eff6ff;
       --amber: #d97706;
       --amber-bg: #fffbeb;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
       --radius: 10px;
       --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Sarabun', sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.55;
       font-size: 15px;
       padding-bottom: 60px;
     }
-
-    /* Header */
     header {
       background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
       color: white;
@@ -59,451 +58,168 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
-    }
-    .brand-title {
-      display: flex;
-      align-items: center;
       gap: 14px;
     }
+    .brand-title { display: flex; align-items: center; gap: 12px; }
     .badge-icon {
-      width: 48px;
-      height: 48px;
+      width: 46px; height: 46px;
       background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 24px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.25);
     }
-    .brand-title h1 {
-      font-family: 'Prompt', sans-serif;
-      font-size: 19px;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.2px;
-    }
-    .brand-title p {
-      font-size: 12.5px;
-      color: #94a3b8;
-      margin-top: 2px;
-    }
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .brand-title h1 { font-family: 'Prompt', sans-serif; font-size: 19px; font-weight: 700; color: #fff; }
+    .brand-title p { font-size: 12.5px; color: #94a3b8; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .container { max-width: 1200px; margin: 18px auto; padding: 0 16px; }
 
-    .container {
-      max-width: 1200px;
-      margin: 18px auto;
-      padding: 0 16px;
-    }
-
-    /* Navigation Tabs */
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      background: white;
-      padding: 6px;
-      border-radius: 12px;
-      border: 1px solid var(--border-light);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
+    .portal-nav {
+      display: flex; gap: 8px; background: white; padding: 8px 12px; border-radius: 10px;
+      border: 1px solid var(--border-light); margin-bottom: 18px; box-shadow: var(--shadow);
       overflow-x: auto;
     }
-    .nav-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-family: 'Prompt', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
+    .portal-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 6px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 600;
+      text-decoration: none; color: var(--text-muted); transition: all 0.15s;
     }
-    .nav-tab:hover {
-      color: var(--navy);
-      background: #f8fafc;
+    .portal-btn:hover { background: #f1f5f9; color: var(--navy); }
+    .portal-btn.active { background: var(--navy); color: white; }
+
+    /* Mode Tabs */
+    .mode-tabs {
+      display: flex; gap: 8px; margin-bottom: 18px;
     }
-    .nav-tab.active {
-      color: white;
+    .mode-tab {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 18px; background: white; border: 2px solid var(--border-light);
+      border-radius: 10px; font-family: 'Prompt', sans-serif; font-size: 14.5px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+    }
+    .mode-tab:hover { border-color: var(--blue); color: var(--blue); }
+    .mode-tab.active { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+
+    .card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border-light); padding: 20px; margin-bottom: 18px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1.5px solid var(--border-light); padding-bottom: 12px;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .card-title {
+      font-family: 'Prompt', sans-serif; font-size: 16.5px; font-weight: 600; color: var(--navy);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .tag {
+      font-size: 11.5px; background: var(--blue-bg); color: var(--blue); padding: 2px 8px;
+      border-radius: 6px; font-weight: 600;
+    }
+
+    /* Score Summary Dashboard Grid */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px; margin-bottom: 18px;
+    }
+    .stat-box {
+      background: white; border-radius: var(--radius); padding: 14px 16px;
+      border: 1px solid var(--border-light); box-shadow: var(--shadow);
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+    }
+    .stat-box::before {
+      content: ""; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
       background: var(--navy);
-      box-shadow: 0 2px 6px rgba(14,42,71,0.25);
     }
-    .nav-tab.active.tab-mentor {
-      background: #8b5cf6;
+    .stat-box.s1::before { background: var(--blue); }
+    .stat-box.s2::before { background: var(--purple); }
+    .stat-box.total::before { background: var(--gold-deep); }
+    .stat-box.weight::before { background: var(--success); }
+
+    .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-value {
+      font-family: 'Prompt', sans-serif; font-size: 24px; font-weight: 700; color: var(--navy);
+      display: flex; align-items: baseline; gap: 6px;
     }
-    .nav-tab.active.tab-calc {
-      background: #059669;
+    .stat-value small { font-size: 13px; font-weight: 400; color: var(--text-muted); }
+    .stat-footer { margin-top: 6px; font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border-light); border-radius: 8px; margin-top: 8px; }
+    table.score-table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: white; }
+    table.score-table th, table.score-table td { padding: 8px 12px; border: 1px solid var(--border-light); vertical-align: middle; }
+    table.score-table th { background: #f8fafc; font-family: 'Prompt', sans-serif; font-weight: 600; color: var(--navy); text-align: center; }
+    table.score-table th.col-desc { text-align: left; }
+    table.score-table tr:hover { background: #fdfdfd; }
+    .row-total { background: #fef9e7 !important; font-weight: 700; color: #92400e; }
+    .score-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14.5px; color: var(--navy); text-align: center; }
+    .score-cell.max { color: var(--success); }
+    .sub-item-text { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Ranking Badge */
+    .rank-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%; font-family: 'Prompt', sans-serif;
+      font-weight: 700; font-size: 13px; background: #e2e8f0; color: var(--navy);
     }
-    .nav-tab .pill-badge {
-      font-size: 11px;
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.25);
-      color: inherit;
-    }
+    .rank-pill.top1 { background: #fef08a; color: #854d0e; border: 1.5px solid #eab308; }
+    .rank-pill.top2 { background: #e2e8f0; color: #334155; border: 1.5px solid #94a3b8; }
+    .rank-pill.top3 { background: #fed7aa; color: #9a3412; border: 1.5px solid #f97316; }
 
     /* Buttons */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-family: 'Prompt', sans-serif;
-      font-size: 13.5px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1px solid transparent; text-decoration: none; transition: all 0.15s;
     }
     .btn-primary { background: var(--blue); color: white; }
     .btn-primary:hover { background: #1d4ed8; }
     .btn-success { background: var(--success); color: white; }
     .btn-success:hover { background: #047857; }
-    .btn-purple { background: #8b5cf6; color: white; }
-    .btn-purple:hover { background: #7c3aed; }
     .btn-gold { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%); color: #1e1b06; font-weight: 600; }
     .btn-gold:hover { filter: brightness(1.08); }
     .btn-outline { background: white; border-color: var(--border); color: var(--navy); }
-    .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+    .btn-outline:hover { background: #f8fafc; }
     .btn-print { background: var(--navy); color: white; }
     .btn-print:hover { background: var(--navy-dark); }
-    .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
 
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border-light);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1.5px solid var(--border-light);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .card-title {
-      font-family: 'Prompt', sans-serif;
-      font-size: 16.5px;
-      font-weight: 600;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card-title .tag {
-      font-size: 12px;
-      background: var(--blue-bg);
-      color: var(--blue);
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    /* Trainee Info Form Grid */
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .form-group label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    .form-group input, .form-group select, .form-group textarea {
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-family: inherit;
-      font-size: 14px;
-      background: #f8fafc;
-      color: var(--text);
-      transition: border 0.15s;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      outline: none;
-      border-color: var(--blue);
-      background: white;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    /* Score Summary Dashboard Grid */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .stat-box {
-      background: white;
-      border-radius: var(--radius);
-      padding: 16px 18px;
-      border: 1px solid var(--border-light);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-box::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; bottom: 0;
-      width: 4px;
-      background: var(--navy);
-    }
-    .stat-box.s1::before { background: var(--blue); }
-    .stat-box.s2::before { background: #8b5cf6; }
-    .stat-box.total::before { background: var(--gold-deep); }
-    .stat-box.weight::before { background: var(--success); }
-
-    .stat-label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .stat-value {
-      font-family: 'Prompt', sans-serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--navy);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    .stat-value small {
-      font-size: 13.5px;
-      font-weight: 400;
-      color: var(--text-muted);
-    }
-    .stat-footer {
-      margin-top: 8px;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    /* Tables */
-    .table-wrap {
-      overflow-x: auto;
-      margin-top: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    table.score-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      background: white;
-      text-align: left;
-    }
-    table.score-table th, table.score-table td {
-      padding: 9px 12px;
-      border: 1px solid var(--border-light);
-      vertical-align: middle;
-    }
-    table.score-table th {
-      background: #f8fafc;
-      color: var(--navy);
-      font-family: 'Prompt', sans-serif;
-      font-weight: 600;
-      font-size: 13px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    table.score-table th.col-desc { text-align: left; }
-    table.score-table tr:hover { background: #fdfdfd; }
-
-    .row-header { background: #f1f5f9; font-weight: 700; color: var(--navy); }
-    .row-total { background: #fef9e7 !important; font-weight: 700; color: #92400e; }
-
-    /* Number inputs in table */
-    .num-input {
-      width: 65px;
-      padding: 5px 6px;
-      border: 1.5px solid var(--border);
-      border-radius: 6px;
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--navy);
-      background: white;
-      transition: all 0.15s;
-    }
-    .num-input:focus {
-      outline: none;
-      border-color: var(--blue);
-      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
-      background: #eff6ff;
-    }
-    .num-disabled {
-      background: #f1f5f9;
-      color: var(--text-muted);
-      border-color: #e2e8f0;
-      cursor: not-allowed;
-    }
-    .score-cell {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--navy);
-      text-align: center;
-    }
-    .score-cell.max { color: var(--success); }
-    .sub-item-text {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-      line-height: 1.4;
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 9px;
-      border-radius: 12px;
-      font-size: 11.5px;
-      font-weight: 600;
-    }
-    .badge-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
-    .badge-evaluated { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
-    .badge-pass { background: var(--success-bg); color: var(--success); font-weight: 700; }
-    .badge-fail { background: var(--danger-bg); color: var(--danger); font-weight: 700; }
-
-    /* Modals */
+    /* Modal */
     .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15,23,42,0.6);
-      backdrop-filter: blur(3px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 1000;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,0.6); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000;
     }
     .modal {
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      width: 100%;
-      max-width: 680px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      position: relative;
+      background: white; border-radius: 14px; width: 100%; max-width: 600px; max-height: 90vh;
+      overflow-y: auto; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
     }
     .modal-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1.5px solid var(--border-light);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1.5px solid var(--border-light); padding-bottom: 12px; margin-bottom: 16px;
     }
-    .modal-hdr h3 {
-      font-family: 'Prompt', sans-serif;
-      font-size: 17px;
-      color: var(--navy);
-    }
+    .modal-hdr h3 { font-family: 'Prompt', sans-serif; font-size: 17px; color: var(--navy); }
     .modal-close {
-      background: #f1f5f9;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 8px;
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .modal-close:hover { background: #e2e8f0; }
 
-    /* Radio Cards */
-    .eval-radio-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .eval-radio-label {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-      transition: all 0.15s;
-    }
-    .eval-radio-label.pass-option:hover, .eval-radio-label.pass-option.selected {
-      border-color: var(--success);
-      background: var(--success-bg);
-      color: var(--success);
-    }
-    .eval-radio-label.fail-option:hover, .eval-radio-label.fail-option.selected {
-      border-color: var(--danger);
-      background: var(--danger-bg);
-      color: var(--danger);
-    }
-    .eval-radio-label input { display: none; }
-
-    /* Print View */
+    /* Print */
     .print-only { display: none; }
-
     @media print {
       body { background: white; color: black; font-size: 12pt; padding: 0; }
-      header, .nav-tabs, .header-actions, .no-print { display: none !important; }
+      header, .portal-nav, .mode-tabs, .header-actions, .no-print { display: none !important; }
       .container { max-width: 100%; margin: 0; padding: 0; }
       .card { box-shadow: none; border: none; padding: 0; margin-bottom: 14pt; }
       .card-header { border-bottom: 1pt solid black; padding-bottom: 4pt; margin-bottom: 8pt; }
       .card-title { color: black; font-size: 14pt; }
       .table-wrap { border: none; margin-top: 6pt; }
-      table.score-table { border: 1pt solid black; font-size: 10.5pt; }
+      table.score-table { border: 1pt solid black; font-size: 10pt; }
       table.score-table th, table.score-table td { border: 1pt solid black; padding: 4pt 6pt; }
       table.score-table th { background: #f0f0f0 !important; color: black; }
-      .row-header { background: #e5e5e5 !important; }
       .row-total { background: #f0f0f0 !important; color: black; }
-      .num-input { border: none; background: transparent; font-size: 10.5pt; width: auto; font-family: inherit; }
-      .num-disabled { background: transparent; }
       .print-only { display: block; }
       .signature-block { margin-top: 25pt; display: flex; justify-content: space-between; text-align: center; font-size: 11pt; }
     }
@@ -514,498 +230,350 @@
   <header class="no-print">
     <div class="header-inner">
       <div class="brand-title">
-        <div class="badge-icon">🎖️</div>
+        <div class="badge-icon">📊</div>
         <div>
-          <h1>ระบบบันทึกและประเมินผลการฝึกหัดปฏิบัติราชการ นสต.</h1>
-          <p>ระบบบันทึกรายวัน · ครูพี่เลี้ยงประเมินผล · คำนวณคะแนน บช.ศ. (๑,๑๖๐ คะแนน) อัตโนมัติ · กก.๕ บก.กฝ.บช.ตชด.</p>
+          <h1>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (ฝ่ายฝึกฯ และวิชาการ)</h1>
+          <p>สูตร บช.ศ. ๑,๑๖๐ คะแนน · ค่าน้ำหนัก ๑๐% (๓๘๗ คะแนน) · ดูรายคน / ดูทุกคนทั้งรุ่น · กก.๕ บก.กฝ.บช.ตชด.</p>
         </div>
       </div>
       <div class="header-actions">
-        <button type="button" class="btn btn-outline btn-sm" onclick="window.location.href='./index.html'">
-          🏠 หน้าหลักพอร์ต
-        </button>
-        <button type="button" class="btn btn-print btn-sm" onclick="window.print()">
-          🖨️ พิมพ์แบบสรุปผล (PDF)
-        </button>
+        <button type="button" class="btn btn-gold btn-sm" onclick="loadSampleData()">⚡ โหลดตัวอย่างรุ่น นสต.</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openRosterModal()">👥 จัดการรายชื่อ นสต.</button>
+        <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์รายงาน (PDF)</button>
       </div>
     </div>
   </header>
 
   <div class="container">
 
-    <!-- Role Switcher Tabs -->
-    <div class="nav-tabs no-print">
-      <button type="button" class="nav-tab active" id="tabBtn_trainee" onclick="switchTab('trainee')">
-        📝 ๑. ฝั่ง นสต. (ลงบันทึกประจำวัน)
+    <!-- 3 Portals Switcher Links -->
+    <div class="portal-nav no-print">
+      <span style="font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;padding:0 6px;">
+        🔗 สลับพอร์ทัล:
+      </span>
+      <a href="./field-training-trainee.html" class="portal-btn">📝 ๑. นสต. (บันทึกประจำวัน)</a>
+      <a href="./field-training-mentor.html" class="portal-btn">👨‍✈️ ๒. ครูพี่เลี้ยง (ตรวจประเมิน)</a>
+      <a href="./field-training-admin.html" class="portal-btn active">📊 ๓. ฝ่ายฝึกฯ/วิชาการ (สรุปคะแนน บช.ศ.)</a>
+    </div>
+
+    <!-- Mode Switcher Tabs (Individual vs Batch Summary) -->
+    <div class="mode-tabs no-print">
+      <button type="button" class="mode-tab active" id="btn_mode_individual" onclick="switchAdminMode('individual')">
+        👤 ๑. ดูผลคะแนนรายบุคคล (Individual View)
       </button>
-      <button type="button" class="nav-tab tab-mentor" id="tabBtn_mentor" onclick="switchTab('mentor')">
-        👨‍✈️ ๒. ฝั่ง ครูพี่เลี้ยง (ตรวจประเมิน)
-        <span class="pill-badge" id="pending_count_badge">0 รอประเมิน</span>
-      </button>
-      <button type="button" class="nav-tab tab-calc" id="tabBtn_calc" onclick="switchTab('calc')">
-        📊 ๓. สรุปผล & คำนวณคะแนน บช.ศ. (๑,๑๖๐ คะแนน)
+      <button type="button" class="mode-tab" id="btn_mode_batch" onclick="switchAdminMode('batch')">
+        👥 ๒. ดูบัญชีรวมคะแนนทุกคนทั้งรุ่น (Batch Ranking Summary)
       </button>
     </div>
 
-    <!-- Trainee Information Form (Always Visible for Context) -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span>👤 ข้อมูลนักเรียนนายสิบตำรวจ (ผู้รับการฝึกหัดปฏิบัติราชการ)</span>
-        </div>
-        <div class="no-print" style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-gold btn-sm" onclick="loadSampleTrainingData()">
-            ⚡ โหลดบันทึกตัวอย่าง นสต. (ครบทั้ง ๒ ภาคเรียน)
-          </button>
-          <button type="button" class="btn btn-outline btn-sm" onclick="clearAllData()">
-            🔄 ล้างข้อมูล
-          </button>
-        </div>
-      </div>
-      <div class="info-grid">
-        <div class="form-group">
-          <label>ยศ - ชื่อ - สกุล นสต.</label>
-          <input type="text" id="t_name" value="นสต. ทศพร สุมาลี">
-        </div>
-        <div class="form-group">
-          <label>เลขประจำตัว นสต.</label>
-          <input type="text" id="t_id" value="6705001">
-        </div>
-        <div class="form-group">
-          <label>เลขประจำตัวประชาชน (๑๓ หลัก)</label>
-          <input type="text" id="t_idcard" value="1589900078539">
-        </div>
-        <div class="form-group">
-          <label>หน่วยฝึกอบรม</label>
-          <input type="text" id="t_unit" value="กก.๕ บก.กฝ.บช.ตชด. (แม่แตง เชียงใหม่)">
-        </div>
-        <div class="form-group">
-          <label>สถานีตำรวจ/หน่วยงานที่ฝึกปฏิบัติ</label>
-          <input type="text" id="t_station" value="สภ.แม่แตง ภ.จว.เชียงใหม่">
-        </div>
-        <div class="form-group">
-          <label>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</label>
-          <input type="text" id="t_mentor" value="ร.ต.อ. อนุชา กล้าหาญ (รอง สวป.สภ.แม่แตง)">
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== SECTION 1: FOR TRAINEE (DAILY LOG) ==================== -->
-    <div id="section_trainee">
-      <div class="card" style="border-top:4px solid var(--navy);">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📝 บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ ๑ ส่วนที่ ๒)</span>
-          </div>
-        </div>
-
-        <form id="dailyLogForm" onsubmit="handleTraineeSubmit(event)">
-          <div class="info-grid" style="margin-bottom:14px;">
-            <div class="form-group">
-              <label>วันที่ปฏิบัติงาน</label>
-              <input type="date" id="log_date" required>
-            </div>
-            <div class="form-group">
-              <label>ภาคเรียน</label>
-              <select id="log_semester" onchange="updateTopicOptions()" required>
-                <option value="1">ภาคเรียนที่ ๑ (งานสารบรรณ, บันทึก, ไอที, มนุษยสัมพันธ์)</option>
-                <option value="2">ภาคเรียนที่ ๒ (ปป., ผู้ต้องหา, ตรวจค้น, สายตรวจ, จราจร, สืบสวน)</option>
-              </select>
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-              <label>หัวข้อการปฏิบัติงานในวันนี้ (ตามระเบียบ บช.ศ.)</label>
-              <select id="log_topic" required>
-                <!-- Dynamically filled based on semester -->
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom:16px;">
-            <label>รายละเอียดการปฏิบัติงานประจำวันของ นสต. (บันทึกเหตุการณ์และงานที่ปฏิบัติอย่างละเอียด)</label>
-            <textarea id="log_content" placeholder="เช่น เวลา 08:30 น. ร่วมประชุมชี้แจงมอบหมายภารกิจประจำวัน ณ สภ.แม่แตง... ปฏิบัติหน้าที่สายตรวจรถยนต์ร่วมกับ ร.ต.อ. อนุชา กล้าหาญ ออกตรวจพื้นที่ตำบลแม่หอพระ ตรวจสอบจุดตรวจตู้แดง และอำนวยความสะดวกการจราจรหน้าโรงเรียน..." required style="min-height:110px;"></textarea>
-          </div>
-
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-            <p style="font-size:12.5px;color:var(--text-muted);">
-              📌 เมื่อบันทึกแล้ว ข้อมูลจะถูกส่งไปยังกระดานของ <b>ครูพี่เลี้ยง</b> เพื่อทำการตรวจและประเมินผล
-            </p>
-            <button type="submit" class="btn btn-primary">
-              💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Trainee Log History Table -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <span>📋 ประวัติการลงบันทึกประจำวันของ นสต. (<span id="trainee_log_count">0</span> รายการ)</span>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="score-table">
-            <thead>
-              <tr>
-                <th style="width:50px;">ลำดับ</th>
-                <th style="width:110px;">วันที่</th>
-                <th style="width:90px;">ภาคเรียน</th>
-                <th class="col-desc">หัวข้อการปฏิบัติงาน</th>
-                <th class="col-desc">สรุปการปฏิบัติงาน</th>
-                <th style="width:130px;">สถานะการประเมิน</th>
-                <th style="width:100px;">ผลประเมิน</th>
-                <th style="width:80px;">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="trainee_logs_tbody">
-              <!-- Rendered by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== SECTION 2: FOR MENTOR (EVALUATION) ==================== -->
-    <div id="section_mentor" style="display:none;">
-      <div class="card" style="border-top:4px solid #8b5cf6;">
-        <div class="card-header">
-          <div class="card-title">
-            <span>👨‍✈️ กระดานตรวจประเมินผลการฝึกหัดปฏิบัติราชการ (สำหรับครูพี่เลี้ยง)</span>
+    <!-- ==================== MODE 1: INDIVIDUAL VIEW ==================== -->
+    <div id="mode_individual_content">
+      
+      <!-- Trainee Selector Card -->
+      <div class="card no-print">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label style="font-size:13.5px;font-weight:700;color:var(--navy);">เลือก นสต. ที่ต้องการดูผลคะแนน:</label>
+            <select id="sel_individual_trainee" onchange="onIndividualTraineeChange()" style="padding:8px 14px;border:1.5px solid var(--blue);border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--navy);background:white;">
+              <!-- Populated by JS -->
+            </select>
           </div>
           <div style="font-size:13px;color:var(--text-muted);">
-            คลิก <b>"🔍 ตรวจประเมิน"</b> เพื่อให้ผลคะแนนและข้อเสนอแนะรายวัน
+            สภ.ที่ฝึก: <strong id="lbl_ind_station" style="color:var(--navy);">-</strong> | ครูพี่เลี้ยง: <strong id="lbl_ind_mentor" style="color:var(--navy);">-</strong>
           </div>
         </div>
-
-        <div class="table-wrap">
-          <table class="score-table">
-            <thead>
-              <tr>
-                <th style="width:50px;">ลำดับ</th>
-                <th style="width:110px;">วันที่</th>
-                <th style="width:85px;">ภาคเรียน</th>
-                <th class="col-desc">หัวข้อปฏิบัติงาน</th>
-                <th class="col-desc">บันทึกของ นสต.</th>
-                <th style="width:120px;">สถานะ</th>
-                <th style="width:120px;">ผลการประเมิน</th>
-                <th style="width:120px;">ดำเนินการ</th>
-              </tr>
-            </thead>
-            <tbody id="mentor_logs_tbody">
-              <!-- Rendered by JS -->
-            </tbody>
-          </table>
-        </div>
       </div>
-    </div>
 
-    <!-- ==================== SECTION 3: AUTOMATED FORMULA ENGINE & REPORT ==================== -->
-    <div id="section_calc" style="display:none;">
-      
-      <!-- Overall Summary Score Dashboard Cards -->
+      <!-- Individual Score Summary Dashboard -->
       <div class="summary-grid">
         <div class="stat-box s1">
           <div class="stat-label">ภาคเรียนที่ ๑ (๔ หัวข้อปฏิบัติ)</div>
           <div class="stat-value">
-            <span id="sum_sem1">๓๔๐</span>
+            <span id="ind_sum_sem1">340</span>
             <small>/ ๓๔๐ คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>คิดเป็นร้อยละ</span>
-            <strong id="pct_sem1">100%</strong>
+            <strong id="ind_pct_sem1">100%</strong>
           </div>
         </div>
 
         <div class="stat-box s2">
           <div class="stat-label">ภาคเรียนที่ ๒ (๑๐ หัวข้อปฏิบัติ)</div>
           <div class="stat-value">
-            <span id="sum_sem2">๘๒๐</span>
+            <span id="ind_sum_sem2">820</span>
             <small>/ ๘๒๐ คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>คิดเป็นร้อยละ</span>
-            <strong id="pct_sem2">100%</strong>
+            <strong id="ind_pct_sem2">100%</strong>
           </div>
         </div>
 
         <div class="stat-box total">
           <div class="stat-label">คะแนนรวมการฝึกหัดปฏิบัติราชการ</div>
           <div class="stat-value" style="color:var(--gold-deep);">
-            <span id="sum_total">๑,๑๖๐</span>
+            <span id="ind_sum_total">1,160</span>
             <small>/ ๑,๑๖๐ คะแนน</small>
           </div>
           <div class="stat-footer">
             <span>ผลรวมทั้ง ๒ ภาคเรียน</span>
-            <strong id="pct_total">100.00%</strong>
+            <strong id="ind_pct_total">100.00%</strong>
           </div>
         </div>
 
         <div class="stat-box weight">
-          <div class="stat-label">คะแนนแปรผันตามค่าน้ำหนัก บช.ศ. (๑๐%)</div>
+          <div class="stat-label">คะแนนแปรผันค่าน้ำหนัก บช.ศ. (๑๐%)</div>
           <div class="stat-value" style="color:var(--success);">
-            <span id="sum_weighted">๓๘๗.๐๐</span>
+            <span id="ind_sum_weighted">387.00</span>
             <small>/ ๓๘๗ คะแนน</small>
           </div>
           <div class="stat-footer">
-            <span>สูตร: คะแนนรวม × ๐.๓๓๓๖</span>
-            <strong id="status_pass" style="color:var(--success);">ผ่านเกณฑ์</strong>
+            <span>สำหรับจัดลำดับเลือกตำแหน่ง</span>
+            <strong id="ind_status_pass" style="color:var(--success);">ผ่านเกณฑ์</strong>
           </div>
         </div>
       </div>
 
-      <!-- Quick Action for Evaluation Table -->
-      <div style="display:flex;justify-content:space-between;align-items:center;background:white;padding:12px 18px;border-radius:var(--radius);margin-bottom:16px;border:1px solid var(--border-light);box-shadow:var(--shadow);" class="no-print">
-        <div style="font-size:13.5px;color:var(--navy);font-weight:600;">
-          💡 ตารางด้านล่างคำนวณสะสมจาก <b>ผลการประเมินรายวันของครูพี่เลี้ยง</b> โดยอัตโนมัติตามสูตร บช.ศ. ๑๐๐%
-        </div>
-        <button type="button" class="btn btn-print btn-sm" onclick="window.print()">
-          🖨️ พิมพ์แบบสรุปผลส่ง บช.ศ. (PDF)
-        </button>
-      </div>
-
-      <!-- Table 1: Semester 1 Calculation -->
+      <!-- Individual Semester 1 Table -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
             <span>📘 ภาคเรียนที่ ๑ : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
-            <span class="tag">คะแนนเต็ม ๓๔๐</span>
+            <span class="tag">เต็ม ๓๔๐ คะแนน</span>
           </div>
-          <div style="font-size:13px;color:var(--text-muted);">
-            รวมคะแนนที่ได้: <strong id="head_sem1_score" style="color:var(--blue);font-size:15px;">340</strong> / 340 คะแนน
+          <div style="font-size:13px;color:var(--navy);font-weight:600;">
+            คะแนนที่ได้: <span id="ind_tbl_sem1_score" style="color:var(--blue);font-size:15px;">340</span> / 340 คะแนน
           </div>
         </div>
-
         <div class="table-wrap">
           <table class="score-table">
             <thead>
               <tr>
-                <th style="width:50px;">ลำดับ</th>
+                <th style="width:45px;">ลำดับ</th>
                 <th class="col-desc">รายการปฏิบัติ</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ประเมิน</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ผ่าน</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
-                <th style="width:90px;">คะแนนเต็ม</th>
-                <th style="width:100px;">คะแนนที่ได้</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ประเมิน</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ผ่าน</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
+                <th style="width:85px;">คะแนนเต็ม</th>
+                <th style="width:95px;">คะแนนที่ได้</th>
               </tr>
             </thead>
-            <tbody id="tbody_sem1">
-              <!-- Injected by JS -->
-            </tbody>
+            <tbody id="ind_tbody_sem1"></tbody>
             <tfoot>
               <tr class="row-total">
                 <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๑</td>
-                <td style="text-align:center;" id="tot_sem1_eval">๑๑๘</td>
-                <td style="text-align:center;" id="tot_sem1_pass">๑๑๘</td>
-                <td style="text-align:center;" id="tot_sem1_fail">๐</td>
+                <td style="text-align:center;" id="ind_tot_s1_eval">-</td>
+                <td style="text-align:center;" id="ind_tot_s1_pass">-</td>
+                <td style="text-align:center;" id="ind_tot_s1_fail">-</td>
                 <td style="text-align:center;">๓๔๐</td>
-                <td class="score-cell" id="tot_sem1_score" style="font-size:16px;">๓๔๐</td>
+                <td class="score-cell" id="ind_tot_s1_score">340</td>
               </tr>
             </tfoot>
           </table>
         </div>
       </div>
 
-      <!-- Table 2: Semester 2 Calculation -->
+      <!-- Individual Semester 2 Table -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
             <span>📗 ภาคเรียนที่ ๒ : ผลการประเมินการฝึกหัดปฏิบัติราชการ (คำนวณอัตโนมัติ)</span>
-            <span class="tag">คะแนนเต็ม ๘๒๐</span>
+            <span class="tag">เต็ม ๘๒๐ คะแนน</span>
           </div>
-          <div style="font-size:13px;color:var(--text-muted);">
-            รวมคะแนนที่ได้: <strong id="head_sem2_score" style="color:#8b5cf6;font-size:15px;">820</strong> / 820 คะแนน
+          <div style="font-size:13px;color:var(--navy);font-weight:600;">
+            คะแนนที่ได้: <span id="ind_tbl_sem2_score" style="color:var(--purple);font-size:15px;">820</span> / 820 คะแนน
           </div>
         </div>
-
         <div class="table-wrap">
           <table class="score-table">
             <thead>
               <tr>
-                <th style="width:50px;">ลำดับ</th>
+                <th style="width:45px;">ลำดับ</th>
                 <th class="col-desc">รายการปฏิบัติ</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ประเมิน</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ผ่าน</th>
-                <th style="width:110px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
-                <th style="width:90px;">คะแนนเต็ม</th>
-                <th style="width:100px;">คะแนนที่ได้</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ประเมิน</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ผ่าน</th>
+                <th style="width:105px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
+                <th style="width:85px;">คะแนนเต็ม</th>
+                <th style="width:95px;">คะแนนที่ได้</th>
               </tr>
             </thead>
-            <tbody id="tbody_sem2">
-              <!-- Injected by JS -->
-            </tbody>
+            <tbody id="ind_tbody_sem2"></tbody>
             <tfoot>
               <tr class="row-total">
                 <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๒</td>
-                <td style="text-align:center;" id="tot_sem2_eval">๑๑๖</td>
-                <td style="text-align:center;" id="tot_sem2_pass">๑๑๖</td>
-                <td style="text-align:center;" id="tot_sem2_fail">๐</td>
+                <td style="text-align:center;" id="ind_tot_s2_eval">-</td>
+                <td style="text-align:center;" id="ind_tot_s2_pass">-</td>
+                <td style="text-align:center;" id="ind_tot_s2_fail">-</td>
                 <td style="text-align:center;">๘๒๐</td>
-                <td class="score-cell" id="tot_sem2_score" style="font-size:16px;">๘๒๐</td>
+                <td class="score-cell" id="ind_tot_s2_score">820</td>
               </tr>
             </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Individual Daily Log History Timeline -->
+      <div class="card no-print">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 บันทึกการปฏิบัติงานรายวันของบุคคลนี้ (<span id="ind_log_count">0</span> วัน)</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th style="width:45px;">ลำดับ</th>
+                <th style="width:105px;">วันที่</th>
+                <th style="width:75px;">ภาค</th>
+                <th style="width:220px;" class="col-desc">หัวข้อปฏิบัติงาน</th>
+                <th class="col-desc">บันทึกของ นสต.</th>
+                <th style="width:110px;">สถานะ</th>
+                <th style="width:170px;" class="col-desc">ผลตรวจ / ข้อเสนอแนะครู</th>
+                <th style="width:70px;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="ind_logs_tbody"></tbody>
           </table>
         </div>
       </div>
 
     </div>
 
-    <!-- Official Summary & Signature Block for Print -->
-    <div class="card print-only">
-      <div style="text-align:center;margin-bottom:14pt;">
-        <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ (แบบที่ ๓)</h2>
-        <p style="font-size:11.5pt;">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.) ประจำปีงบประมาณ พ.ศ. ๒๕๖๗</p>
-        <p style="font-size:10.5pt;color:#444;">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
+    <!-- ==================== MODE 2: BATCH SUMMARY & RANKING VIEW ==================== -->
+    <div id="mode_batch_content" style="display:none;">
+      
+      <!-- Overall Stats Cards -->
+      <div class="summary-grid">
+        <div class="stat-box s1">
+          <div class="stat-label">จำนวน นสต. ในรุ่นทั้งหมด</div>
+          <div class="stat-value"><span id="batch_count_trainees">0</span> <small>นาย</small></div>
+          <div class="stat-footer"><span>กก.๕ บก.กฝ.บช.ตชด.</span></div>
+        </div>
+        <div class="stat-box s2">
+          <div class="stat-label">จำนวนบันทึกประจำวันทั้งหมด</div>
+          <div class="stat-value"><span id="batch_count_logs">0</span> <small>รายการ</small></div>
+          <div class="stat-footer"><span>บันทึกส่งแล้ว</span></div>
+        </div>
+        <div class="stat-box total">
+          <div class="stat-label">ร้อยละการผ่านเกณฑ์ทั้งรุ่น</div>
+          <div class="stat-value" style="color:var(--gold-deep);"><span id="batch_pass_rate">100%</span></div>
+          <div class="stat-footer"><span>เกณฑ์ผ่าน >= 60%</span></div>
+        </div>
+        <div class="stat-box weight">
+          <div class="stat-label">คะแนนเฉลี่ยทั้งรุ่น (เต็ม ๑,๑๖๐)</div>
+          <div class="stat-value" style="color:var(--success);"><span id="batch_avg_score">0</span> <small>คะแนน</small></div>
+          <div class="stat-footer"><span>คะแนนเฉลี่ยค่าน้ำหนัก: <strong id="batch_avg_weighted">0</strong></span></div>
+        </div>
       </div>
 
-      <div style="margin-top:10px;">
-        <h3 style="font-size:13pt;font-weight:700;margin-bottom:6pt;">สรุปผลคะแนนภาคการฝึกหัดปฏิบัติราชการ</h3>
-        <table style="width:100%;border-collapse:collapse;margin-top:6pt;" class="score-table">
-          <tr>
-            <td style="width:60%;padding:8pt;background:#f9f9f9;"><b>๑. คะแนนรวมภาคเรียนที่ ๑ (เต็ม ๓๔๐ คะแนน)</b></td>
-            <td style="width:40%;padding:8pt;text-align:right;"><span id="p_sem1_val">340</span> / 340 คะแนน</td>
-          </tr>
-          <tr>
-            <td style="padding:8pt;background:#f9f9f9;"><b>๒. คะแนนรวมภาคเรียนที่ ๒ (เต็ม ๘๒๐ คะแนน)</b></td>
-            <td style="padding:8pt;text-align:right;"><span id="p_sem2_val">820</span> / 820 คะแนน</td>
-          </tr>
-          <tr style="font-weight:700;background:#f0f0f0;">
-            <td style="padding:8pt;"><b>รวมคะแนนการฝึกหัดปฏิบัติราชการทั้งสิ้น</b></td>
-            <td style="padding:8pt;text-align:right;font-size:12pt;"><span id="p_total_val">1,160</span> / 1,160 คะแนน</td>
-          </tr>
-          <tr>
-            <td style="padding:8pt;background:#f9f9f9;"><b>คะแนนแปรผันตามค่าน้ำหนัก (๑๐% เพื่อจัดลำดับเลือกตำแหน่ง บช.ศ.)</b></td>
-            <td style="padding:8pt;text-align:right;font-weight:700;color:#059669;"><span id="p_weight_val">387.00</span> / 387 คะแนน</td>
-          </tr>
-        </table>
+      <!-- Batch Ranking Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 บัญชีสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. ทั้งรุ่น (จัดลำดับที่)</span>
+          </div>
+          <div class="no-print" style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="exportBatchCSV()">📥 ส่งออก Excel/CSV</button>
+            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์บัญชีรวม บช.ศ.</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th style="width:70px;">อันดับที่</th>
+                <th class="col-desc" style="min-width:160px;">ยศ - ชื่อ - สกุล นสต.</th>
+                <th class="col-desc" style="min-width:140px;">สภ. ที่ฝึกปฏิบัติ</th>
+                <th class="col-desc" style="min-width:140px;">ครูพี่เลี้ยง</th>
+                <th style="width:85px;">บันทึก (วัน)</th>
+                <th style="width:95px;">ภาค ๑<br>(๓๔๐)</th>
+                <th style="width:95px;">ภาค ๒<br>(๘๒๐)</th>
+                <th style="width:110px;">คะแนนรวม<br>(๑,๑๖๐)</th>
+                <th style="width:115px;">ค่าน้ำหนัก ๑๐%<br>(๓๘๗ คะแนน)</th>
+                <th style="width:95px;">ผลการฝึก</th>
+                <th style="width:85px;" class="no-print">ดูคะแนน</th>
+              </tr>
+            </thead>
+            <tbody id="batch_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Official Print Signature Block -->
+    <div class="card print-only">
+      <div style="text-align:center;margin-bottom:14pt;">
+        <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. ประจำปีงบประมาณ ๒๕๖๗</h2>
+        <p style="font-size:11.5pt;">กองกำกับการ ๕ กองบังคับการฝึกพิเศษ กองบัญชาการตำรวจตระเวนชายแดน (ค่ายนเรศวรมหาราช)</p>
+        <p style="font-size:10.5pt;color:#444;">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
       </div>
 
       <div class="signature-block">
         <div style="width:30%;">
           <p>ลงชื่อ......................................................</p>
-          <p style="margin-top:4pt;">(<span id="sig_trainee">นสต. ทศพร สุมาลี</span>)</p>
-          <p>ผู้รับการประเมิน (นสต.)</p>
-        </div>
-        <div style="width:30%;">
-          <p>ลงชื่อ......................................................</p>
-          <p style="margin-top:4pt;">(<span id="sig_mentor">ร.ต.อ. อนุชา กล้าหาญ</span>)</p>
-          <p>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</p>
+          <p style="margin-top:4pt;">(......................................................)</p>
+          <p>เจ้าหน้าที่ฝ่ายงานการฝึกและวิชาการ</p>
         </div>
         <div style="width:30%;">
           <p>ลงชื่อ......................................................</p>
           <p style="margin-top:4pt;">(......................................................)</p>
-          <p>หัวหน้าสถานีตำรวจ / ผู้บังคับบัญชา</p>
+          <p>สารวัตรฝ่ายงานการฝึกและวิชาการ</p>
+        </div>
+        <div style="width:30%;">
+          <p>ลงชื่อ......................................................</p>
+          <p style="margin-top:4pt;">(......................................................)</p>
+          <p>ผกก.๕ บก.กฝ.บช.ตชด. / ผู้บังคับบัญชา</p>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- Modal for Mentor Evaluation -->
-  <div id="evalModal" class="modal-overlay" style="display:none;">
+  <!-- Modal for Roster Management -->
+  <div id="rosterModal" class="modal-overlay" style="display:none;">
     <div class="modal">
       <div class="modal-hdr">
-        <h3 id="modal_title">👨‍✈️ แบบประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ ๑)</h3>
-        <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
+        <h3>👥 จัดการรายชื่อ นสต. ในรุ่น</h3>
+        <button type="button" class="modal-close" onclick="closeRosterModal()">✕</button>
       </div>
 
-      <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
-        <div><b>วันที่:</b> <span id="m_eval_date">-</span> &nbsp;|&nbsp; <b>ภาคเรียน:</b> <span id="m_eval_sem">-</span></div>
-        <div style="margin-top:4px;"><b>หัวข้อการปฏิบัติงาน:</b> <strong id="m_eval_topic" style="color:var(--navy);">-</strong></div>
-        <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);">
-          <b>บันทึกของ นสต.:</b>
-          <div id="m_eval_trainee_note" style="color:#334155;margin-top:2px;font-style:italic;">-</div>
+      <form onsubmit="handleAddRosterTrainee(event)" style="margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-light);">
+        <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px;">➕ เพิ่มรายชื่อ นสต. ใหม่ในรุ่น:</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <input type="text" id="m_add_name" placeholder="ยศ-ชื่อ-สกุล นสต." required style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <input type="text" id="m_add_station" placeholder="สภ. ที่ฝึกปฏิบัติ" required style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
         </div>
-      </div>
-
-      <form id="evalForm" onsubmit="handleMentorEvaluationSubmit(event)">
-        <input type="hidden" id="m_eval_log_id">
-
-        <!-- 1. ก่อนปฏิบัติงาน -->
-        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13.5px;color:var(--navy);">๑. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, เครื่องมืออุปกรณ์, ร่างกาย/จิตใจ)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_prep_pass">
-              <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_prep_fail">
-              <input type="radio" name="eval_prep" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_prep_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        </div>
-
-        <!-- 2. การปฏิบัติงาน -->
-        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13.5px;color:var(--navy);">๒. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_work_pass">
-              <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_work_fail">
-              <input type="radio" name="eval_work" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_work_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        </div>
-
-        <!-- 3. หลังปฏิบัติงาน -->
-        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13.5px;color:var(--navy);">๓. หลังปฏิบัติงาน (การเก็บ/บำรุงรักษาเครื่องมือ อุปกรณ์ ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_post_pass">
-              <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_post_fail">
-              <input type="radio" name="eval_post" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_post_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        </div>
-
-        <!-- ข้อเสนอแนะประจำวัน -->
-        <div class="form-group" style="margin-bottom:16px;">
-          <label style="font-weight:700;color:var(--navy);">ส่วนที่ ๓ : ข้อเสนอแนะประจำวันของครูพี่เลี้ยง</label>
-          <textarea id="eval_mentor_feedback" placeholder="ให้คำแนะนำ ชี้แนะแนวทางแก้ไขปรับปรุง หรือคำชมเชยแก่ นสต. ..." style="min-height:75px;"></textarea>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-          <button type="button" class="btn btn-outline" onclick="closeEvalModal()">ยกเลิก</button>
-          <button type="submit" class="btn btn-purple">
-            ✓ บันทึกผลการประเมิน
-          </button>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="m_add_mentor" placeholder="ครูพี่เลี้ยง / ผู้ควบคุมการฝึก" required style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <button type="submit" class="btn btn-primary btn-sm">+ เพิ่มในรุ่น</button>
         </div>
       </form>
+
+      <div class="table-wrap" style="max-height:260px;overflow-y:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">ลำดับ</th>
+              <th>ยศ-ชื่อ-สกุล</th>
+              <th>สภ. ที่ฝึก</th>
+              <th style="width:60px;">ลบ</th>
+            </tr>
+          </thead>
+          <tbody id="roster_modal_tbody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;text-align:right;">
+        <button type="button" class="btn btn-outline" onclick="closeRosterModal()">ปิดหน้าต่าง</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // Official Definitions according to Police Education Bureau (บช.ศ.)
-    const TOPICS_SEM1 = [
-      { code: 's1_2_1', name: '๒.๑ ความรู้ด้านงานสารบรรณ', sub: 'รับ-ส่งหนังสือ, ร่างหนังสือ, ชั้นความลับ, เลขหนังสือ' },
-      { code: 's1_2_2', name: '๒.๒ การเขียนบันทึกต่างๆ', sub: 'บันทึกจับกุม/ตรวจค้น, รายงานประจำวัน, ใบสั่ง, รายงานสืบสวน' },
-      { code: 's1_2_3', name: '๒.๓ ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', sub: 'สืบค้น Polis, E-cop, วิทยุสื่อสาร, สมุดคุมรับแจ้งเหตุ' },
-      { code: 's1_2_4', name: '๒.๔ การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', sub: 'การให้คำแนะนำ ปรึกษา, มวลชนสัมพันธ์กับประชาชน' }
-    ];
-
-    const TOPICS_SEM2 = [
-      { code: 's2_2_5', name: '๒.๕ ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม', sub: 'อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา ๕ กลุ่ม, นาฬิกาอาชญากรรม' },
-      { code: 's2_2_6', name: '๒.๖ การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา', sub: 'ค้นตัว, พันธนาการ, ทรัพย์สิน/อาหารญาติ, พิมพ์ลายนิ้วมือ, ฝากขัง' },
-      { code: 's2_2_7', name: '๒.๗ การเผชิญเหตุ/ตรวจค้น/จับกุม', sub: 'รับแจ้งเหตุ, บันทึกจับกุม, ตรวจค้นบุคคล/สถานที่, จุดตรวจ/จุดสกัด' },
-      { code: 's2_2_8', name: '๒.๘ การปฏิบัติงานสายตรวจ', sub: 'สายตรวจเดินเท้า, รถจักรยานยนต์, รถยนต์, สายตรวจตำบล' },
-      { code: 's2_2_9', name: '๒.๙ การปฏิบัติงานด้านชุมชนสัมพันธ์', sub: 'มวลชนสัมพันธ์, ลงพื้นที่ชุมชน, ประสานงานผู้นำชุมชน' },
-      { code: 's2_2_10', name: '๒.๑๐ ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ', sub: 'มาตรการรักษาความปลอดภัยขบวนเสด็จ, บุคคลสำคัญ' },
-      { code: 's2_2_11', name: '๒.๑๑ ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น', sub: 'พ.ร.บ.จราจรทางบก, พ.ร.บ.รถยนต์, กฎหมายขนส่ง' },
-      { code: 's2_2_12', name: '๒.๑๒ การปฏิบัติงานด้านการจราจร', sub: 'อำนวยการจราจร, เขียนใบสั่ง, ตรวจจับความเร็ว, เป่าแอลกอฮอล์' },
-      { code: 's2_2_13', name: '๒.๑๓ ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน', sub: 'ข้อมูลท้องถิ่น, บุคคล, แผนประทุษกรรม, สมุดภาพคนร้าย' },
-      { code: 's2_2_14', name: '๒.๑๔ การปฏิบัติงานด้านสืบสวน/สอบสวน', sub: 'เฝ้าจุด, สะกดรอย, ล่อซื้อ, ข่าวกรอง, ซักถามบุคคล, จับกุมตามหมาย' }
-    ];
-
     const SEMESTER_1_CALC_ITEMS = [
       { id: 's1_1', no: '๑.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
       { id: 's1_2_1', no: '๒.๑', title: 'ความรู้ด้านงานสารบรรณ', sub: 'รับ-ส่ง หนังสือ, ร่างหนังสือ, ชั้นความลับ, เลขหนังสือ', maxScore: 80 },
@@ -1017,277 +585,101 @@
 
     const SEMESTER_2_CALC_ITEMS = [
       { id: 's2_1', no: '๑.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
-      { id: 's2_2_5', no: '๒.๕', title: 'ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม', sub: 'อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา ๕ กลุ่ม, แผนเผชิญเหตุ', maxScore: 80 },
+      { id: 's2_2_5', no: '๒.๕', title: 'ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม', sub: 'อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา ๕ กลุ่ม', maxScore: 80 },
       { id: 's2_2_6', no: '๒.๖', title: 'การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา', sub: 'ค้นตัว, พันธนาการ, ทรัพย์สิน/อาหารญาติ, พิมพ์ลายนิ้วมือ', maxScore: 80 },
-      { id: 's2_2_7', no: '๒.๗', title: 'การเผชิญเหตุ/ตรวจค้น/จับกุม', sub: 'รับแจ้งเหตุ, บันทึกจับกุม, ตรวจค้นบุคคล/ยานพาหนะ, จุดตรวจ', maxScore: 80 },
-      { id: 's2_2_8', no: '๒.๘', title: 'การปฏิบัติงานสายตรวจ', sub: 'สายตรวจเดินเท้า, จักรยานยนต์, รถยนต์, สายตรวจตำบล', maxScore: 80 },
+      { id: 's2_2_7', no: '๒.๗', title: 'การเผชิญเหตุ/ตรวจค้น/จับกุม', sub: 'รับแจ้งเหตุ, บันทึกจับกุม, ตรวจค้นบุคคล/ยานพาหนะ', maxScore: 80 },
+      { id: 's2_2_8', no: '๒.๘', title: 'การปฏิบัติงานสายตรวจ', sub: 'สายตรวจเดินเท้า, รถจักรยานยนต์, รถยนต์, สายตรวจตำบล', maxScore: 80 },
       { id: 's2_2_9', no: '๒.๙', title: 'การปฏิบัติงานด้านชุมชนสัมพันธ์', sub: 'มวลชนสัมพันธ์, ลงพื้นที่ชุมชน, ประสานงานผู้นำชุมชน', maxScore: 80 },
       { id: 's2_2_10', no: '๒.๑๐', title: 'ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ', sub: 'การรักษาความปลอดภัยขบวนเสด็จ, บุคคลสำคัญ', maxScore: 80 },
       { id: 's2_2_11', no: '๒.๑๑', title: 'ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น', sub: 'พ.ร.บ.จราจรทางบก, พ.ร.บ.รถยนต์, กฎหมายขนส่ง', maxScore: 80 },
-      { id: 's2_2_12', no: '๒.๑๒', title: 'การปฏิบัติงานด้านการจราจร', sub: 'อำนวยการจราจร, เขียนใบสั่ง, ตรวจจับความเร็ว, เป่าแอลกอฮอล์', maxScore: 80 },
+      { id: 's2_2_12', no: '๒.๑๒', title: 'การปฏิบัติงานด้านการจราจร', sub: 'อำนวยการจราจร, เขียนใบสั่ง, ตรวจจับความเร็ว', maxScore: 80 },
       { id: 's2_2_13', no: '๒.๑๓', title: 'ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน', sub: 'ข้อมูลท้องถิ่น, บุคคล, แผนประทุษกรรม, สมุดภาพคนร้าย', maxScore: 80 },
       { id: 's2_2_14', no: '๒.๑๔', title: 'การปฏิบัติงานด้านสืบสวน/สอบสวน', sub: 'เฝ้าจุด, สะกดรอย, ล่อซื้อ, ข่าวกรอง, ซักถามบุคคล, จับกุม', maxScore: 80 },
       { id: 's2_3', no: '๓.', title: 'หลังปฏิบัติงาน', sub: 'เก็บ/บำรุงรักษาอุปกรณ์ ยานพาหนะ, สรุปรายงานผล', maxScore: 10 }
     ];
 
-    // Local Storage State
     const STORAGE_KEY = 'police_field_training_logs_v1';
-    let dailyLogs = [];
+    const ROSTER_KEY = 'police_field_training_roster_v1';
 
-    function initData() {
+    const DEFAULT_ROSTER = [
+      { name: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ' },
+      { name: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ' },
+      { name: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา' },
+      { name: 'นสต. กิตติพงษ์ สิทธิชัย', station: 'สภ.แม่ริม ภ.จว.เชียงใหม่', mentor: 'พ.ต.ต. เอกพล จันทร์ดี' },
+      { name: 'นสต. ธีรภัทร ชัยมงคล', station: 'สภ.แม่ริม ภ.จว.เชียงใหม่', mentor: 'พ.ต.ต. เอกพล จันทร์ดี' }
+    ];
+
+    let logs = [];
+    let roster = [];
+
+    function loadData() {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          dailyLogs = JSON.parse(stored);
-        } else {
-          dailyLogs = [];
-        }
-      } catch (e) {
-        dailyLogs = [];
-      }
-      if (!dailyLogs || dailyLogs.length === 0) {
-        loadSampleTrainingData(false);
-      }
-    }
+        const storedRoster = localStorage.getItem(ROSTER_KEY);
+        roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
+      } catch(e) { roster = DEFAULT_ROSTER; }
 
-    function saveLogs() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(dailyLogs));
-      } catch (e) {}
-    }
+        const storedLogs = localStorage.getItem(STORAGE_KEY);
+        logs = storedLogs ? JSON.parse(storedLogs) : [];
+      } catch(e) { logs = []; }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('section_trainee').style.display = 'none';
-      document.getElementById('section_mentor').style.display = 'none';
-      document.getElementById('section_calc').style.display = 'none';
-
-      if (tab === 'trainee') {
-        document.getElementById('tabBtn_trainee').classList.add('active');
-        document.getElementById('section_trainee').style.display = 'block';
-      } else if (tab === 'mentor') {
-        document.getElementById('tabBtn_mentor').classList.add('active');
-        document.getElementById('section_mentor').style.display = 'block';
-      } else if (tab === 'calc') {
-        document.getElementById('tabBtn_calc').classList.add('active');
-        document.getElementById('section_calc').style.display = 'block';
+      if (logs.length === 0) {
+        loadSampleData(false);
       }
-      renderAllViews();
     }
 
-    function updateTopicOptions() {
-      const sem = document.getElementById('log_semester').value;
-      const topicSelect = document.getElementById('log_topic');
-      topicSelect.innerHTML = '';
-      const list = sem === '1' ? TOPICS_SEM1 : TOPICS_SEM2;
-      list.forEach(t => {
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
+      } catch(e) {}
+    }
+
+    function switchAdminMode(mode) {
+      document.getElementById('btn_mode_individual').classList.remove('active');
+      document.getElementById('btn_mode_batch').classList.remove('active');
+      document.getElementById('mode_individual_content').style.display = 'none';
+      document.getElementById('mode_batch_content').style.display = 'none';
+
+      if (mode === 'individual') {
+        document.getElementById('btn_mode_individual').classList.add('active');
+        document.getElementById('mode_individual_content').style.display = 'block';
+        renderIndividualView();
+      } else {
+        document.getElementById('btn_mode_batch').classList.add('active');
+        document.getElementById('mode_batch_content').style.display = 'block';
+        renderBatchView();
+      }
+    }
+
+    function populateTraineeDropdown() {
+      const select = document.getElementById('sel_individual_trainee');
+      const currentVal = select.value;
+      select.innerHTML = '';
+
+      // Get all names from roster + logs
+      const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
+      allNames.forEach(name => {
         const opt = document.createElement('option');
-        opt.value = t.code;
-        opt.textContent = `${t.name} (${t.sub})`;
-        topicSelect.appendChild(opt);
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
       });
-    }
 
-    function handleTraineeSubmit(e) {
-      e.preventDefault();
-      const date = document.getElementById('log_date').value;
-      const semester = document.getElementById('log_semester').value;
-      const topicCode = document.getElementById('log_topic').value;
-      const content = document.getElementById('log_content').value.trim();
-
-      const topicObj = (semester === '1' ? TOPICS_SEM1 : TOPICS_SEM2).find(t => t.code === topicCode);
-      const topicName = topicObj ? topicObj.name : topicCode;
-
-      const newLog = {
-        id: 'log_' + Date.now(),
-        date: date,
-        semester: semester,
-        topicCode: topicCode,
-        topicName: topicName,
-        traineeNote: content,
-        status: 'pending', // 'pending' or 'evaluated'
-        evalPrep: null, // 'ผ่าน' or 'ไม่ผ่าน'
-        evalPrepReason: '',
-        evalWork: null, // 'ผ่าน' or 'ไม่ผ่าน'
-        evalWorkReason: '',
-        evalPost: null, // 'ผ่าน' or 'ไม่ผ่าน'
-        evalPostReason: '',
-        mentorFeedback: ''
-      };
-
-      dailyLogs.unshift(newLog);
-      saveLogs();
-      document.getElementById('log_content').value = '';
-      alert('บันทึกข้อมูลและส่งให้ครูพี่เลี้ยงตรวจเรียบร้อยแล้ว!');
-      renderAllViews();
-    }
-
-    function deleteLog(logId) {
-      if (!confirm('ต้องการลบบันทึกประจำวันรายการนี้หรือไม่?')) return;
-      dailyLogs = dailyLogs.filter(l => l.id !== logId);
-      saveLogs();
-      renderAllViews();
-    }
-
-    function openEvalModal(logId) {
-      const log = dailyLogs.find(l => l.id === logId);
-      if (!log) return;
-
-      document.getElementById('m_eval_log_id').value = log.id;
-      document.getElementById('m_eval_date').textContent = log.date;
-      document.getElementById('m_eval_sem').textContent = 'ภาคเรียนที่ ' + log.semester;
-      document.getElementById('m_eval_topic').textContent = log.topicName;
-      document.getElementById('m_eval_trainee_note').textContent = log.traineeNote;
-
-      // Set values if already evaluated
-      setRadioValue('eval_prep', log.evalPrep || 'ผ่าน');
-      setRadioValue('eval_work', log.evalWork || 'ผ่าน');
-      setRadioValue('eval_post', log.evalPost || 'ผ่าน');
-
-      document.getElementById('eval_prep_reason').value = log.evalPrepReason || '';
-      document.getElementById('eval_work_reason').value = log.evalWorkReason || '';
-      document.getElementById('eval_post_reason').value = log.evalPostReason || '';
-      document.getElementById('eval_mentor_feedback').value = log.mentorFeedback || '';
-
-      updateRadioStyles();
-      document.getElementById('evalModal').style.display = 'flex';
-    }
-
-    function closeEvalModal() {
-      document.getElementById('evalModal').style.display = 'none';
-    }
-
-    function setRadioValue(name, val) {
-      const radios = document.getElementsByName(name);
-      for (let r of radios) {
-        r.checked = (r.value === val);
+      if (currentVal && allNames.includes(currentVal)) {
+        select.value = currentVal;
+      } else if (allNames.length > 0) {
+        select.value = allNames[0];
       }
     }
 
-    function getRadioValue(name) {
-      const radios = document.getElementsByName(name);
-      for (let r of radios) {
-        if (r.checked) return r.value;
-      }
-      return 'ผ่าน';
+    function onIndividualTraineeChange() {
+      renderIndividualView();
     }
 
-    function updateRadioStyles() {
-      ['prep', 'work', 'post'].forEach(field => {
-        const val = getRadioValue('eval_' + field);
-        const passLbl = document.getElementById(`lbl_${field}_pass`);
-        const failLbl = document.getElementById(`lbl_${field}_fail`);
-        if (val === 'ผ่าน') {
-          passLbl.classList.add('selected');
-          failLbl.classList.remove('selected');
-        } else {
-          passLbl.classList.remove('selected');
-          failLbl.classList.add('selected');
-        }
-      });
-    }
+    function computeTraineeScores(traineeName) {
+      const traineeLogs = logs.filter(l => l.traineeName === traineeName && l.status === 'evaluated');
 
-    function handleMentorEvaluationSubmit(e) {
-      e.preventDefault();
-      const logId = document.getElementById('m_eval_log_id').value;
-      const log = dailyLogs.find(l => l.id === logId);
-      if (!log) return;
-
-      log.evalPrep = getRadioValue('eval_prep');
-      log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim();
-      log.evalWork = getRadioValue('eval_work');
-      log.evalWorkReason = document.getElementById('eval_work_reason').value.trim();
-      log.evalPost = getRadioValue('eval_post');
-      log.evalPostReason = document.getElementById('eval_post_reason').value.trim();
-      log.mentorFeedback = document.getElementById('eval_mentor_feedback').value.trim();
-      log.status = 'evaluated';
-
-      saveLogs();
-      closeEvalModal();
-      alert('บันทึกผลการประเมินเรียบร้อยแล้ว และระบบได้คำนวณคะแนนรวมให้อัตโนมัติ!');
-      renderAllViews();
-    }
-
-    function renderAllViews() {
-      // 1. Render Trainee History
-      const traineeTbody = document.getElementById('trainee_logs_tbody');
-      traineeTbody.innerHTML = '';
-      document.getElementById('trainee_log_count').textContent = dailyLogs.length;
-
-      dailyLogs.forEach((log, index) => {
-        const tr = document.createElement('tr');
-        const isEval = log.status === 'evaluated';
-        const statusBadge = isEval
-          ? '<span class="badge badge-evaluated">✓ ครูตรวจแล้ว</span>'
-          : '<span class="badge badge-pending">⏳ รอครูตรวจ</span>';
-        
-        let resultSummary = '-';
-        if (isEval) {
-          const passCount = (log.evalPrep === 'ผ่าน' ? 1 : 0) + (log.evalWork === 'ผ่าน' ? 1 : 0) + (log.evalPost === 'ผ่าน' ? 1 : 0);
-          resultSummary = passCount === 3
-            ? '<span class="badge badge-pass">ผ่านทุกส่วน</span>'
-            : `<span class="badge badge-fail">ผ่าน ${passCount}/3 ส่วน</span>`;
-        }
-
-        tr.innerHTML = `
-          <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${log.date}</td>
-          <td style="text-align:center;">ภาค ${log.semester}</td>
-          <td><b>${log.topicName}</b></td>
-          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
-          <td style="text-align:center;">${statusBadge}</td>
-          <td style="text-align:center;">${resultSummary}</td>
-          <td style="text-align:center;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog('${log.id}')" title="ลบ">🗑️</button>
-          </td>
-        `;
-        traineeTbody.appendChild(tr);
-      });
-
-      // 2. Render Mentor Board
-      const mentorTbody = document.getElementById('mentor_logs_tbody');
-      mentorTbody.innerHTML = '';
-      let pendingCount = 0;
-
-      dailyLogs.forEach((log, index) => {
-        const tr = document.createElement('tr');
-        const isEval = log.status === 'evaluated';
-        if (!isEval) pendingCount++;
-
-        const statusBadge = isEval
-          ? '<span class="badge badge-evaluated">✓ ประเมินแล้ว</span>'
-          : '<span class="badge badge-pending">⏳ รอประเมิน</span>';
-
-        let resultBadge = '-';
-        if (isEval) {
-          resultBadge = (log.evalWork === 'ผ่าน') ? '<span class="badge badge-pass">งาน: ผ่าน</span>' : '<span class="badge badge-fail">งาน: ไม่ผ่าน</span>';
-        }
-
-        tr.innerHTML = `
-          <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${log.date}</td>
-          <td style="text-align:center;">ภาค ${log.semester}</td>
-          <td><b>${log.topicName}</b></td>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
-          <td style="text-align:center;">${statusBadge}</td>
-          <td style="text-align:center;">${resultBadge}</td>
-          <td style="text-align:center;">
-            <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal('${log.id}')">
-              ${isEval ? '✏️ แก้ไขผล' : '🔍 ตรวจประเมิน'}
-            </button>
-          </td>
-        `;
-        mentorTbody.appendChild(tr);
-      });
-
-      document.getElementById('pending_count_badge').textContent = `${pendingCount} รอประเมิน`;
-
-      // 3. Aggregate & Calculate Formula from Daily Evaluations!
-      calculateFormulaFromLogs();
-    }
-
-    function calculateFormulaFromLogs() {
-      // Build counts map: { topicCode: { eval: X, pass: Y } }
       const statsMap = {
         s1_1: { eval: 0, pass: 0 },
         s1_2_1: { eval: 0, pass: 0 },
@@ -1309,10 +701,8 @@
         s2_3: { eval: 0, pass: 0 },
       };
 
-      dailyLogs.forEach(log => {
-        if (log.status !== 'evaluated') return;
+      traineeLogs.forEach(log => {
         const sem = log.semester;
-
         // Prep
         const prepKey = sem === '1' ? 's1_1' : 's2_1';
         statsMap[prepKey].eval++;
@@ -1330,214 +720,358 @@
         if (log.evalPost === 'ผ่าน') statsMap[postKey].pass++;
       });
 
-      // Render Calculation Tables
-      renderSemCalcTable('tbody_sem1', SEMESTER_1_CALC_ITEMS, statsMap, 'tot_sem1');
-      renderSemCalcTable('tbody_sem2', SEMESTER_2_CALC_ITEMS, statsMap, 'tot_sem2');
+      // Calculate Sem 1
+      let s1Score = 0, s1Eval = 0, s1Pass = 0, s1Fail = 0;
+      const s1Rows = SEMESTER_1_CALC_ITEMS.map(item => {
+        const st = statsMap[item.id] || { eval: 0, pass: 0 };
+        const ev = st.eval > 0 ? st.eval : 1;
+        const ps = st.eval > 0 ? st.pass : 1;
+        const fl = ev - ps;
+        const sc = Math.round((ps * item.maxScore) / ev);
+        s1Score += sc; s1Eval += ev; s1Pass += ps; s1Fail += fl;
+        return { item, ev, ps, fl, sc };
+      });
+
+      // Calculate Sem 2
+      let s2Score = 0, s2Eval = 0, s2Pass = 0, s2Fail = 0;
+      const s2Rows = SEMESTER_2_CALC_ITEMS.map(item => {
+        const st = statsMap[item.id] || { eval: 0, pass: 0 };
+        const ev = st.eval > 0 ? st.eval : 1;
+        const ps = st.eval > 0 ? st.pass : 1;
+        const fl = ev - ps;
+        const sc = Math.round((ps * item.maxScore) / ev);
+        s2Score += sc; s2Eval += ev; s2Pass += ps; s2Fail += fl;
+        return { item, ev, ps, fl, sc };
+      });
+
+      const totalScore = s1Score + s2Score;
+      const weightedScore = +(totalScore * (387 / 1160)).toFixed(2);
+      const isPass = totalScore >= 696;
+
+      return {
+        traineeLogs,
+        s1Rows, s1Score, s1Eval, s1Pass, s1Fail,
+        s2Rows, s2Score, s2Eval, s2Pass, s2Fail,
+        totalScore, weightedScore, isPass
+      };
     }
 
-    function renderSemCalcTable(tbodyId, items, statsMap, totPrefix) {
-      const tbody = document.getElementById(tbodyId);
-      tbody.innerHTML = '';
+    function renderIndividualView() {
+      const selectedName = document.getElementById('sel_individual_trainee').value;
+      if (!selectedName) return;
 
-      let totalEval = 0, totalPass = 0, totalFail = 0, totalScore = 0;
+      const rosterMatch = roster.find(r => r.name === selectedName);
+      document.getElementById('lbl_ind_station').textContent = rosterMatch ? rosterMatch.station : '-';
+      document.getElementById('lbl_ind_mentor').textContent = rosterMatch ? rosterMatch.mentor : '-';
 
-      items.forEach(item => {
-        const stat = statsMap[item.id] || { eval: 0, pass: 0 };
-        // If no evaluations yet in this topic, default to 1 eval 1 pass for clean preview or actual counts
-        const evalCount = stat.eval > 0 ? stat.eval : 1;
-        const passCount = stat.eval > 0 ? stat.pass : 1;
-        const failCount = evalCount - passCount;
-        const score = Math.round((passCount * item.maxScore) / evalCount);
+      const res = computeTraineeScores(selectedName);
 
-        totalEval += evalCount;
-        totalPass += passCount;
-        totalFail += failCount;
-        totalScore += score;
+      // Summary boxes
+      document.getElementById('ind_sum_sem1').textContent = res.s1Score;
+      document.getElementById('ind_pct_sem1').textContent = ((res.s1Score / 340) * 100).toFixed(1) + '%';
+      document.getElementById('ind_tbl_sem1_score').textContent = res.s1Score;
+
+      document.getElementById('ind_sum_sem2').textContent = res.s2Score;
+      document.getElementById('ind_pct_sem2').textContent = ((res.s2Score / 820) * 100).toFixed(1) + '%';
+      document.getElementById('ind_tbl_sem2_score').textContent = res.s2Score;
+
+      document.getElementById('ind_sum_total').textContent = res.totalScore.toLocaleString('th-TH');
+      document.getElementById('ind_pct_total').textContent = ((res.totalScore / 1160) * 100).toFixed(2) + '%';
+      document.getElementById('ind_sum_weighted').textContent = res.weightedScore.toFixed(2);
+
+      const statusEl = document.getElementById('ind_status_pass');
+      if (res.isPass) {
+        statusEl.textContent = 'ผ่านเกณฑ์ (' + ((res.totalScore / 1160) * 100).toFixed(1) + '%)';
+        statusEl.style.color = 'var(--success)';
+      } else {
+        statusEl.textContent = 'ไม่ผ่านเกณฑ์ (< 60%)';
+        statusEl.style.color = 'var(--danger)';
+      }
+
+      // Render Sem 1 Table
+      const s1Tbody = document.getElementById('ind_tbody_sem1');
+      s1Tbody.innerHTML = '';
+      res.s1Rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${r.item.no}</td>
+          <td><b>${r.item.title}</b><div class="sub-item-text">${r.item.sub}</div></td>
+          <td style="text-align:center;font-weight:600;">${r.ev}</td>
+          <td style="text-align:center;font-weight:600;color:var(--success);">${r.ps}</td>
+          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>
+          <td style="text-align:center;color:var(--text-muted);">${r.item.maxScore}</td>
+          <td class="score-cell ${r.sc === r.item.maxScore ? 'max' : ''}">${r.sc}</td>
+        `;
+        s1Tbody.appendChild(tr);
+      });
+      document.getElementById('ind_tot_s1_eval').textContent = res.s1Eval;
+      document.getElementById('ind_tot_s1_pass').textContent = res.s1Pass;
+      document.getElementById('ind_tot_s1_fail').textContent = res.s1Fail;
+      document.getElementById('ind_tot_s1_score').textContent = res.s1Score;
+
+      // Render Sem 2 Table
+      const s2Tbody = document.getElementById('ind_tbody_sem2');
+      s2Tbody.innerHTML = '';
+      res.s2Rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${r.item.no}</td>
+          <td><b>${r.item.title}</b><div class="sub-item-text">${r.item.sub}</div></td>
+          <td style="text-align:center;font-weight:600;">${r.ev}</td>
+          <td style="text-align:center;font-weight:600;color:var(--success);">${r.ps}</td>
+          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>
+          <td style="text-align:center;color:var(--text-muted);">${r.item.maxScore}</td>
+          <td class="score-cell ${r.sc === r.item.maxScore ? 'max' : ''}">${r.sc}</td>
+        `;
+        s2Tbody.appendChild(tr);
+      });
+      document.getElementById('ind_tot_s2_eval').textContent = res.s2Eval;
+      document.getElementById('ind_tot_s2_pass').textContent = res.s2Pass;
+      document.getElementById('ind_tot_s2_fail').textContent = res.s2Fail;
+      document.getElementById('ind_tot_s2_score').textContent = res.s2Score;
+
+      // Render Individual Logs Timeline
+      const logsTbody = document.getElementById('ind_logs_tbody');
+      logsTbody.innerHTML = '';
+      const allUserLogs = logs.filter(l => l.traineeName === selectedName);
+      document.getElementById('ind_log_count').textContent = allUserLogs.length;
+
+      allUserLogs.forEach((log, index) => {
+        const isEval = log.status === 'evaluated';
+        const statusBadge = isEval
+          ? '<span style="color:var(--success);font-weight:600;">✓ ตรวจแล้ว</span>'
+          : '<span style="color:var(--amber);font-weight:600;">⏳ รอตรวจ</span>';
+
+        let evalDetails = '-';
+        if (isEval) {
+          evalDetails = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
+          if (log.mentorFeedback) {
+            evalDetails += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>ครูแนะ:</b> ${log.mentorFeedback}</div>`;
+          }
+        }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="text-align:center;font-weight:600;">${item.no}</td>
-          <td>
-            <div style="font-weight:600;color:var(--navy);">${item.title}</div>
-            <div class="sub-item-text">${item.sub}</div>
+          <td style="text-align:center;font-weight:600;">${index + 1}</td>
+          <td style="text-align:center;font-weight:600;">${log.date}</td>
+          <td style="text-align:center;">ภาค ${log.semester}</td>
+          <td><b>${log.topicName}</b></td>
+          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;">${statusBadge}</td>
+          <td>${evalDetails}</td>
+          <td style="text-align:center;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="adminDeleteLog('${log.id}')" title="ลบรายการนี้">🗑️</button>
           </td>
-          <td style="text-align:center;font-weight:600;">${evalCount}</td>
-          <td style="text-align:center;font-weight:600;color:var(--success);">${passCount}</td>
-          <td style="text-align:center;font-weight:600;color:${failCount > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${failCount}</td>
-          <td style="text-align:center;color:var(--text-muted);">${item.maxScore}</td>
-          <td class="score-cell ${score === item.maxScore ? 'max' : ''}">${score}</td>
+        `;
+        logsTbody.appendChild(tr);
+      });
+    }
+
+    function renderBatchView() {
+      const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
+      document.getElementById('batch_count_trainees').textContent = allNames.length;
+      document.getElementById('batch_count_logs').textContent = logs.length;
+
+      // Compute scores for all trainees
+      const batchData = allNames.map(name => {
+        const match = roster.find(r => r.name === name);
+        const res = computeTraineeScores(name);
+        const userLogsCount = logs.filter(l => l.traineeName === name).length;
+        return {
+          name,
+          station: match ? match.station : 'สภ.แม่แตง',
+          mentor: match ? match.mentor : 'ร.ต.อ. อนุชา กล้าหาญ',
+          logsCount: userLogsCount,
+          s1Score: res.s1Score,
+          s2Score: res.s2Score,
+          totalScore: res.totalScore,
+          weightedScore: res.weightedScore,
+          isPass: res.isPass
+        };
+      });
+
+      // Sort by totalScore descending (Ranking)
+      batchData.sort((a, b) => b.totalScore - a.totalScore);
+
+      // Render Table
+      const tbody = document.getElementById('batch_tbody');
+      tbody.innerHTML = '';
+
+      let passCount = 0, sumAllScores = 0, sumAllWeighted = 0;
+
+      batchData.forEach((row, index) => {
+        const rank = index + 1;
+        if (row.isPass) passCount++;
+        sumAllScores += row.totalScore;
+        sumAllWeighted += row.weightedScore;
+
+        let rankBadgeClass = '';
+        if (rank === 1) rankBadgeClass = 'top1';
+        else if (rank === 2) rankBadgeClass = 'top2';
+        else if (rank === 3) rankBadgeClass = 'top3';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;">
+            <span class="rank-pill ${rankBadgeClass}">${rank}</span>
+          </td>
+          <td><b>${row.name}</b></td>
+          <td>${row.station}</td>
+          <td>${row.mentor}</td>
+          <td style="text-align:center;font-weight:600;">${row.logsCount}</td>
+          <td style="text-align:center;font-weight:600;color:var(--blue);">${row.s1Score}</td>
+          <td style="text-align:center;font-weight:600;color:var(--purple);">${row.s2Score}</td>
+          <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--navy);">${row.totalScore.toLocaleString('th-TH')}</td>
+          <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--success);">${row.weightedScore.toFixed(2)}</td>
+          <td style="text-align:center;">
+            <span class="badge ${row.isPass ? 'badge-evaluated' : 'badge-pending'}">${row.isPass ? '✓ ผ่าน' : '✕ ไม่ผ่าน'}</span>
+          </td>
+          <td style="text-align:center;" class="no-print">
+            <button type="button" class="btn btn-outline btn-sm" onclick="selectAndShowTrainee('${row.name}')">🔍 ดูผล</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
 
-      document.getElementById(`${totPrefix}_eval`).textContent = totalEval;
-      document.getElementById(`${totPrefix}_pass`).textContent = totalPass;
-      document.getElementById(`${totPrefix}_fail`).textContent = totalFail;
-      document.getElementById(`${totPrefix}_score`).textContent = totalScore;
+      // Overall batch stats
+      const totalTrainees = batchData.length || 1;
+      const passRate = ((passCount / totalTrainees) * 100).toFixed(1) + '%';
+      const avgScore = (sumAllScores / totalTrainees).toFixed(1);
+      const avgWeight = (sumAllWeighted / totalTrainees).toFixed(2);
 
-      if (totPrefix === 'tot_sem1') {
-        document.getElementById('head_sem1_score').textContent = totalScore;
-        document.getElementById('sum_sem1').textContent = totalScore;
-        document.getElementById('pct_sem1').textContent = ((totalScore / 340) * 100).toFixed(1) + '%';
-        document.getElementById('p_sem1_val').textContent = totalScore;
-        window.sem1CalculatedScore = totalScore;
-      } else {
-        document.getElementById('head_sem2_score').textContent = totalScore;
-        document.getElementById('sum_sem2').textContent = totalScore;
-        document.getElementById('pct_sem2').textContent = ((totalScore / 820) * 100).toFixed(1) + '%';
-        document.getElementById('p_sem2_val').textContent = totalScore;
-        window.sem2CalculatedScore = totalScore;
-      }
-
-      // Update Grand Totals
-      const grandTotal = (window.sem1CalculatedScore || 340) + (window.sem2CalculatedScore || 820);
-      const grandPct = ((grandTotal / 1160) * 100).toFixed(2);
-      const weighted = (grandTotal * (387 / 1160)).toFixed(2);
-
-      document.getElementById('sum_total').textContent = grandTotal.toLocaleString('th-TH');
-      document.getElementById('pct_total').textContent = grandPct + '%';
-      document.getElementById('sum_weighted').textContent = weighted;
-
-      document.getElementById('p_total_val').textContent = grandTotal.toLocaleString('th-TH');
-      document.getElementById('p_weight_val').textContent = weighted;
-
-      const passStatusEl = document.getElementById('status_pass');
-      if (grandTotal >= 696) {
-        passStatusEl.textContent = 'ผ่านเกณฑ์ (ได้ ' + grandPct + '%)';
-        passStatusEl.style.color = 'var(--success)';
-      } else {
-        passStatusEl.textContent = 'ไม่ผ่านเกณฑ์ (< 60%)';
-        passStatusEl.style.color = 'var(--danger)';
-      }
+      document.getElementById('batch_pass_rate').textContent = passRate;
+      document.getElementById('batch_avg_score').textContent = avgScore;
+      document.getElementById('batch_avg_weighted').textContent = avgWeight;
     }
 
-    function loadSampleTrainingData(showAlert = true) {
-      const sampleDate = '2026-08-01';
-      dailyLogs = [
-        // Semester 1 Samples (งานสารบรรณ, บันทึก, ไอที, มวลชน)
-        {
-          id: 'log_1',
-          date: '2026-08-03',
-          semester: '1',
-          topicCode: 's1_2_1',
-          topicName: '๒.๑ ความรู้ด้านงานสารบรรณ',
-          traineeNote: 'ปฏิบัติหน้าที่ฝ่ายธุรการ สภ.แม่แตง รับ-ส่งหนังสือราชการผ่านระบบสารบรรณอิเล็กทรอนิกส์ ร่างหนังสือขอรับการสนับสนุน และจัดเก็บแฟ้มคำสั่ง',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'ร่างหนังสือได้ถูกต้องตามระเบียบงานสารบรรณ มีความละเอียดรอบคอบดีมาก'
-        },
-        {
-          id: 'log_2',
-          date: '2026-08-04',
-          semester: '1',
-          topicCode: 's1_2_2',
-          topicName: '๒.๒ การเขียนบันทึกต่างๆ',
-          traineeNote: 'ร่วมกับสิบเวรลงบันทึกรายงานประจำวันรับแจ้งเหตุเอกสารหาย ฝึกเขียนบันทึกเปรียบเทียบปรับคดีจราจร และตรวจร่างบันทึกจับกุม',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'เขียนข้อความชัดเจน เข้าใจขั้นตอนการลง ปจว.'
-        },
-        {
-          id: 'log_3',
-          date: '2026-08-05',
-          semester: '1',
-          topicCode: 's1_2_3',
-          topicName: '๒.๓ ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร',
-          traineeNote: 'ฝึกใช้งานระบบสารสนเทศสถานีตำรวจ (CRIMES, POLIS, E-cop) ตรวจสอบประวัติหมายจับ และลงบันทึกรับแจ้งเหตุทางวิทยุสื่อสาร',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'ใช้งานระบบคอมพิวเตอร์และรหัสวิทยุสื่อสารได้อย่างคล่องแคล่ว'
-        },
-        {
-          id: 'log_4',
-          date: '2026-08-06',
-          semester: '1',
-          topicCode: 's1_2_4',
-          topicName: '๒.๔ การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน',
-          traineeNote: 'ปฏิบัติหน้าที่ประจำจุดบริการประชาชน One Stop Service สภ.แม่แตง ต้อนรับ แนะนำ และช่วยเหลือประชาชนที่มาติดต่อราชการ',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'กิริยาวาจาสุภาพเรียบร้อย มีจิตบริการ (Service Mind) ยอดเยี่ยม'
-        },
-        // Semester 2 Samples (ปป, สายตรวจ, สืบสวน, จราจร)
-        {
-          id: 'log_5',
-          date: '2026-08-10',
-          semester: '2',
-          topicCode: 's2_2_8',
-          topicName: '๒.๘ การปฏิบัติงานสายตรวจ',
-          traineeNote: 'ออกตรวจพื้นที่เขตรับผิดชอบร่วมกับสายตรวจ จยย. ตรวจตู้แดงร้านทอง ธนาคาร และสถานประกอบการในตลาดแม่แตง เหตุการณ์ทั่วไปปกติ',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'มีความตื่นตัวและระมัดระวังตนเองตามหลักยุทธวิธีตำรวจได้ดี'
-        },
-        {
-          id: 'log_6',
-          date: '2026-08-11',
-          semester: '2',
-          topicCode: 's2_2_12',
-          topicName: '๒.๑๒ การปฏิบัติงานด้านการจราจร',
-          traineeNote: 'อำนวยความสะดวกการจราจรบริเวณสี่แยกหน้าโรงเรียนช่วงเวลาเร่งด่วน และร่วมตั้งจุดตรวจกวดขันวินัยจราจร',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'ให้สัญญาณมือและสัญญาณนกหวีดได้ชัดเจนถูกต้อง'
-        },
-        {
-          id: 'log_7',
-          date: '2026-08-12',
-          semester: '2',
-          topicCode: 's2_2_14',
-          topicName: '๒.๑๔ การปฏิบัติงานด้านสืบสวน/สอบสวน',
-          traineeNote: 'ร่วมกับชุดสืบสวน สภ.แม่แตง ตรวจสอบกล้องวงจรปิด CCTV ติดตามเส้นทางหลบหนีของผู้ต้องสงสัยคดีลักทรัพย์',
-          status: 'evaluated',
-          evalPrep: 'ผ่าน', evalPrepReason: '',
-          evalWork: 'ผ่าน', evalWorkReason: '',
-          evalPost: 'ผ่าน', evalPostReason: '',
-          mentorFeedback: 'มีความช่างสังเกตและให้ความช่วยเหลือทีมสืบสวนได้เป็นอย่างดี'
-        }
+    function selectAndShowTrainee(name) {
+      document.getElementById('sel_individual_trainee').value = name;
+      switchAdminMode('individual');
+    }
+
+    function adminDeleteLog(logId) {
+      if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนใหม่ทันที)')) return;
+      logs = logs.filter(l => l.id !== logId);
+      saveData();
+      renderIndividualView();
+      renderBatchView();
+    }
+
+    function exportBatchCSV() {
+      const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
+      const batchData = allNames.map(name => {
+        const match = roster.find(r => r.name === name);
+        const res = computeTraineeScores(name);
+        const count = logs.filter(l => l.traineeName === name).length;
+        return {
+          name,
+          station: match ? match.station : 'สภ.แม่แตง',
+          mentor: match ? match.mentor : 'ร.ต.อ. อนุชา กล้าหาญ',
+          count,
+          s1: res.s1Score,
+          s2: res.s2Score,
+          total: res.totalScore,
+          weight: res.weightedScore,
+          pass: res.isPass ? 'ผ่าน' : 'ไม่ผ่าน'
+        };
+      }).sort((a, b) => b.total - a.total);
+
+      let csv = '\uFEFFอันดับที่,ยศ-ชื่อ-สกุล,สภ.ที่ฝึก,ครูพี่เลี้ยง,จำนวนวันบันทึก,ภาค1(340),ภาค2(820),รวมคะแนน(1160),ค่าน้ำหนัก10%(387),ผลการฝึก\n';
+      batchData.forEach((row, i) => {
+        csv += `"${i+1}","${row.name}","${row.station}","${row.mentor}","${row.count}","${row.s1}","${row.s2}","${row.total}","${row.weight}","${row.pass}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `รายงานคะแนนฝึกปฏิบัติราชการ_นสต_บชศ_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Roster Management Modal
+    function openRosterModal() {
+      renderRosterModalList();
+      document.getElementById('rosterModal').style.display = 'flex';
+    }
+    function closeRosterModal() {
+      document.getElementById('rosterModal').style.display = 'none';
+      populateTraineeDropdown();
+      renderIndividualView();
+      renderBatchView();
+    }
+    function handleAddRosterTrainee(e) {
+      e.preventDefault();
+      const name = document.getElementById('m_add_name').value.trim();
+      const station = document.getElementById('m_add_station').value.trim();
+      const mentor = document.getElementById('m_add_mentor').value.trim();
+
+      if (roster.some(r => r.name === name)) {
+        alert('มีชื่อ นสต. ท่านนี้ในรุ่นอยู่แล้ว');
+        return;
+      }
+      roster.push({ name, station, mentor });
+      saveData();
+      document.getElementById('m_add_name').value = '';
+      document.getElementById('m_add_station').value = '';
+      document.getElementById('m_add_mentor').value = '';
+      renderRosterModalList();
+    }
+    function deleteRosterTrainee(index) {
+      if (!confirm(`ต้องการลบรายชื่อ ${roster[index].name} ออกจากรุ่นหรือไม่?`)) return;
+      roster.splice(index, 1);
+      saveData();
+      renderRosterModalList();
+    }
+    function renderRosterModalList() {
+      const tbody = document.getElementById('roster_modal_tbody');
+      tbody.innerHTML = '';
+      roster.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;">${i+1}</td>
+          <td><b>${r.name}</b></td>
+          <td>${r.station}</td>
+          <td style="text-align:center;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteRosterTrainee(${i})" style="color:var(--danger);">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function loadSampleData(showAlert = true) {
+      roster = DEFAULT_ROSTER;
+      logs = [
+        // นสต. ทศพร สุมาลี
+        { id: 'l1', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '๒.๑ ความรู้ด้านงานสารบรรณ', traineeNote: 'รับ-ส่งหนังสือราชการผ่านระบบสารบรรณอิเล็กทรอนิกส์ ร่างหนังสือขอรับการสนับสนุน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความละเอียดรอบคอบดีมาก' },
+        { id: 'l2', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-04', semester: '1', topicCode: 's1_2_2', topicName: '๒.๒ การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกเขียนบันทึกรายงานประจำวันรับแจ้งเหตุเอกสารหาย และบันทึกเปรียบเทียบปรับ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เข้าใจขั้นตอนการลง ปจว.' },
+        { id: 'l3', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-05', semester: '1', topicCode: 's1_2_3', topicName: '๒.๓ ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร', traineeNote: 'ฝึกใช้งานระบบ POLIS ตรวจสอบข้อมูลหมายจับ และสมุดคุมรับแจ้งเหตุ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ใช้ระบบคอมพิวเตอร์ได้อย่างคล่องแคล่ว' },
+        { id: 'l4', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-06', semester: '1', topicCode: 's1_2_4', topicName: '๒.๔ การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน', traineeNote: 'ปฏิบัติหน้าที่ประจำจุด One Stop Service ให้คำแนะนำประชาชนที่มาติดต่อราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'กิริยาวาจาสุภาพเรียบร้อยดีมาก' },
+        { id: 'l5', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '๒.๘ การปฏิบัติงานสายตรวจ', traineeNote: 'ออกตรวจพื้นที่เขตรับผิดชอบร่วมกับสายตรวจ จยย. ตรวจตู้แดงร้านทอง ธนาคาร', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ปฏิบัติตามหลักยุทธวิธีตำรวจได้ดี' },
+        { id: 'l6', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-11', semester: '2', topicCode: 's2_2_12', topicName: '๒.๑๒ การปฏิบัติงานด้านการจราจร', traineeNote: 'อำนวยความสะดวกการจราจรบริเวณสี่แยกหน้าโรงเรียนช่วงเวลาเร่งด่วน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ให้สัญญาณมือและนกหวีดได้ถูกต้อง' },
+        { id: 'l7', traineeName: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-12', semester: '2', topicCode: 's2_2_14', topicName: '๒.๑๔ การปฏิบัติงานด้านสืบสวน/สอบสวน', traineeNote: 'ร่วมกับชุดสืบสวนตรวจสอบกล้องวงจรปิด CCTV ติดตามเส้นทางหลบหนีคนร้าย', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความช่างสังเกตเป็นอย่างดี' },
+
+        // นสต. สมชาย ใจดี
+        { id: 'l8', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-03', semester: '1', topicCode: 's1_2_1', topicName: '๒.๑ ความรู้ด้านงานสารบรรณ', traineeNote: 'ลงทะเบียนรับหนังสือราชการและจัดส่งต่อให้ผู้บังคับบัญชา', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'เรียบร้อยดี' },
+        { id: 'l9', traineeName: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ', date: '2026-08-10', semester: '2', topicCode: 's2_2_8', topicName: '๒.๘ การปฏิบัติงานสายตรวจ', traineeNote: 'ตรวจตู้แดงตลาดแม่แตง และประสานงานชุมชน', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'มีความกระตือรือร้น' },
+
+        // นสต. วิชัย รักชาติ
+        { id: 'l10', traineeName: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา', date: '2026-08-03', semester: '1', topicCode: 's1_2_2', topicName: '๒.๒ การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกร่างบันทึกข้อความราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ภาษาเขียนถูกต้อง' }
       ];
 
-      saveLogs();
-      if (showAlert) alert('โหลดชุดข้อมูลบันทึกและประเมินผลตัวอย่าง นสต. เรียบร้อยแล้ว!');
-      renderAllViews();
+      saveData();
+      if (showAlert) alert('โหลดชุดข้อมูลตัวอย่างรุ่น นสต. เรียบร้อยแล้ว!');
+      populateTraineeDropdown();
+      renderIndividualView();
+      renderBatchView();
     }
 
-    function clearAllData() {
-      if (!confirm('ต้องการล้างข้อมูลบันทึกทั้งหมดเพื่อเริ่มต้นใหม่หรือไม่?')) return;
-      dailyLogs = [];
-      saveLogs();
-      renderAllViews();
-    }
-
-    // Set today's date on input
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('log_date').value = today;
-
-    // Sync input signatures
-    document.getElementById('t_name').addEventListener('input', (e) => {
-      document.getElementById('sig_trainee').textContent = e.target.value || '......................................................';
-    });
-    document.getElementById('t_mentor').addEventListener('input', (e) => {
-      document.getElementById('sig_mentor').textContent = e.target.value || '......................................................';
-    });
-
-    // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
-      initData();
-      updateTopicOptions();
-      renderAllViews();
+      loadData();
+      populateTraineeDropdown();
+      renderIndividualView();
+      renderBatchView();
     });
   </script>
 </body>

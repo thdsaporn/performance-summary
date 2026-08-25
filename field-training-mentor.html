@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจประเมินการฝึกหัดปฏิบัติราชการ (สำหรับ ครูพี่เลี้ยง) | กก.๕ บก.กฝ.บช.ตชด.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0e2a47;
+      --navy-dark: #09192c;
+      --navy-light: #163e69;
+      --gold: #d4af37;
+      --gold-deep: #b38e1b;
+      --purple: #7c3aed;
+      --purple-bg: #f5f3ff;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --radius: 10px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 15px;
+      padding-bottom: 60px;
+    }
+    header {
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 60%, #7c3aed 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border-bottom: 3px solid var(--gold);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .brand-title { display: flex; align-items: center; gap: 12px; }
+    .badge-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .brand-title h1 { font-family: 'Prompt', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+    .brand-title p { font-size: 12px; color: #ddd6fe; }
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .container { max-width: 1200px; margin: 18px auto; padding: 0 16px; }
+    .portal-nav {
+      display: flex; gap: 8px; background: white; padding: 8px 12px; border-radius: 10px;
+      border: 1px solid var(--border-light); margin-bottom: 18px; box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .portal-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 6px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 600;
+      text-decoration: none; color: var(--text-muted); transition: all 0.15s;
+    }
+    .portal-btn:hover { background: #f1f5f9; color: var(--navy); }
+    .portal-btn.active { background: #7c3aed; color: white; }
+    .card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border-light); padding: 20px; margin-bottom: 18px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1.5px solid var(--border-light); padding-bottom: 12px;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .card-title {
+      font-family: 'Prompt', sans-serif; font-size: 16.5px; font-weight: 600; color: var(--navy);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .filter-bar {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .filter-bar select, .filter-bar input {
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 13.5px; background: white;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; text-decoration: none;
+    }
+    .btn-purple { background: #7c3aed; color: white; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-outline { background: white; border: 1px solid var(--border); color: var(--navy); }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border-light); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { padding: 9px 12px; border: 1px solid var(--border-light); text-align: left; vertical-align: middle; }
+    th { background: #f8fafc; font-family: 'Prompt', sans-serif; color: var(--navy); font-weight: 600; }
+    .badge { display: inline-flex; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+    .badge-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
+    .badge-evaluated { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+    .badge-pass { background: var(--success-bg); color: var(--success); font-weight: 700; }
+    .badge-fail { background: var(--danger-bg); color: var(--danger); font-weight: 700; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,0.6); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000;
+    }
+    .modal {
+      background: white; border-radius: 14px; width: 100%; max-width: 680px; max-height: 90vh;
+      overflow-y: auto; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+    .modal-hdr {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1.5px solid var(--border-light); padding-bottom: 12px; margin-bottom: 16px;
+    }
+    .modal-hdr h3 { font-family: 'Prompt', sans-serif; font-size: 17px; color: var(--navy); }
+    .modal-close {
+      background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 8px;
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .eval-radio-group { display: flex; gap: 10px; margin-top: 6px; }
+    .eval-radio-label {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--border);
+      cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.15s;
+    }
+    .eval-radio-label.pass-option:hover, .eval-radio-label.pass-option.selected {
+      border-color: var(--success); background: var(--success-bg); color: var(--success);
+    }
+    .eval-radio-label.fail-option:hover, .eval-radio-label.fail-option.selected {
+      border-color: var(--danger); background: var(--danger-bg); color: var(--danger);
+    }
+    .eval-radio-label input { display: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <div class="badge-icon">👨‍✈️</div>
+        <div>
+          <h1>พอร์ทัลตรวจประเมินการฝึกหัดปฏิบัติราชการ (สำหรับ ครูพี่เลี้ยง)</h1>
+          <p>ตรวจบันทึกรายวัน · ประเมิน ๓ ส่วน · ให้ข้อเสนอแนะ · กก.๕ บก.กฝ.บช.ตชด. / บช.ศ.</p>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="./field-training.html" class="btn btn-outline btn-sm">🏠 หน้าหลักฝึกปฏิบัติ</a>
+        <a href="./index.html" class="btn btn-outline btn-sm">🌟 หน้าพอร์ตผลงาน</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 3 Portals Switcher Links -->
+    <div class="portal-nav">
+      <span style="font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;padding:0 6px;">
+        🔗 สลับพอร์ทัล:
+      </span>
+      <a href="./field-training-trainee.html" class="portal-btn">📝 ๑. นสต. (บันทึกประจำวัน)</a>
+      <a href="./field-training-mentor.html" class="portal-btn active">👨‍✈️ ๒. ครูพี่เลี้ยง (ตรวจประเมิน)</a>
+      <a href="./field-training-admin.html" class="portal-btn">📊 ๓. ฝ่ายฝึกฯ/วิชาการ (สรุปคะแนน บช.ศ.)</a>
+    </div>
+
+    <!-- Main Mentor Card -->
+    <div class="card" style="border-top:4px solid #7c3aed;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋 รายการบันทึกการปฏิบัติงานประจำวันของ นสต.</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);">
+          รอตรวจ: <strong id="lbl_pending_count" style="color:var(--amber);">0</strong> รายการ | ตรวจแล้ว: <strong id="lbl_done_count" style="color:var(--success);">0</strong> รายการ
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">กรองตาม นสต.:</label>
+          <select id="filter_trainee" onchange="renderTable()">
+            <option value="">-- แสดง นสต. ทุกคน --</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">สถานะการตรวจ:</label>
+          <select id="filter_status" onchange="renderTable()">
+            <option value="">ทั้งหมด</option>
+            <option value="pending">⏳ เฉพาะรอตรวจ</option>
+            <option value="evaluated">✓ เฉพาะตรวจแล้ว</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">ภาคเรียน:</label>
+          <select id="filter_semester" onchange="renderTable()">
+            <option value="">ทั้งหมด</option>
+            <option value="1">ภาคเรียนที่ ๑</option>
+            <option value="2">ภาคเรียนที่ ๒</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">ลำดับ</th>
+              <th style="width:105px;text-align:center;">วันที่</th>
+              <th style="width:160px;">นสต. ผู้บันทึก</th>
+              <th style="width:75px;text-align:center;">ภาค</th>
+              <th style="width:230px;">หัวข้อปฏิบัติงาน</th>
+              <th>บันทึกของ นสต.</th>
+              <th style="width:115px;text-align:center;">สถานะ</th>
+              <th style="width:115px;text-align:center;">ผลการตรวจ</th>
+              <th style="width:130px;text-align:center;">ดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody id="mentor_tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal for Evaluation -->
+  <div id="evalModal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-hdr">
+        <h3 id="modal_title">👨‍✈️ ตรวจประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ ๑)</h3>
+        <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
+      </div>
+
+      <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div><b>นสต.:</b> <strong id="m_eval_trainee_name" style="color:var(--navy);">-</strong></div>
+          <div><b>วันที่:</b> <span id="m_eval_date">-</span> (ภาค <span id="m_eval_sem">-</span>)</div>
+        </div>
+        <div style="margin-top:4px;"><b>หัวข้อ:</b> <span id="m_eval_topic">-</span></div>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);">
+          <b>บันทึกของ นสต.:</b>
+          <div id="m_eval_trainee_note" style="color:#334155;margin-top:2px;font-style:italic;">-</div>
+        </div>
+      </div>
+
+      <form id="evalForm" onsubmit="handleEvaluationSubmit(event)">
+        <input type="hidden" id="m_eval_log_id">
+
+        <!-- 1. ก่อนปฏิบัติงาน -->
+        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">๑. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกาย/จิตใจ)</label>
+          <div class="eval-radio-group">
+            <label class="eval-radio-label pass-option" id="lbl_prep_pass">
+              <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles()">
+              ✓ ผ่าน
+            </label>
+            <label class="eval-radio-label fail-option" id="lbl_prep_fail">
+              <input type="radio" name="eval_prep" value="ไม่ผ่าน" onchange="updateRadioStyles()">
+              ✕ ไม่ผ่าน
+            </label>
+          </div>
+          <input type="text" id="eval_prep_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+
+        <!-- 2. การปฏิบัติงาน -->
+        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">๒. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
+          <div class="eval-radio-group">
+            <label class="eval-radio-label pass-option" id="lbl_work_pass">
+              <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles()">
+              ✓ ผ่าน
+            </label>
+            <label class="eval-radio-label fail-option" id="lbl_work_fail">
+              <input type="radio" name="eval_work" value="ไม่ผ่าน" onchange="updateRadioStyles()">
+              ✕ ไม่ผ่าน
+            </label>
+          </div>
+          <input type="text" id="eval_work_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+
+        <!-- 3. หลังปฏิบัติงาน -->
+        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">๓. หลังปฏิบัติงาน (การบำรุงรักษาอุปกรณ์/ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
+          <div class="eval-radio-group">
+            <label class="eval-radio-label pass-option" id="lbl_post_pass">
+              <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles()">
+              ✓ ผ่าน
+            </label>
+            <label class="eval-radio-label fail-option" id="lbl_post_fail">
+              <input type="radio" name="eval_post" value="ไม่ผ่าน" onchange="updateRadioStyles()">
+              ✕ ไม่ผ่าน
+            </label>
+          </div>
+          <input type="text" id="eval_post_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+
+        <!-- ข้อเสนอแนะ -->
+        <div style="margin-bottom:16px;">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">ส่วนที่ ๓ : ข้อเสนอแนะประจำวันของครูพี่เลี้ยง</label>
+          <textarea id="eval_mentor_feedback" placeholder="ให้คำแนะนำ ชี้แนะแนวทาง หรือข้อคิดเห็นแก่ นสต. ..." style="width:100%;min-height:75px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteCurrentLogFromModal()">🗑️ ลบรายการนี้</button>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-outline" onclick="closeEvalModal()">ยกเลิก</button>
+            <button type="submit" class="btn btn-purple">✓ บันทึกผลการประเมิน</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'police_field_training_logs_v1';
+    const ROSTER_KEY = 'police_field_training_roster_v1';
+
+    let logs = [];
+    let roster = [];
+
+    function loadData() {
+      try {
+        const storedLogs = localStorage.getItem(STORAGE_KEY);
+        logs = storedLogs ? JSON.parse(storedLogs) : [];
+      } catch(e) { logs = []; }
+
+      try {
+        const storedRoster = localStorage.getItem(ROSTER_KEY);
+        roster = storedRoster ? JSON.parse(storedRoster) : [];
+      } catch(e) { roster = []; }
+
+      // Populate trainee filter
+      const filterSelect = document.getElementById('filter_trainee');
+      filterSelect.innerHTML = '<option value="">-- แสดง นสต. ทุกคน --</option>';
+      const names = [...new Set(logs.map(l => l.traineeName).filter(Boolean))];
+      names.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = n;
+        filterSelect.appendChild(opt);
+      });
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+      } catch(e) {}
+    }
+
+    function openEvalModal(logId) {
+      const log = logs.find(l => l.id === logId);
+      if (!log) return;
+
+      document.getElementById('m_eval_log_id').value = log.id;
+      document.getElementById('m_eval_trainee_name').textContent = log.traineeName;
+      document.getElementById('m_eval_date').textContent = log.date;
+      document.getElementById('m_eval_sem').textContent = log.semester;
+      document.getElementById('m_eval_topic').textContent = log.topicName;
+      document.getElementById('m_eval_trainee_note').textContent = log.traineeNote;
+
+      setRadioValue('eval_prep', log.evalPrep || 'ผ่าน');
+      setRadioValue('eval_work', log.evalWork || 'ผ่าน');
+      setRadioValue('eval_post', log.evalPost || 'ผ่าน');
+
+      document.getElementById('eval_prep_reason').value = log.evalPrepReason || '';
+      document.getElementById('eval_work_reason').value = log.evalWorkReason || '';
+      document.getElementById('eval_post_reason').value = log.evalPostReason || '';
+      document.getElementById('eval_mentor_feedback').value = log.mentorFeedback || '';
+
+      updateRadioStyles();
+      document.getElementById('evalModal').style.display = 'flex';
+    }
+
+    function closeEvalModal() {
+      document.getElementById('evalModal').style.display = 'none';
+    }
+
+    function setRadioValue(name, val) {
+      const radios = document.getElementsByName(name);
+      for (let r of radios) {
+        r.checked = (r.value === val);
+      }
+    }
+
+    function getRadioValue(name) {
+      const radios = document.getElementsByName(name);
+      for (let r of radios) {
+        if (r.checked) return r.value;
+      }
+      return 'ผ่าน';
+    }
+
+    function updateRadioStyles() {
+      ['prep', 'work', 'post'].forEach(field => {
+        const val = getRadioValue('eval_' + field);
+        const passLbl = document.getElementById(`lbl_${field}_pass`);
+        const failLbl = document.getElementById(`lbl_${field}_fail`);
+        if (val === 'ผ่าน') {
+          passLbl.classList.add('selected');
+          failLbl.classList.remove('selected');
+        } else {
+          passLbl.classList.remove('selected');
+          failLbl.classList.add('selected');
+        }
+      });
+    }
+
+    function handleEvaluationSubmit(e) {
+      e.preventDefault();
+      const logId = document.getElementById('m_eval_log_id').value;
+      const log = logs.find(l => l.id === logId);
+      if (!log) return;
+
+      log.evalPrep = getRadioValue('eval_prep');
+      log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim();
+      log.evalWork = getRadioValue('eval_work');
+      log.evalWorkReason = document.getElementById('eval_work_reason').value.trim();
+      log.evalPost = getRadioValue('eval_post');
+      log.evalPostReason = document.getElementById('eval_post_reason').value.trim();
+      log.mentorFeedback = document.getElementById('eval_mentor_feedback').value.trim();
+      log.status = 'evaluated';
+
+      saveData();
+      closeEvalModal();
+      alert('บันทึกผลการตรวจประเมินเรียบร้อยแล้ว!');
+      renderTable();
+    }
+
+    function deleteLog(logId) {
+      if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนรวมใหม่ทันที)')) return;
+      logs = logs.filter(l => l.id !== logId);
+      saveData();
+      renderTable();
+    }
+
+    function deleteCurrentLogFromModal() {
+      const logId = document.getElementById('m_eval_log_id').value;
+      if (logId) {
+        deleteLog(logId);
+        closeEvalModal();
+      }
+    }
+
+    function renderTable() {
+      const filterTrainee = document.getElementById('filter_trainee').value;
+      const filterStatus = document.getElementById('filter_status').value;
+      const filterSem = document.getElementById('filter_semester').value;
+
+      let filtered = logs.slice();
+      if (filterTrainee) filtered = filtered.filter(l => l.traineeName === filterTrainee);
+      if (filterStatus) filtered = filtered.filter(l => l.status === filterStatus);
+      if (filterSem) filtered = filtered.filter(l => l.semester === filterSem);
+
+      let pendingCount = logs.filter(l => l.status !== 'evaluated').length;
+      let doneCount = logs.filter(l => l.status === 'evaluated').length;
+      document.getElementById('lbl_pending_count').textContent = pendingCount;
+      document.getElementById('lbl_done_count').textContent = doneCount;
+
+      const tbody = document.getElementById('mentor_tbody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px;">ไม่พบบันทึกประจำวันตามเงื่อนไขที่เลือก</td></tr>';
+        return;
+      }
+
+      filtered.forEach((log, index) => {
+        const isEval = log.status === 'evaluated';
+        const statusBadge = isEval
+          ? '<span class="badge badge-evaluated">✓ ตรวจแล้ว</span>'
+          : '<span class="badge badge-pending">⏳ รอตรวจ</span>';
+
+        let evalSummary = '-';
+        if (isEval) {
+          evalSummary = (log.evalWork === 'ผ่าน')
+            ? '<span class="badge badge-pass">ผ่าน</span>'
+            : '<span class="badge badge-fail">ไม่ผ่าน</span>';
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${index + 1}</td>
+          <td style="text-align:center;font-weight:600;">${log.date}</td>
+          <td><b>${log.traineeName || '-'}</b></td>
+          <td style="text-align:center;">ภาค ${log.semester}</td>
+          <td><b>${log.topicName}</b></td>
+          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;">${statusBadge}</td>
+          <td style="text-align:center;">${evalSummary}</td>
+          <td style="text-align:center;white-space:nowrap;">
+            <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal('${log.id}')">
+              ${isEval ? '✏️ แก้ไขผล' : '🔍 ตรวจประเมิน'}
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog('${log.id}')" title="ลบ">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      renderTable();
+    });
+  </script>
+</body>
+</html>

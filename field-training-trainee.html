@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกการฝึกหัดปฏิบัติราชการ (สำหรับ นสต.) | กก.๕ บก.กฝ.บช.ตชด.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0e2a47;
+      --navy-dark: #09192c;
+      --navy-light: #163e69;
+      --gold: #d4af37;
+      --gold-deep: #b38e1b;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --radius: 10px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 15px;
+      padding-bottom: 60px;
+    }
+    header {
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border-bottom: 3px solid var(--gold);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .brand-title { display: flex; align-items: center; gap: 12px; }
+    .badge-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .brand-title h1 { font-family: 'Prompt', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
+    .brand-title p { font-size: 12px; color: #94a3b8; }
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .container { max-width: 1100px; margin: 18px auto; padding: 0 16px; }
+    .portal-nav {
+      display: flex; gap: 8px; background: white; padding: 8px 12px; border-radius: 10px;
+      border: 1px solid var(--border-light); margin-bottom: 18px; box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .portal-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      border-radius: 6px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 600;
+      text-decoration: none; color: var(--text-muted); transition: all 0.15s;
+    }
+    .portal-btn:hover { background: #f1f5f9; color: var(--navy); }
+    .portal-btn.active { background: var(--navy); color: white; }
+    .card {
+      background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 1px solid var(--border-light); padding: 20px; margin-bottom: 18px;
+    }
+    .card-title {
+      font-family: 'Prompt', sans-serif; font-size: 16px; font-weight: 600; color: var(--navy);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 14px; background: #f8fafc; color: var(--text);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--blue); background: white;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 13.5px; font-weight: 500;
+      cursor: pointer; border: none; text-decoration: none;
+    }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-outline { background: white; border: 1px solid var(--border); color: var(--navy); }
+    .btn-outline:hover { background: #f8fafc; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border-light); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { padding: 9px 12px; border: 1px solid var(--border-light); text-align: left; vertical-align: middle; }
+    th { background: #f8fafc; font-family: 'Prompt', sans-serif; color: var(--navy); font-weight: 600; }
+    .badge { display: inline-flex; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+    .badge-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
+    .badge-evaluated { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <div class="badge-icon">📝</div>
+        <div>
+          <h1>พอร์ทัลบันทึกการฝึกหัดปฏิบัติราชการ (สำหรับ นสต.)</h1>
+          <p>ระบบบันทึกการปฏิบัติงานประจำวัน · กก.๕ บก.กฝ.บช.ตชด. / บช.ศ.</p>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="./field-training.html" class="btn btn-outline btn-sm">🏠 หน้าหลักฝึกปฏิบัติ</a>
+        <a href="./index.html" class="btn btn-outline btn-sm">🌟 หน้าพอร์ตผลงาน</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 3 Portals Switcher Links -->
+    <div class="portal-nav">
+      <span style="font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;padding:0 6px;">
+        🔗 สลับพอร์ทัล:
+      </span>
+      <a href="./field-training-trainee.html" class="portal-btn active">📝 ๑. นสต. (บันทึกประจำวัน)</a>
+      <a href="./field-training-mentor.html" class="portal-btn">👨‍✈️ ๒. ครูพี่เลี้ยง (ตรวจประเมิน)</a>
+      <a href="./field-training-admin.html" class="portal-btn">📊 ๓. ฝ่ายฝึกฯ/วิชาการ (สรุปคะแนน บช.ศ.)</a>
+    </div>
+
+    <!-- Trainee Profile Selector -->
+    <div class="card">
+      <div class="card-title">
+        <span>👤 ข้อมูลนักเรียนนายสิบตำรวจ (ผู้บันทึก)</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>เลือกหรือพิมพ์ ยศ-ชื่อ-สกุล นสต.</label>
+          <input type="text" id="trainee_name" list="trainee_roster_list" value="นสต. ทศพร สุมาลี" onchange="onTraineeChange()">
+          <datalist id="trainee_roster_list"></datalist>
+        </div>
+        <div class="form-group">
+          <label>สถานีตำรวจ/หน่วยงานที่ฝึกปฏิบัติ</label>
+          <input type="text" id="trainee_station" value="สภ.แม่แตง ภ.จว.เชียงใหม่">
+        </div>
+        <div class="form-group">
+          <label>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</label>
+          <input type="text" id="trainee_mentor" value="ร.ต.อ. อนุชา กล้าหาญ">
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Log Form -->
+    <div class="card" style="border-top:4px solid var(--blue);">
+      <div class="card-title">
+        <span>📝 บันทึกการปฏิบัติงานประจำวัน (แบบประเมินแบบที่ ๑ ส่วนที่ ๒)</span>
+      </div>
+      <form id="traineeForm" onsubmit="handleTraineeSubmit(event)">
+        <input type="hidden" id="edit_log_id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>วันที่ปฏิบัติงาน</label>
+            <input type="date" id="log_date" required>
+          </div>
+          <div class="form-group">
+            <label>ภาคเรียน</label>
+            <select id="log_semester" onchange="updateTopics()" required>
+              <option value="1">ภาคเรียนที่ ๑ (งานสารบรรณ, บันทึก, ไอที, มวลชน)</option>
+              <option value="2">ภาคเรียนที่ ๒ (ปป, ผู้ต้องหา, สายตรวจ, จราจร, สืบสวน)</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>หัวข้อการปฏิบัติงานในวันนี้ (ตามระเบียบ บช.ศ.)</label>
+            <select id="log_topic" required></select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>รายละเอียดการปฏิบัติงานประจำวัน (บันทึกเหตุการณ์และสิ่งที่ปฏิบัติอย่างละเอียด)</label>
+          <textarea id="log_content" placeholder="บันทึกรายละเอียดการปฏิบัติงานประจำวัน..." required style="min-height:100px;"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <span style="font-size:12.5px;color:var(--text-muted);">
+            📌 เมื่อกดบันทึก ข้อมูลจะส่งไปยัง <b>พอร์ทัลครูพี่เลี้ยง</b> ทันที
+          </span>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-outline" id="btn_cancel_edit" style="display:none;" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
+            <button type="submit" class="btn btn-primary" id="btn_submit_log">💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- History Table -->
+    <div class="card">
+      <div class="card-title">
+        <span>📋 ประวัติการลงบันทึกของ <span id="lbl_current_trainee" style="color:var(--blue);">นสต. ทศพร สุมาลี</span> (<span id="count_logs">0</span> รายการ)</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">ลำดับ</th>
+              <th style="width:105px;text-align:center;">วันที่</th>
+              <th style="width:80px;text-align:center;">ภาค</th>
+              <th style="width:240px;">หัวข้อปฏิบัติงาน</th>
+              <th>บันทึกของ นสต.</th>
+              <th style="width:115px;text-align:center;">สถานะ</th>
+              <th style="width:180px;">ผลการตรวจ/ข้อเสนอแนะครู</th>
+              <th style="width:75px;text-align:center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="trainee_tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const TOPICS_S1 = [
+      { code: 's1_2_1', name: '๒.๑ ความรู้ด้านงานสารบรรณ' },
+      { code: 's1_2_2', name: '๒.๒ การเขียนบันทึกต่างๆ' },
+      { code: 's1_2_3', name: '๒.๓ ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร' },
+      { code: 's1_2_4', name: '๒.๔ การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงาน' }
+    ];
+    const TOPICS_S2 = [
+      { code: 's2_2_5', name: '๒.๕ ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม' },
+      { code: 's2_2_6', name: '๒.๖ การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา' },
+      { code: 's2_2_7', name: '๒.๗ การเผชิญเหตุ/ตรวจค้น/จับกุม' },
+      { code: 's2_2_8', name: '๒.๘ การปฏิบัติงานสายตรวจ' },
+      { code: 's2_2_9', name: '๒.๙ การปฏิบัติงานด้านชุมชนสัมพันธ์' },
+      { code: 's2_2_10', name: '๒.๑๐ ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ' },
+      { code: 's2_2_11', name: '๒.๑๑ ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น' },
+      { code: 's2_2_12', name: '๒.๑๒ การปฏิบัติงานด้านการจราจร' },
+      { code: 's2_2_13', name: '๒.๑๓ ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน' },
+      { code: 's2_2_14', name: '๒.๑๔ การปฏิบัติงานด้านสืบสวน/สอบสวน' }
+    ];
+
+    const STORAGE_KEY = 'police_field_training_logs_v1';
+    const ROSTER_KEY = 'police_field_training_roster_v1';
+
+    const DEFAULT_ROSTER = [
+      { name: 'นสต. ทศพร สุมาลี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ' },
+      { name: 'นสต. สมชาย ใจดี', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.อ. อนุชา กล้าหาญ' },
+      { name: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา' },
+      { name: 'นสต. กิตติพงษ์ สิทธิชัย', station: 'สภ.แม่ริม ภ.จว.เชียงใหม่', mentor: 'พ.ต.ต. เอกพล จันทร์ดี' },
+      { name: 'นสต. ธีรภัทร ชัยมงคล', station: 'สภ.แม่ริม ภ.จว.เชียงใหม่', mentor: 'พ.ต.ต. เอกพล จันทร์ดี' }
+    ];
+
+    let roster = [];
+    let logs = [];
+
+    function loadData() {
+      try {
+        const storedRoster = localStorage.getItem(ROSTER_KEY);
+        roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
+      } catch(e) { roster = DEFAULT_ROSTER; }
+
+      try {
+        const storedLogs = localStorage.getItem(STORAGE_KEY);
+        logs = storedLogs ? JSON.parse(storedLogs) : [];
+      } catch(e) { logs = []; }
+
+      // Update Roster datalist
+      const dl = document.getElementById('trainee_roster_list');
+      dl.innerHTML = '';
+      roster.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.name;
+        dl.appendChild(opt);
+      });
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
+      } catch(e) {}
+    }
+
+    function onTraineeChange() {
+      const name = document.getElementById('trainee_name').value.trim();
+      const match = roster.find(r => r.name === name);
+      if (match) {
+        document.getElementById('trainee_station').value = match.station;
+        document.getElementById('trainee_mentor').value = match.mentor;
+      }
+      document.getElementById('lbl_current_trainee').textContent = name;
+      renderTable();
+    }
+
+    function updateTopics() {
+      const sem = document.getElementById('log_semester').value;
+      const select = document.getElementById('log_topic');
+      select.innerHTML = '';
+      const list = sem === '1' ? TOPICS_S1 : TOPICS_S2;
+      list.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.code;
+        opt.textContent = t.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function handleTraineeSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('edit_log_id').value;
+      const tName = document.getElementById('trainee_name').value.trim();
+      const station = document.getElementById('trainee_station').value.trim();
+      const mentor = document.getElementById('trainee_mentor').value.trim();
+      const date = document.getElementById('log_date').value;
+      const semester = document.getElementById('log_semester').value;
+      const topicCode = document.getElementById('log_topic').value;
+      const content = document.getElementById('log_content').value.trim();
+
+      const topicObj = (semester === '1' ? TOPICS_S1 : TOPICS_S2).find(t => t.code === topicCode);
+      const topicName = topicObj ? topicObj.name : topicCode;
+
+      // Add to roster if new
+      if (!roster.some(r => r.name === tName)) {
+        roster.push({ name: tName, station: station, mentor: mentor });
+      }
+
+      if (editId) {
+        const log = logs.find(l => l.id === editId);
+        if (log) {
+          log.traineeName = tName;
+          log.station = station;
+          log.mentor = mentor;
+          log.date = date;
+          log.semester = semester;
+          log.topicCode = topicCode;
+          log.topicName = topicName;
+          log.traineeNote = content;
+        }
+        cancelEdit();
+      } else {
+        const newLog = {
+          id: 'log_' + Date.now(),
+          traineeName: tName,
+          station: station,
+          mentor: mentor,
+          date: date,
+          semester: semester,
+          topicCode: topicCode,
+          topicName: topicName,
+          traineeNote: content,
+          status: 'pending',
+          evalPrep: null, evalPrepReason: '',
+          evalWork: null, evalWorkReason: '',
+          evalPost: null, evalPostReason: '',
+          mentorFeedback: ''
+        };
+        logs.unshift(newLog);
+      }
+
+      saveData();
+      document.getElementById('log_content').value = '';
+      alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+      renderTable();
+    }
+
+    function editLog(logId) {
+      const log = logs.find(l => l.id === logId);
+      if (!log) return;
+      if (log.status === 'evaluated') {
+        alert('รายการนี้ครูพี่เลี้ยงประเมินผลเรียบร้อยแล้ว หากต้องการแก้ไขกรุณาติดต่อครูพี่เลี้ยง');
+        return;
+      }
+      document.getElementById('edit_log_id').value = log.id;
+      document.getElementById('log_date').value = log.date;
+      document.getElementById('log_semester').value = log.semester;
+      updateTopics();
+      document.getElementById('log_topic').value = log.topicCode;
+      document.getElementById('log_content').value = log.traineeNote;
+
+      document.getElementById('btn_submit_log').textContent = '💾 บันทึกการแก้ไข';
+      document.getElementById('btn_cancel_edit').style.display = 'inline-flex';
+      window.scrollTo({ top: 200, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+      document.getElementById('edit_log_id').value = '';
+      document.getElementById('log_content').value = '';
+      document.getElementById('btn_submit_log').textContent = '💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ';
+      document.getElementById('btn_cancel_edit').style.display = 'none';
+    }
+
+    function deleteLog(logId) {
+      const log = logs.find(l => l.id === logId);
+      if (!log) return;
+      if (log.status === 'evaluated' && !confirm('รายการนี้ครูพี่เลี้ยงตรวจแล้ว ยืนยันที่จะลบหรือไม่?')) {
+        return;
+      } else if (log.status !== 'evaluated' && !confirm('ต้องการลบบันทึกรายการนี้หรือไม่?')) {
+        return;
+      }
+      logs = logs.filter(l => l.id !== logId);
+      saveData();
+      renderTable();
+    }
+
+    function renderTable() {
+      const currentName = document.getElementById('trainee_name').value.trim();
+      const filtered = logs.filter(l => l.traineeName === currentName);
+      document.getElementById('count_logs').textContent = filtered.length;
+
+      const tbody = document.getElementById('trainee_tbody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">ยังไม่มีบันทึกประจำวันของ นสต. ท่านนี้ กรุณากรอกแบบฟอร์มด้านบนเพื่อลงบันทึก</td></tr>';
+        return;
+      }
+
+      filtered.forEach((log, index) => {
+        const isEval = log.status === 'evaluated';
+        const statusBadge = isEval
+          ? '<span class="badge badge-evaluated">✓ ครูตรวจแล้ว</span>'
+          : '<span class="badge badge-pending">⏳ รอครูตรวจ</span>';
+
+        let resultSummary = '<span style="color:var(--text-muted);">-</span>';
+        if (isEval) {
+          resultSummary = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
+          if (log.mentorFeedback) {
+            resultSummary += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>แนะ:</b> ${log.mentorFeedback}</div>`;
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${index + 1}</td>
+          <td style="text-align:center;font-weight:600;">${log.date}</td>
+          <td style="text-align:center;">ภาค ${log.semester}</td>
+          <td><b>${log.topicName}</b></td>
+          <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;">${statusBadge}</td>
+          <td>${resultSummary}</td>
+          <td style="text-align:center;white-space:nowrap;">
+            ${!isEval ? `<button type="button" class="btn btn-outline btn-sm" onclick="editLog('${log.id}')" title="แก้ไข">✏️</button>` : ''}
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog('${log.id}')" title="ลบ">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Set today date
+    document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      updateTopics();
+      onTraineeChange();
+    });
+  </script>
+</body>
+</html>

@@ -82,6 +82,20 @@
     }
     .portal-btn:hover { background: #f1f5f9; color: var(--navy); }
     .portal-btn.active { background: #7c3aed; color: white; }
+
+    /* Mentor Mode Tabs */
+    .mentor-tabs {
+      display: flex; gap: 8px; margin-bottom: 18px;
+    }
+    .mentor-tab-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 16px; background: white; border: 2px solid var(--border-light);
+      border-radius: 10px; font-family: 'Prompt', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+    }
+    .mentor-tab-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+    .mentor-tab-btn.active { background: #f5f3ff; border-color: #7c3aed; color: #7c3aed; }
+
     .card {
       background: white; border-radius: var(--radius); box-shadow: var(--shadow);
       border: 1px solid var(--border-light); padding: 20px; margin-bottom: 18px;
@@ -105,7 +119,7 @@
     .btn {
       display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
       border-radius: 8px; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 500;
-      cursor: pointer; border: none; text-decoration: none;
+      cursor: pointer; border: 1px solid transparent; text-decoration: none;
     }
     .btn-purple { background: #7c3aed; color: white; }
     .btn-purple:hover { background: #6d28d9; }
@@ -113,7 +127,10 @@
     .btn-outline:hover { background: #f8fafc; }
     .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
     .btn-danger:hover { background: #fee2e2; }
+    .btn-print { background: var(--navy); color: white; }
+    .btn-print:hover { background: var(--navy-dark); }
     .btn-sm { padding: 4px 10px; font-size: 12px; }
+
     .table-wrap { overflow-x: auto; border: 1px solid var(--border-light); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
     th, td { padding: 9px 12px; border: 1px solid var(--border-light); text-align: left; vertical-align: middle; }
@@ -156,17 +173,32 @@
       border-color: var(--danger); background: var(--danger-bg); color: var(--danger);
     }
     .eval-radio-label input { display: none; }
+
+    /* Print styling */
+    .print-only { display: none; }
+    @media print {
+      body { background: white; color: black; font-size: 12pt; padding: 0; }
+      header, .portal-nav, .mentor-tabs, .no-print { display: none !important; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: none; padding: 0; margin-bottom: 14pt; }
+      .print-only { display: block; }
+      .table-wrap { border: none; margin-top: 6pt; }
+      table { border: 1pt solid black; font-size: 10.5pt; }
+      th, td { border: 1pt solid black; padding: 4pt 6pt; }
+      th { background: #f0f0f0 !important; color: black; }
+      .signature-block { margin-top: 25pt; display: flex; justify-content: space-between; text-align: center; font-size: 11pt; }
+    }
   </style>
 </head>
 <body>
 
-  <header>
+  <header class="no-print">
     <div class="header-inner">
       <div class="brand-title">
         <div class="badge-icon">👨‍✈️</div>
         <div>
-          <h1>พอร์ทัลตรวจประเมินการฝึกหัดปฏิบัติราชการ (สำหรับ ครูพี่เลี้ยง)</h1>
-          <p>ตรวจบันทึกรายวัน · ประเมิน ๓ ส่วน · ให้ข้อเสนอแนะ · กก.๕ บก.กฝ.บช.ตชด. / บช.ศ.</p>
+          <h1>พอร์ทัลตรวจประเมินและออกรายงาน (สำหรับ ครูพี่เลี้ยง)</h1>
+          <p>ตรวจบันทึกรายวัน · แบบประเมินรายเดือน (แบบที่ ๒) · แบบสรุปผล (แบบที่ ๓) · กก.๕ บก.กฝ.บช.ตชด.</p>
         </div>
       </div>
       <div class="nav-links">
@@ -179,7 +211,7 @@
   <div class="container">
 
     <!-- 3 Portals Switcher Links -->
-    <div class="portal-nav">
+    <div class="portal-nav no-print">
       <span style="font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;padding:0 6px;">
         🔗 สลับพอร์ทัล:
       </span>
@@ -188,67 +220,260 @@
       <a href="./field-training-admin.html" class="portal-btn">📊 ๓. ฝ่ายฝึกฯ/วิชาการ (สรุปคะแนน บช.ศ.)</a>
     </div>
 
-    <!-- Main Mentor Card -->
-    <div class="card" style="border-top:4px solid #7c3aed;">
-      <div class="card-header">
-        <div class="card-title">
-          <span>📋 รายการบันทึกการปฏิบัติงานประจำวันของ นสต.</span>
+    <!-- Mentor Mode Tabs: Daily Evaluation vs Monthly/Summary Forms -->
+    <div class="mentor-tabs no-print">
+      <button type="button" class="mentor-tab-btn active" id="btn_tab_daily" onclick="switchMentorTab('daily')">
+        📝 ๑. ตรวจประเมินบันทึกรายวัน (แบบที่ ๑)
+      </button>
+      <button type="button" class="mentor-tab-btn" id="btn_tab_monthly" onclick="switchMentorTab('monthly')">
+        📅 ๒. แบบประเมินรายเดือน (แบบที่ ๒)
+      </button>
+      <button type="button" class="mentor-tab-btn" id="btn_tab_summary" onclick="switchMentorTab('summary')">
+        🎖️ ๓. แบบสรุปผลการประเมินของครูพี่เลี้ยง (แบบที่ ๓)
+      </button>
+    </div>
+
+    <!-- ==================== TAB 1: DAILY EVALUATION ==================== -->
+    <div id="tab_daily_view">
+      <div class="card" style="border-top:4px solid #7c3aed;">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 รายการบันทึกการปฏิบัติงานประจำวันของ นสต. (แบบประเมินแบบที่ ๑)</span>
+          </div>
+          <div style="font-size:13px;color:var(--text-muted);">
+            รอตรวจ: <strong id="lbl_pending_count" style="color:var(--amber);">0</strong> รายการ | ตรวจแล้ว: <strong id="lbl_done_count" style="color:var(--success);">0</strong> รายการ
+          </div>
         </div>
-        <div style="font-size:13px;color:var(--text-muted);">
-          รอตรวจ: <strong id="lbl_pending_count" style="color:var(--amber);">0</strong> รายการ | ตรวจแล้ว: <strong id="lbl_done_count" style="color:var(--success);">0</strong> รายการ
+
+        <!-- Filters -->
+        <div class="filter-bar no-print">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">กรองตาม นสต.:</label>
+            <select id="filter_trainee" onchange="renderDailyTable()">
+              <option value="">-- แสดง นสต. ทุกคน --</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">สถานะการตรวจ:</label>
+            <select id="filter_status" onchange="renderDailyTable()">
+              <option value="">ทั้งหมด</option>
+              <option value="pending">⏳ เฉพาะรอตรวจ</option>
+              <option value="evaluated">✓ เฉพาะตรวจแล้ว</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">ภาคเรียน:</label>
+            <select id="filter_semester" onchange="renderDailyTable()">
+              <option value="">ทั้งหมด</option>
+              <option value="1">ภาคเรียนที่ ๑</option>
+              <option value="2">ภาคเรียนที่ ๒</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">ลำดับ</th>
+                <th style="width:105px;text-align:center;">วันที่</th>
+                <th style="width:160px;">นสต. ผู้บันทึก</th>
+                <th style="width:75px;text-align:center;">ภาค</th>
+                <th style="width:230px;">หัวข้อปฏิบัติงาน</th>
+                <th>บันทึกของ นสต.</th>
+                <th style="width:115px;text-align:center;">สถานะ</th>
+                <th style="width:115px;text-align:center;">ผลการตรวจ</th>
+                <th style="width:130px;text-align:center;" class="no-print">ดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody id="mentor_tbody"></tbody>
+          </table>
         </div>
       </div>
+    </div>
 
-      <!-- Filters -->
-      <div class="filter-bar">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">กรองตาม นสต.:</label>
-          <select id="filter_trainee" onchange="renderTable()">
-            <option value="">-- แสดง นสต. ทุกคน --</option>
-          </select>
+    <!-- ==================== TAB 2: MONTHLY EVALUATION FORM (แบบที่ ๒) ==================== -->
+    <div id="tab_monthly_view" style="display:none;">
+      <div class="card" style="border-top:4px solid var(--blue);">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📅 แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ ๒)</span>
+          </div>
+          <div class="no-print" style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบประเมินรายเดือน (PDF)</button>
+          </div>
         </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">สถานะการตรวจ:</label>
-          <select id="filter_status" onchange="renderTable()">
-            <option value="">ทั้งหมด</option>
-            <option value="pending">⏳ เฉพาะรอตรวจ</option>
-            <option value="evaluated">✓ เฉพาะตรวจแล้ว</option>
-          </select>
+
+        <div class="filter-bar no-print" style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือก นสต.:</label>
+            <select id="m_monthly_trainee" onchange="renderMonthlyReport()" style="font-weight:600;color:var(--navy);">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือกเดือนที่ประเมิน:</label>
+            <input type="month" id="m_monthly_month" value="2026-08" onchange="renderMonthlyReport()">
+          </div>
         </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">ภาคเรียน:</label>
-          <select id="filter_semester" onchange="renderTable()">
-            <option value="">ทั้งหมด</option>
-            <option value="1">ภาคเรียนที่ ๑</option>
-            <option value="2">ภาคเรียนที่ ๒</option>
-          </select>
+
+        <!-- Official Form 2 Preview Header -->
+        <div style="text-align:center;margin-bottom:14px;">
+          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ ๒)</h3>
+          <p style="font-size:13px;color:var(--text-muted);">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.) ประจำปีงบประมาณ ๒๕๖๗ · กก.๕ บก.กฝ.บช.ตชด.</p>
+        </div>
+
+        <div style="background:#f8fafc;padding:12px 16px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div><b>ชื่อ นสต.:</b> <span id="m_rep2_name">-</span></div>
+            <div><b>ประจำเดือน:</b> <span id="m_rep2_month_text">-</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:4px;">
+            <div><b>สถานีตำรวจที่ฝึก:</b> <span id="m_rep2_station">-</span></div>
+            <div><b>ครูพี่เลี้ยง:</b> <span id="m_rep2_mentor">-</span></div>
+          </div>
+        </div>
+
+        <!-- Form 2 Monthly Aggregate Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px;text-align:center;">ลำดับ</th>
+                <th>รายการหัวข้อการปฏิบัติงานที่ประเมินในเดือนนี้</th>
+                <th style="width:120px;text-align:center;">จำนวนครั้งที่ประเมิน</th>
+                <th style="width:120px;text-align:center;color:var(--success);">จำนวนครั้งที่ผ่าน</th>
+                <th style="width:120px;text-align:center;color:var(--danger);">จำนวนครั้งที่ไม่ผ่าน</th>
+                <th style="width:130px;text-align:center;">ผลการประเมิน</th>
+              </tr>
+            </thead>
+            <tbody id="m_rep2_tbody"></tbody>
+            <tfoot>
+              <tr style="background:#fef9e7;font-weight:700;">
+                <td colspan="2" style="text-align:center;">รวมจำนวนครั้งที่ประเมินในเดือนนี้</td>
+                <td style="text-align:center;" id="m_rep2_tot_eval">0</td>
+                <td style="text-align:center;color:var(--success);" id="m_rep2_tot_pass">0</td>
+                <td style="text-align:center;color:var(--danger);" id="m_rep2_tot_fail">0</td>
+                <td style="text-align:center;color:var(--navy);" id="m_rep2_tot_result">ผ่านเกณฑ์</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Monthly Feedback Section -->
+        <div style="margin-top:16px;background:#f8fafc;padding:14px;border-radius:8px;border:1px solid var(--border-light);">
+          <div style="font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:6px;">
+            ข้อคิดเห็น / ข้อเสนอแนะภาพรวมประจำเดือนของครูพี่เลี้ยง:
+          </div>
+          <div id="m_rep2_feedback_box" style="font-size:13.5px;color:#334155;line-height:1.6;font-style:italic;padding:8px;background:white;border-radius:6px;border:1px dashed var(--border);">
+            - มีความตั้งใจปฏิบัติงานตามที่ได้รับมอบหมาย มีวินัย และพัฒนาการด้านงานสารบรรณและการตรวจพื้นที่ได้อย่างถูกต้อง -
+          </div>
+        </div>
+
+        <!-- Signatures for Form 2 -->
+        <div class="signature-block" style="margin-top:24px;display:flex;justify-content:space-between;text-align:center;font-size:13px;">
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(<span id="m_rep2_sig_t">นสต. ทศพร สุมาลี</span>)</p>
+            <p>ผู้รับการประเมิน (นสต.)</p>
+          </div>
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(<span id="m_rep2_sig_m">ร.ต.อ. อนุชา กล้าหาญ</span>)</p>
+            <p>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</p>
+          </div>
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(......................................................)</p>
+            <p>หัวหน้าสถานีตำรวจ / ผกก.สภ.</p>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Table -->
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:45px;text-align:center;">ลำดับ</th>
-              <th style="width:105px;text-align:center;">วันที่</th>
-              <th style="width:160px;">นสต. ผู้บันทึก</th>
-              <th style="width:75px;text-align:center;">ภาค</th>
-              <th style="width:230px;">หัวข้อปฏิบัติงาน</th>
-              <th>บันทึกของ นสต.</th>
-              <th style="width:115px;text-align:center;">สถานะ</th>
-              <th style="width:115px;text-align:center;">ผลการตรวจ</th>
-              <th style="width:130px;text-align:center;">ดำเนินการ</th>
-            </tr>
-          </thead>
-          <tbody id="mentor_tbody"></tbody>
-        </table>
+    <!-- ==================== TAB 3: EVALUATION SUMMARY FORM (แบบที่ ๓) ==================== -->
+    <div id="tab_summary_view" style="display:none;">
+      <div class="card" style="border-top:4px solid var(--gold-deep);">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🎖️ แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการรวม (แบบประเมินแบบที่ ๓)</span>
+          </div>
+          <div class="no-print" style="display:flex;gap:8px;">
+            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบสรุปผลรวม (PDF)</button>
+          </div>
+        </div>
+
+        <div class="filter-bar no-print" style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือก นสต. เพื่อดูแบบสรุปผลรวม:</label>
+            <select id="m_summary_trainee" onchange="renderSummaryReport()" style="font-weight:600;color:var(--navy);">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:14px;">
+          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ ๓)</h3>
+          <p style="font-size:13px;color:var(--text-muted);">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
+        </div>
+
+        <!-- Summary Score Card Box -->
+        <div style="background:#fef9e7;border:1.5px solid #fde68a;border-radius:10px;padding:16px;margin-bottom:16px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;text-align:center;">
+            <div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ ๑ (เต็ม ๓๔๐)</div>
+              <div style="font-size:22px;font-weight:700;color:var(--blue);"><span id="m_rep3_s1_val">340</span> คะแนน</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ภาคเรียนที่ ๒ (เต็ม ๘๒๐)</div>
+              <div style="font-size:22px;font-weight:700;color:#7c3aed;"><span id="m_rep3_s2_val">820</span> คะแนน</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">รวมคะแนนการฝึก (เต็ม ๑,๑๖๐)</div>
+              <div style="font-size:22px;font-weight:700;color:var(--gold-deep);"><span id="m_rep3_total_val">1,160</span> คะแนน</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:#92400e;font-weight:600;">ค่าน้ำหนัก ๑๐% (เต็ม ๓๘๗)</div>
+              <div style="font-size:22px;font-weight:700;color:var(--success);"><span id="m_rep3_weight_val">387.00</span> คะแนน</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Certification Box -->
+        <div style="background:#f8fafc;padding:14px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:18px;">
+          <div style="font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:6px;">
+            ความเห็นและการรับรองของครูพี่เลี้ยง / ผู้ควบคุมการฝึก:
+          </div>
+          <div style="font-size:13.5px;color:#334155;line-height:1.6;">
+            ขอรับรองว่า <strong id="m_rep3_cert_name">นสต. ทศพร สุมาลี</strong> ได้เข้ารับการฝึกหัดปฏิบัติราชการ ณ สถานีตำรวจ และผ่านการประเมินครบถ้วนตามหลักเกณฑ์ของ บช.ศ. มีความรู้ ความประพฤติ และทักษะพร้อมสำหรับการปฏิบัติหน้าที่ราชการตำรวจ
+          </div>
+        </div>
+
+        <!-- Signatures for Form 3 -->
+        <div class="signature-block" style="margin-top:24px;display:flex;justify-content:space-between;text-align:center;font-size:13px;">
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(<span id="m_rep3_sig_t">นสต. ทศพร สุมาลี</span>)</p>
+            <p>ผู้รับการประเมิน (นสต.)</p>
+          </div>
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(<span id="m_rep3_sig_m">ร.ต.อ. อนุชา กล้าหาญ</span>)</p>
+            <p>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</p>
+          </div>
+          <div style="width:30%;">
+            <p>ลงชื่อ......................................................</p>
+            <p style="margin-top:4px;">(......................................................)</p>
+            <p>หัวหน้าสถานีตำรวจ / ผกก.สภ.</p>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 
-  <!-- Modal for Evaluation -->
+  <!-- Modal for Daily Evaluation -->
   <div id="evalModal" class="modal-overlay" style="display:none;">
     <div class="modal">
       <div class="modal-hdr">
@@ -354,22 +579,67 @@
         roster = storedRoster ? JSON.parse(storedRoster) : [];
       } catch(e) { roster = []; }
 
-      // Populate trainee filter
-      const filterSelect = document.getElementById('filter_trainee');
-      filterSelect.innerHTML = '<option value="">-- แสดง นสต. ทุกคน --</option>';
-      const names = [...new Set(logs.map(l => l.traineeName).filter(Boolean))];
-      names.forEach(n => {
-        const opt = document.createElement('option');
-        opt.value = n;
-        opt.textContent = n;
-        filterSelect.appendChild(opt);
-      });
+      populateFilterDropdowns();
     }
 
     function saveData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
       } catch(e) {}
+    }
+
+    function switchMentorTab(tab) {
+      document.getElementById('btn_tab_daily').classList.remove('active');
+      document.getElementById('btn_tab_monthly').classList.remove('active');
+      document.getElementById('btn_tab_summary').classList.remove('active');
+      document.getElementById('tab_daily_view').style.display = 'none';
+      document.getElementById('tab_monthly_view').style.display = 'none';
+      document.getElementById('tab_summary_view').style.display = 'none';
+
+      if (tab === 'daily') {
+        document.getElementById('btn_tab_daily').classList.add('active');
+        document.getElementById('tab_daily_view').style.display = 'block';
+        renderDailyTable();
+      } else if (tab === 'monthly') {
+        document.getElementById('btn_tab_monthly').classList.add('active');
+        document.getElementById('tab_monthly_view').style.display = 'block';
+        renderMonthlyReport();
+      } else if (tab === 'summary') {
+        document.getElementById('btn_tab_summary').classList.add('active');
+        document.getElementById('tab_summary_view').style.display = 'block';
+        renderSummaryReport();
+      }
+    }
+
+    function populateFilterDropdowns() {
+      const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
+
+      // Daily Filter
+      const fTrainee = document.getElementById('filter_trainee');
+      fTrainee.innerHTML = '<option value="">-- แสดง นสต. ทุกคน --</option>';
+      allNames.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        fTrainee.appendChild(opt);
+      });
+
+      // Monthly Dropdown
+      const mSel = document.getElementById('m_monthly_trainee');
+      mSel.innerHTML = '';
+      allNames.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        mSel.appendChild(opt);
+      });
+
+      // Summary Dropdown
+      const sSel = document.getElementById('m_summary_trainee');
+      sSel.innerHTML = '';
+      allNames.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        sSel.appendChild(opt);
+      });
     }
 
     function openEvalModal(logId) {
@@ -402,16 +672,12 @@
 
     function setRadioValue(name, val) {
       const radios = document.getElementsByName(name);
-      for (let r of radios) {
-        r.checked = (r.value === val);
-      }
+      for (let r of radios) r.checked = (r.value === val);
     }
 
     function getRadioValue(name) {
       const radios = document.getElementsByName(name);
-      for (let r of radios) {
-        if (r.checked) return r.value;
-      }
+      for (let r of radios) if (r.checked) return r.value;
       return 'ผ่าน';
     }
 
@@ -448,14 +714,14 @@
       saveData();
       closeEvalModal();
       alert('บันทึกผลการตรวจประเมินเรียบร้อยแล้ว!');
-      renderTable();
+      renderDailyTable();
     }
 
     function deleteLog(logId) {
-      if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนรวมใหม่ทันที)')) return;
+      if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนใหม่ทันที)')) return;
       logs = logs.filter(l => l.id !== logId);
       saveData();
-      renderTable();
+      renderDailyTable();
     }
 
     function deleteCurrentLogFromModal() {
@@ -466,7 +732,7 @@
       }
     }
 
-    function renderTable() {
+    function renderDailyTable() {
       const filterTrainee = document.getElementById('filter_trainee').value;
       const filterStatus = document.getElementById('filter_status').value;
       const filterSem = document.getElementById('filter_semester').value;
@@ -512,7 +778,7 @@
           <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td style="text-align:center;">${evalSummary}</td>
-          <td style="text-align:center;white-space:nowrap;">
+          <td style="text-align:center;white-space:nowrap;" class="no-print">
             <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal('${log.id}')">
               ${isEval ? '✏️ แก้ไขผล' : '🔍 ตรวจประเมิน'}
             </button>
@@ -523,9 +789,113 @@
       });
     }
 
+    // ================= Monthly Report (แบบที่ ๒) =================
+    function renderMonthlyReport() {
+      const selectedName = document.getElementById('m_monthly_trainee').value;
+      const selectedMonth = document.getElementById('m_monthly_month').value; // 'YYYY-MM'
+      if (!selectedName || !selectedMonth) return;
+
+      const matchRoster = roster.find(r => r.name === selectedName);
+      document.getElementById('m_rep2_name').textContent = selectedName;
+      document.getElementById('m_rep2_station').textContent = matchRoster ? matchRoster.station : 'สภ.แม่แตง ภ.จว.เชียงใหม่';
+      document.getElementById('m_rep2_mentor').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+      document.getElementById('m_rep2_sig_t').textContent = selectedName;
+      document.getElementById('m_rep2_sig_m').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+
+      // Format month text (e.g. สิงหาคม ๒๕๖๗)
+      const [year, month] = selectedMonth.split('-');
+      const thaiMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+      const thaiYear = parseInt(year) + 543;
+      document.getElementById('m_rep2_month_text').textContent = `${thaiMonths[parseInt(month)]} พ.ศ. ${thaiYear}`;
+
+      // Filter logs in this month
+      const monthLogs = logs.filter(l => l.traineeName === selectedName && l.date.startsWith(selectedMonth));
+
+      // Aggregate by topic
+      const topicStats = {};
+      monthLogs.forEach(l => {
+        if (!topicStats[l.topicName]) {
+          topicStats[l.topicName] = { eval: 0, pass: 0, fail: 0 };
+        }
+        topicStats[l.topicName].eval++;
+        if (l.evalWork === 'ผ่าน') topicStats[l.topicName].pass++;
+        else if (l.evalWork === 'ไม่ผ่าน') topicStats[l.topicName].fail++;
+      });
+
+      const tbody = document.getElementById('m_rep2_tbody');
+      tbody.innerHTML = '';
+
+      let totalEval = 0, totalPass = 0, totalFail = 0;
+      const topicKeys = Object.keys(topicStats);
+
+      if (topicKeys.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px;">ไม่พบรายการบันทึกในเดือนนี้</td></tr>';
+      } else {
+        topicKeys.forEach((topicName, idx) => {
+          const st = topicStats[topicName];
+          totalEval += st.eval;
+          totalPass += st.pass;
+          totalFail += st.fail;
+
+          const isPass = st.pass >= st.fail;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="text-align:center;font-weight:600;">${idx + 1}</td>
+            <td><b>${topicName}</b></td>
+            <td style="text-align:center;font-weight:600;">${st.eval}</td>
+            <td style="text-align:center;font-weight:600;color:var(--success);">${st.pass}</td>
+            <td style="text-align:center;font-weight:600;color:${st.fail > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${st.fail}</td>
+            <td style="text-align:center;">
+              <span class="badge ${isPass ? 'badge-evaluated' : 'badge-pending'}">${isPass ? 'ผ่าน' : 'ไม่ผ่าน'}</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('m_rep2_tot_eval').textContent = totalEval;
+      document.getElementById('m_rep2_tot_pass').textContent = totalPass;
+      document.getElementById('m_rep2_tot_fail').textContent = totalFail;
+      document.getElementById('m_rep2_tot_result').textContent = (totalPass >= totalFail && totalEval > 0) ? 'ผ่านเกณฑ์' : 'ไม่ผ่านเกณฑ์';
+    }
+
+    // ================= Summary Report (แบบที่ ๓) =================
+    function renderSummaryReport() {
+      const selectedName = document.getElementById('m_summary_trainee').value;
+      if (!selectedName) return;
+
+      const matchRoster = roster.find(r => r.name === selectedName);
+      document.getElementById('m_rep3_cert_name').textContent = selectedName;
+      document.getElementById('m_rep3_sig_t').textContent = selectedName;
+      document.getElementById('m_rep3_sig_m').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+
+      // Compute scores
+      const userLogs = logs.filter(l => l.traineeName === selectedName && l.status === 'evaluated');
+      let s1Score = 340, s2Score = 820; // Default full if logs present or calculated
+      if (userLogs.length > 0) {
+        const s1Pass = userLogs.filter(l => l.semester === '1' && l.evalWork === 'ผ่าน').length;
+        const s1Total = userLogs.filter(l => l.semester === '1').length;
+        if (s1Total > 0) s1Score = Math.round((s1Pass / s1Total) * 340);
+
+        const s2Pass = userLogs.filter(l => l.semester === '2' && l.evalWork === 'ผ่าน').length;
+        const s2Total = userLogs.filter(l => l.semester === '2').length;
+        if (s2Total > 0) s2Score = Math.round((s2Pass / s2Total) * 820);
+      }
+
+      const totalScore = s1Score + s2Score;
+      const weightedScore = (totalScore * (387 / 1160)).toFixed(2);
+
+      document.getElementById('m_rep3_s1_val').textContent = s1Score;
+      document.getElementById('m_rep3_s2_val').textContent = s2Score;
+      document.getElementById('m_rep3_total_val').textContent = totalScore.toLocaleString('th-TH');
+      document.getElementById('m_rep3_weight_val').textContent = weightedScore;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
-      renderTable();
+      renderDailyTable();
+      renderMonthlyReport();
+      renderSummaryReport();
     });
   </script>
 </body>

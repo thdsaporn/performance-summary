@@ -98,7 +98,7 @@
   /* Section Containers with Scroll Margin Offset */
   section {
     padding: 38px 5vw; position: relative;
-    scroll-margin-top: 70px; /* Crucial: Prevents header from hiding under topbar */
+    scroll-margin-top: 70px;
   }
   section.alt { background: #fff; }
   .inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
@@ -194,7 +194,7 @@
   }
   .btn-hero-outline:hover { background: rgba(255, 255, 255, 0.16); border-color: #fff; }
 
-  /* Officer Photo Frame (Fixed Head Clipping with object-fit: contain & proper height) */
+  /* Officer Photo Frame (Never cut head) */
   .hero-photo-wrap {
     display: flex; justify-content: center; align-items: center; position: relative;
   }
@@ -207,9 +207,7 @@
   }
   .hero-photo-frame img {
     width: 100%; height: auto; display: block;
-    border-radius: 15px;
-    /* Important: Never crop the head */
-    object-fit: contain;
+    border-radius: 15px; object-fit: contain;
   }
   .hero-photo-badge {
     position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
@@ -219,7 +217,7 @@
     box-shadow: 0 3px 10px rgba(0,0,0,0.4); white-space: nowrap; backdrop-filter: blur(6px);
   }
 
-  /* ================= Executive Dashboard Strip ================= */
+  /* ================= 4 Pillars Navigation Dashboard ================= */
   .exec-dashboard {
     margin-top: -24px; position: relative; z-index: 10;
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
@@ -227,9 +225,10 @@
   }
   .exec-card {
     background: #fff; border-radius: var(--radius-md);
-    padding: 12px 16px; border: 1px solid var(--line);
+    padding: 12px 14px; border: 1px solid var(--line);
     box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 12px;
     transition: all .25s ease; position: relative; overflow: hidden;
+    text-decoration: none; color: inherit; cursor: pointer;
   }
   .exec-card::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
@@ -238,7 +237,7 @@
   .exec-card.gold::before { background: var(--gold-deep); }
   .exec-card.green::before { background: #059669; }
   .exec-card.purple::before { background: #7c3aed; }
-  .exec-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .exec-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
   .exec-icon {
     width: 38px; height: 38px; border-radius: 10px;
     background: var(--navy-light); color: var(--navy);
@@ -247,8 +246,8 @@
   .exec-card.gold .exec-icon { background: #fef3c7; color: #92400e; }
   .exec-card.green .exec-icon { background: #ecfdf5; color: #065f46; }
   .exec-card.purple .exec-icon { background: #f5f3ff; color: #6d28d9; }
-  .exec-info .exec-val { font-size: 17px; font-weight: 800; font-family: 'Prompt', sans-serif; color: var(--navy); line-height: 1.15; }
-  .exec-info .exec-lbl { font-size: 11.5px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+  .exec-info .exec-val { font-size: 14.5px; font-weight: 700; font-family: 'Prompt', sans-serif; color: var(--navy); line-height: 1.2; }
+  .exec-info .exec-lbl { font-size: 11.5px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
 
   /* ================= Standard Cards & Grid ================= */
   .grid { display: grid; gap: 16px; }
@@ -570,36 +569,36 @@
     </div>
   </section>
 
-  <!-- ============ Executive Dashboard (4 เสาหลัก) ============ -->
+  <!-- ============ ทางเลือกที่ 3 : 4 เสาหลักภารกิจสำคัญ (Interactive Pillars) ============ -->
   <div class="exec-dashboard">
-    <div class="exec-card">
-      <div class="exec-icon">📅</div>
+    <a href="#work1" class="exec-card">
+      <div class="exec-icon">📂</div>
       <div class="exec-info">
-        <div class="exec-val">7 หลักสูตร</div>
-        <div class="exec-lbl">บริหารตารางฝึกอบรม นสต.</div>
+        <div class="exec-val">งานสารบรรณ – ธุรการ</div>
+        <div class="exec-lbl">ตารางสอน · คำสั่ง · เบิกจ่าย</div>
       </div>
-    </div>
-    <div class="exec-card gold">
-      <div class="exec-icon">👥</div>
-      <div class="exec-info">
-        <div class="exec-val">2,325 นาย</div>
-        <div class="exec-lbl">ฐานข้อมูลผู้สำเร็จการฝึก 18 รุ่น</div>
-      </div>
-    </div>
-    <div class="exec-card green">
+    </a>
+    <a href="#work2" class="exec-card gold">
       <div class="exec-icon">🎖️</div>
       <div class="exec-info">
-        <div class="exec-val">1,160 คะแนน</div>
-        <div class="exec-lbl">ระบบประเมินฝึกงาน บช.ศ.</div>
+        <div class="exec-val">การจัดการฝึกอบรม</div>
+        <div class="exec-lbl">รับ–ส่งตัว · วุฒิบัตร · ฝึกงานจริง</div>
       </div>
-    </div>
-    <div class="exec-card purple">
-      <div class="exec-icon">📊</div>
+    </a>
+    <a href="#qa" class="exec-card green">
+      <div class="exec-icon">📑</div>
       <div class="exec-info">
-        <div class="exec-val">ตัวชี้วัดที่ 2</div>
-        <div class="exec-lbl">รายงานประกันคุณภาพการศึกษา</div>
+        <div class="exec-val">ประกันคุณภาพ & วินัย</div>
+        <div class="exec-lbl">ตัวชี้วัดที่ 2 · วินัยจรรยาบรรณ</div>
       </div>
-    </div>
+    </a>
+    <a href="#achievement" class="exec-card purple">
+      <div class="exec-icon">💻</div>
+      <div class="exec-info">
+        <div class="exec-val">3 นวัตกรรมดิจิทัล</div>
+        <div class="exec-lbl">ระบบพัฒนาใช้งานจริง</div>
+      </div>
+    </a>
   </div>
 
   <!-- ============ หมวดงานที่ 1 : งานสารบรรณ – ธุรการ ============ -->
@@ -719,7 +718,7 @@
         <div class="s-num">3</div>
         <div>
           <h2 class="s-title">งานประกันคุณภาพการศึกษา & วินัยจรรยาบรรณ</h2>
-          <div class="s-sub">ดำเนินงานตามตัวชี้วัดที่ 2 (ICT) และรักษามาตรฐานวินัยตำรวจอย่างเคร่งครัด</div>
+          <div class="s-sub">ดำเนินงานตามตัวชี้วัดที่ 2 และรักษามาตรฐานวินัยตำรวจอย่างเคร่งครัด</div>
         </div>
       </div>
       <div class="grid g2">
@@ -728,7 +727,7 @@
             <div class="card-ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             </div>
-            <h3 class="card-title">ตัวชี้วัดที่ 2 : ทักษะเทคโนโลยีสารสนเทศ (ICT)</h3>
+            <h3 class="card-title">ตัวชี้วัดที่ 2 : ด้านเทคโนโลยีสารสนเทศ</h3>
           </div>
           <ul>
             <li><b>รวบรวมและวิเคราะห์ข้อมูล:</b> จัดทำรายงานผลการดำเนินงานหลักสูตร <b>นสต.66</b> และ <b>กดต.69</b></li>
@@ -923,7 +922,8 @@
         <div class="card reveal">
           <div class="card-hdr">
             <div class="card-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+              <!-- Complete Graduation Cap / Training Icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
             </div>
             <h3 class="card-title">การจัดการฝึกอบรม</h3>
           </div>

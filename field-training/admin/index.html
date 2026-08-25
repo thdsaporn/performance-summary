@@ -229,8 +229,8 @@
         </div>
       </div>
       <div class="header-actions">
-        <button type="button" class="btn btn-gold btn-sm" onclick="loadSampleData">⚡ โหลดตัวอย่างรุ่น นสต.</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="openRosterModal">👥 จัดการรายชื่อ นสต.</button>
+        <button type="button" class="btn btn-gold btn-sm" onclick="loadSampleData()">⚡ โหลดตัวอย่างรุ่น นสต.</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openRosterModal()">👥 จัดการรายชื่อ นสต.</button>
         <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์รายงาน (PDF)</button>
       </div>
     </div>
@@ -256,7 +256,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <label style="font-size:13.5px;font-weight:700;color:var(--navy);">เลือก นสต. ที่ต้องการดูผลคะแนน:</label>
-            <select id="sel_individual_trainee" onchange="onIndividualTraineeChange" style="padding:8px 14px;border:1.5px solid var(--blue);border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--navy);background:white;">
+            <select id="sel_individual_trainee" onchange="onIndividualTraineeChange()" style="padding:8px 14px;border:1.5px solid var(--blue);border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;color:var(--navy);background:white;">
               <!-- Populated by JS -->
             </select>
           </div>
@@ -504,7 +504,7 @@
     <div class="modal">
       <div class="modal-hdr">
         <h3>👥 จัดการรายชื่อ นสต. ในรุ่น</h3>
-        <button type="button" class="modal-close" onclick="closeRosterModal">✕</button>
+        <button type="button" class="modal-close" onclick="closeRosterModal()">✕</button>
       </div>
 
       <form onsubmit="handleAddRosterTrainee(event)" style="margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-light);">
@@ -534,7 +534,7 @@
       </div>
 
       <div style="margin-top:14px;text-align:right;">
-        <button type="button" class="btn btn-outline" onclick="closeRosterModal">ปิดหน้าต่าง</button>
+        <button type="button" class="btn btn-outline" onclick="closeRosterModal()">ปิดหน้าต่าง</button>
       </div>
     </div>
   </div>
@@ -578,7 +578,7 @@
     let logs = [];
     let roster = [];
 
-    function loadData {
+    function loadData() {
       try {
         const storedRoster = localStorage.getItem(ROSTER_KEY);
         roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
@@ -594,7 +594,7 @@
       }
     }
 
-    function saveData {
+    function saveData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
         localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
@@ -610,7 +610,7 @@
       if (mode === 'individual') {
         document.getElementById('btn_mode_individual').classList.add('active');
         document.getElementById('mode_individual_content').style.display = 'block';
-        renderIndividualView;
+        renderIndividualView();
       } else {
         document.getElementById('btn_mode_batch').classList.add('active');
         document.getElementById('mode_batch_content').style.display = 'block';
@@ -618,7 +618,7 @@
       }
     }
 
-    function populateTraineeDropdown {
+    function populateTraineeDropdown() {
       const select = document.getElementById('sel_individual_trainee');
       const currentVal = select.value;
       select.innerHTML = '';
@@ -639,8 +639,8 @@
       }
     }
 
-    function onIndividualTraineeChange {
-      renderIndividualView;
+    function onIndividualTraineeChange() {
+      renderIndividualView();
     }
 
     function computeTraineeScores(traineeName) {
@@ -722,7 +722,7 @@
       };
     }
 
-    function renderIndividualView {
+    function renderIndividualView() {
       const selectedName = document.getElementById('sel_individual_trainee').value;
       if (!selectedName) return;
 
@@ -833,7 +833,7 @@
       });
     }
 
-    function renderBatchView {
+    function renderBatchView() {
       const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
       document.getElementById('batch_count_trainees').textContent = allNames.length;
       document.getElementById('batch_count_logs').textContent = logs.length;
@@ -918,12 +918,12 @@
     function adminDeleteLog(logId) {
       if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนใหม่ทันที)')) return;
       logs = logs.filter(l => l.id !== logId);
-      saveData;
-      renderIndividualView;
+      saveData();
+      renderIndividualView();
       renderBatchView;
     }
 
-    function exportBatchCSV {
+    function exportBatchCSV() {
       const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
       const batchData = allNames.map(name => {
         const match = roster.find(r => r.name === name);
@@ -951,33 +951,33 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `รายงานคะแนนฝึกปฏิบัติราชการ_นสต_บชศ_${new Date.toISOString.split('T')[0]}.csv`;
+      a.download = `รายงานคะแนนฝึกปฏิบัติราชการ_นสต_บชศ_${new Date().toISOString().split('T')[0]}.csv`;
       a.click;
     }
 
     // Roster Management Modal
-    function openRosterModal {
+    function openRosterModal() {
       renderRosterModalList;
       document.getElementById('rosterModal').style.display = 'flex';
     }
-    function closeRosterModal {
+    function closeRosterModal() {
       document.getElementById('rosterModal').style.display = 'none';
       populateTraineeDropdown;
-      renderIndividualView;
+      renderIndividualView();
       renderBatchView;
     }
     function handleAddRosterTrainee(e) {
-      e.preventDefault;
-      const name = document.getElementById('m_add_name').value.trim;
-      const station = document.getElementById('m_add_station').value.trim;
-      const mentor = document.getElementById('m_add_mentor').value.trim;
+      e.preventDefault();
+      const name = document.getElementById('m_add_name').value.trim();
+      const station = document.getElementById('m_add_station').value.trim();
+      const mentor = document.getElementById('m_add_mentor').value.trim();
 
       if (roster.some(r => r.name === name)) {
         alert('มีชื่อ นสต. ท่านนี้ในรุ่นอยู่แล้ว');
         return;
       }
       roster.push({ name, station, mentor });
-      saveData;
+      saveData();
       document.getElementById('m_add_name').value = '';
       document.getElementById('m_add_station').value = '';
       document.getElementById('m_add_mentor').value = '';
@@ -986,10 +986,10 @@
     function deleteRosterTrainee(index) {
       if (!confirm(`ต้องการลบรายชื่อ ${roster[index].name} ออกจากรุ่นหรือไม่?`)) return;
       roster.splice(index, 1);
-      saveData;
+      saveData();
       renderRosterModalList;
     }
-    function renderRosterModalList {
+    function renderRosterModalList() {
       const tbody = document.getElementById('roster_modal_tbody');
       tbody.innerHTML = '';
       roster.forEach((r, i) => {
@@ -1026,17 +1026,17 @@
         { id: 'l10', traineeName: 'นสต. วิชัย รักชาติ', station: 'สภ.แม่แตง ภ.จว.เชียงใหม่', mentor: 'ร.ต.ท. เกรียงศักดิ์ วงศ์ษา', date: '2026-08-03', semester: '1', topicCode: 's1_2_2', topicName: '๒.๒ การเขียนบันทึกต่างๆ', traineeNote: 'ฝึกร่างบันทึกข้อความราชการ', status: 'evaluated', evalPrep: 'ผ่าน', evalPrepReason: '', evalWork: 'ผ่าน', evalWorkReason: '', evalPost: 'ผ่าน', evalPostReason: '', mentorFeedback: 'ภาษาเขียนถูกต้อง' }
       ];
 
-      saveData;
+      saveData();
       if (showAlert) alert('โหลดชุดข้อมูลตัวอย่างรุ่น นสต. เรียบร้อยแล้ว!');
       populateTraineeDropdown;
-      renderIndividualView;
+      renderIndividualView();
       renderBatchView;
     }
 
-    window.addEventListener('DOMContentLoaded',  => {
-      loadData;
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
       populateTraineeDropdown;
-      renderIndividualView;
+      renderIndividualView();
       renderBatchView;
     });
   </script>

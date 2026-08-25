@@ -228,13 +228,13 @@
         <div class="filter-bar no-print">
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">กรองตาม นสต.:</label>
-            <select id="filter_trainee" onchange="renderDailyTable">
+            <select id="filter_trainee" onchange="renderDailyTable()">
               <option value="">-- แสดง นสต. ทุกคน --</option>
             </select>
           </div>
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">สถานะการตรวจ:</label>
-            <select id="filter_status" onchange="renderDailyTable">
+            <select id="filter_status" onchange="renderDailyTable()">
               <option value="">ทั้งหมด</option>
               <option value="pending">⏳ เฉพาะรอตรวจ</option>
               <option value="evaluated">✓ เฉพาะตรวจแล้ว</option>
@@ -242,7 +242,7 @@
           </div>
           <div>
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">ภาคเรียน:</label>
-            <select id="filter_semester" onchange="renderDailyTable">
+            <select id="filter_semester" onchange="renderDailyTable()">
               <option value="">ทั้งหมด</option>
               <option value="1">ภาคเรียนที่ ๑</option>
               <option value="2">ภาคเรียนที่ ๒</option>
@@ -425,7 +425,7 @@
     <div class="modal">
       <div class="modal-hdr">
         <h3 id="modal_title">👨‍✈️ ตรวจประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ ๑)</h3>
-        <button type="button" class="modal-close" onclick="closeEvalModal">✕</button>
+        <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
       </div>
 
       <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
@@ -448,11 +448,11 @@
           <label style="font-weight:700;font-size:13px;color:var(--navy);">๑. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกาย/จิตใจ)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_prep_pass">
-              <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles">
+              <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles()">
               ✓ ผ่าน
             </label>
             <label class="eval-radio-label fail-option" id="lbl_prep_fail">
-              <input type="radio" name="eval_prep" value="ไม่ผ่าน" onchange="updateRadioStyles">
+              <input type="radio" name="eval_prep" value="ไม่ผ่าน" onchange="updateRadioStyles()">
               ✕ ไม่ผ่าน
             </label>
           </div>
@@ -464,11 +464,11 @@
           <label style="font-weight:700;font-size:13px;color:var(--navy);">๒. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_work_pass">
-              <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles">
+              <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles()">
               ✓ ผ่าน
             </label>
             <label class="eval-radio-label fail-option" id="lbl_work_fail">
-              <input type="radio" name="eval_work" value="ไม่ผ่าน" onchange="updateRadioStyles">
+              <input type="radio" name="eval_work" value="ไม่ผ่าน" onchange="updateRadioStyles()">
               ✕ ไม่ผ่าน
             </label>
           </div>
@@ -480,11 +480,11 @@
           <label style="font-weight:700;font-size:13px;color:var(--navy);">๓. หลังปฏิบัติงาน (การบำรุงรักษาอุปกรณ์/ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
           <div class="eval-radio-group">
             <label class="eval-radio-label pass-option" id="lbl_post_pass">
-              <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles">
+              <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles()">
               ✓ ผ่าน
             </label>
             <label class="eval-radio-label fail-option" id="lbl_post_fail">
-              <input type="radio" name="eval_post" value="ไม่ผ่าน" onchange="updateRadioStyles">
+              <input type="radio" name="eval_post" value="ไม่ผ่าน" onchange="updateRadioStyles()">
               ✕ ไม่ผ่าน
             </label>
           </div>
@@ -498,9 +498,9 @@
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <button type="button" class="btn btn-danger btn-sm" onclick="deleteCurrentLogFromModal">🗑️ ลบรายการนี้</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteCurrentLogFromModal()">🗑️ ลบรายการนี้</button>
           <div style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-outline" onclick="closeEvalModal">ยกเลิก</button>
+            <button type="button" class="btn btn-outline" onclick="closeEvalModal()">ยกเลิก</button>
             <button type="submit" class="btn btn-purple">✓ บันทึกผลการประเมิน</button>
           </div>
         </div>
@@ -515,7 +515,7 @@
     let logs = [];
     let roster = [];
 
-    function loadData {
+    function loadData() {
       try {
         const storedLogs = localStorage.getItem(STORAGE_KEY);
         logs = storedLogs ? JSON.parse(storedLogs) : [];
@@ -526,10 +526,10 @@
         roster = storedRoster ? JSON.parse(storedRoster) : [];
       } catch(e) { roster = []; }
 
-      populateFilterDropdowns;
+      populateFilterDropdowns();
     }
 
-    function saveData {
+    function saveData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
       } catch(e) {}
@@ -546,19 +546,19 @@
       if (tab === 'daily') {
         document.getElementById('btn_tab_daily').classList.add('active');
         document.getElementById('tab_daily_view').style.display = 'block';
-        renderDailyTable;
+        renderDailyTable();
       } else if (tab === 'monthly') {
         document.getElementById('btn_tab_monthly').classList.add('active');
         document.getElementById('tab_monthly_view').style.display = 'block';
-        renderMonthlyReport;
+        renderMonthlyReport();
       } else if (tab === 'summary') {
         document.getElementById('btn_tab_summary').classList.add('active');
         document.getElementById('tab_summary_view').style.display = 'block';
-        renderSummaryReport;
+        renderSummaryReport();
       }
     }
 
-    function populateFilterDropdowns {
+    function populateFilterDropdowns() {
       const allNames = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
 
       // Daily Filter
@@ -609,11 +609,11 @@
       document.getElementById('eval_post_reason').value = log.evalPostReason || '';
       document.getElementById('eval_mentor_feedback').value = log.mentorFeedback || '';
 
-      updateRadioStyles;
+      updateRadioStyles();
       document.getElementById('evalModal').style.display = 'flex';
     }
 
-    function closeEvalModal {
+    function closeEvalModal() {
       document.getElementById('evalModal').style.display = 'none';
     }
 
@@ -628,7 +628,7 @@
       return 'ผ่าน';
     }
 
-    function updateRadioStyles {
+    function updateRadioStyles() {
       ['prep', 'work', 'post'].forEach(field => {
         const val = getRadioValue('eval_' + field);
         const passLbl = document.getElementById(`lbl_${field}_pass`);
@@ -644,47 +644,47 @@
     }
 
     function handleEvaluationSubmit(e) {
-      e.preventDefault;
+      e.preventDefault();
       const logId = document.getElementById('m_eval_log_id').value;
       const log = logs.find(l => l.id === logId);
       if (!log) return;
 
       log.evalPrep = getRadioValue('eval_prep');
-      log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim;
+      log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim();
       log.evalWork = getRadioValue('eval_work');
-      log.evalWorkReason = document.getElementById('eval_work_reason').value.trim;
+      log.evalWorkReason = document.getElementById('eval_work_reason').value.trim();
       log.evalPost = getRadioValue('eval_post');
-      log.evalPostReason = document.getElementById('eval_post_reason').value.trim;
-      log.mentorFeedback = document.getElementById('eval_mentor_feedback').value.trim;
+      log.evalPostReason = document.getElementById('eval_post_reason').value.trim();
+      log.mentorFeedback = document.getElementById('eval_mentor_feedback').value.trim();
       log.status = 'evaluated';
 
-      saveData;
-      closeEvalModal;
+      saveData();
+      closeEvalModal();
       alert('บันทึกผลการตรวจประเมินเรียบร้อยแล้ว!');
-      renderDailyTable;
+      renderDailyTable();
     }
 
     function deleteLog(logId) {
       if (!confirm('ยืนยันที่จะลบรายการบันทึกนี้หรือไม่? (ระบบจะคำนวณคะแนนใหม่ทันที)')) return;
       logs = logs.filter(l => l.id !== logId);
-      saveData;
-      renderDailyTable;
+      saveData();
+      renderDailyTable();
     }
 
-    function deleteCurrentLogFromModal {
+    function deleteCurrentLogFromModal() {
       const logId = document.getElementById('m_eval_log_id').value;
       if (logId) {
         deleteLog(logId);
-        closeEvalModal;
+        closeEvalModal();
       }
     }
 
-    function renderDailyTable {
+    function renderDailyTable() {
       const filterTrainee = document.getElementById('filter_trainee').value;
       const filterStatus = document.getElementById('filter_status').value;
       const filterSem = document.getElementById('filter_semester').value;
 
-      let filtered = logs.slice;
+      let filtered = logs.slice();
       if (filterTrainee) filtered = filtered.filter(l => l.traineeName === filterTrainee);
       if (filterStatus) filtered = filtered.filter(l => l.status === filterStatus);
       if (filterSem) filtered = filtered.filter(l => l.semester === filterSem);
@@ -737,7 +737,7 @@
     }
 
     // ================= Monthly Report (แบบที่ ๒) =================
-    function renderMonthlyReport {
+    function renderMonthlyReport() {
       const selectedName = document.getElementById('m_monthly_trainee').value;
       const selectedMonth = document.getElementById('m_monthly_month').value; // 'YYYY-MM'
       if (!selectedName || !selectedMonth) return;
@@ -746,8 +746,8 @@
       document.getElementById('m_rep2_name').textContent = selectedName;
       document.getElementById('m_rep2_station').textContent = matchRoster ? matchRoster.station : 'สภ.แม่แตง ภ.จว.เชียงใหม่';
       document.getElementById('m_rep2_mentor').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
-      document.getElementById('m_rep2_sig_t').textContent = selectedName;
-      document.getElementById('m_rep2_sig_m').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+      
+      
 
       // Format month text (e.g. สิงหาคม ๒๕๖๗)
       const [year, month] = selectedMonth.split('-');
@@ -807,14 +807,14 @@
     }
 
     // ================= Summary Report (แบบที่ ๓) =================
-    function renderSummaryReport {
+    function renderSummaryReport() {
       const selectedName = document.getElementById('m_summary_trainee').value;
       if (!selectedName) return;
 
       const matchRoster = roster.find(r => r.name === selectedName);
       document.getElementById('m_rep3_cert_name').textContent = selectedName;
-      document.getElementById('m_rep3_sig_t').textContent = selectedName;
-      document.getElementById('m_rep3_sig_m').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+      
+      
 
       // Compute scores
       const userLogs = logs.filter(l => l.traineeName === selectedName && l.status === 'evaluated');
@@ -838,11 +838,11 @@
       document.getElementById('m_rep3_weight_val').textContent = weightedScore;
     }
 
-    window.addEventListener('DOMContentLoaded',  => {
-      loadData;
-      renderDailyTable;
-      renderMonthlyReport;
-      renderSummaryReport;
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      renderDailyTable();
+      renderMonthlyReport();
+      renderSummaryReport();
     });
   </script>
 </body>

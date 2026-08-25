@@ -614,7 +614,7 @@
       } else {
         document.getElementById('btn_mode_batch').classList.add('active');
         document.getElementById('mode_batch_content').style.display = 'block';
-        renderBatchView;
+        renderBatchView();
       }
     }
 
@@ -920,7 +920,7 @@
       logs = logs.filter(l => l.id !== logId);
       saveData();
       renderIndividualView();
-      renderBatchView;
+      renderBatchView();
     }
 
     function exportBatchCSV() {
@@ -952,19 +952,19 @@
       const a = document.createElement('a');
       a.href = url;
       a.download = `รายงานคะแนนฝึกปฏิบัติราชการ_นสต_บชศ_${new Date().toISOString().split('T')[0]}.csv`;
-      a.click;
+      a.click();
     }
 
     // Roster Management Modal
     function openRosterModal() {
-      renderRosterModalList;
+      renderRosterModalList();
       document.getElementById('rosterModal').style.display = 'flex';
     }
     function closeRosterModal() {
       document.getElementById('rosterModal').style.display = 'none';
-      populateTraineeDropdown;
+      populateTraineeDropdown();
       renderIndividualView();
-      renderBatchView;
+      renderBatchView();
     }
     function handleAddRosterTrainee(e) {
       e.preventDefault();
@@ -981,13 +981,13 @@
       document.getElementById('m_add_name').value = '';
       document.getElementById('m_add_station').value = '';
       document.getElementById('m_add_mentor').value = '';
-      renderRosterModalList;
+      renderRosterModalList();
     }
     function deleteRosterTrainee(index) {
       if (!confirm(`ต้องการลบรายชื่อ ${roster[index].name} ออกจากรุ่นหรือไม่?`)) return;
       roster.splice(index, 1);
       saveData();
-      renderRosterModalList;
+      renderRosterModalList();
     }
     function renderRosterModalList() {
       const tbody = document.getElementById('roster_modal_tbody');
@@ -1028,16 +1028,16 @@
 
       saveData();
       if (showAlert) alert('โหลดชุดข้อมูลตัวอย่างรุ่น นสต. เรียบร้อยแล้ว!');
-      populateTraineeDropdown;
+      populateTraineeDropdown();
       renderIndividualView();
-      renderBatchView;
+      renderBatchView();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
-      populateTraineeDropdown;
+      populateTraineeDropdown();
       renderIndividualView();
-      renderBatchView;
+      renderBatchView();
     });
   </script>
 </body>

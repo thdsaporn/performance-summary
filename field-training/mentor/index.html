@@ -340,13 +340,24 @@
           </table>
         </div>
 
-        <!-- Monthly Feedback Section -->
-        <div style="margin-top:16px;background:#f8fafc;padding:14px;border-radius:8px;border:1px solid var(--border-light);">
-          <div style="font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:6px;">
-            ข้อคิดเห็น / ข้อเสนอแนะภาพรวมประจำเดือนของครูพี่เลี้ยง:
+        <!-- Monthly Feedback Section (Editable & Savable) -->
+        <div style="margin-top:16px;background:#f8fafc;padding:16px;border-radius:8px;border:1px solid var(--border-light);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <label for="m_rep2_feedback_input" style="font-weight:700;font-size:13.5px;color:var(--navy);">
+              ✍️ ข้อคิดเห็น / ข้อเสนอแนะภาพรวมประจำเดือนของครูพี่เลี้ยง:
+            </label>
+            <div class="no-print" style="display:flex;gap:8px;align-items:center;">
+              <span id="m_rep2_feedback_saved_indicator" style="font-size:12px;color:var(--success);font-weight:600;display:none;">✓ บันทึกข้อคิดเห็นแล้ว</span>
+              <button type="button" class="btn btn-purple btn-sm" onclick="saveMonthlyFeedback()">
+                💾 บันทึกข้อคิดเห็น
+              </button>
+            </div>
           </div>
-          <div id="m_rep2_feedback_box" style="font-size:13.5px;color:#334155;line-height:1.6;font-style:italic;padding:8px;background:white;border-radius:6px;border:1px dashed var(--border);">
-            - มีความตั้งใจปฏิบัติงานตามที่ได้รับมอบหมาย มีวินัย และพัฒนาการด้านงานสารบรรณและการตรวจพื้นที่ได้อย่างถูกต้อง -
+          <!-- Editable Textarea on Screen -->
+          <textarea id="m_rep2_feedback_input" class="no-print" rows="3" placeholder="พิมพ์ข้อคิดเห็น / ข้อเสนอแนะภาพรวมประจำเดือนของ นสต. ท่านนี้..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;line-height:1.5;background:white;" onchange="saveMonthlyFeedback()"></textarea>
+          
+          <!-- Clean Print Version for Official PDF -->
+          <div id="m_rep2_feedback_print" class="print-only" style="font-size:13.5px;color:#334155;line-height:1.6;font-style:italic;padding:8px 12px;border:1px dashed #cbd5e1;border-radius:6px;min-height:50px;">
           </div>
         </div>
 
@@ -513,6 +524,41 @@
     const ROSTER_KEY = 'police_field_training_roster_v1';
 
     let logs = [];
+
+    const FEEDBACK_STORAGE_KEY = 'police_field_training_monthly_feedback_v1';
+    let monthlyFeedbacks = {};
+
+    function loadFeedbacks() {
+      try {
+        const stored = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+        monthlyFeedbacks = stored ? JSON.parse(stored) : {};
+      } catch(e) { monthlyFeedbacks = {}; }
+    }
+
+    function saveMonthlyFeedback() {
+      const selectedName = document.getElementById('m_monthly_trainee').value;
+      const selectedMonth = document.getElementById('m_monthly_month').value;
+      if (!selectedName || !selectedMonth) return;
+
+      const key = `${selectedName}_${selectedMonth}`;
+      const text = document.getElementById('m_rep2_feedback_input').value.trim();
+      monthlyFeedbacks[key] = text;
+      try {
+        localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(monthlyFeedbacks));
+      } catch(e) {}
+
+      // Update print view
+      const printBox = document.getElementById('m_rep2_feedback_print');
+      if (printBox) printBox.textContent = text || '- ไม่มีความเห็นเพิ่มเติม -';
+
+      // Show indicator
+      const ind = document.getElementById('m_rep2_feedback_saved_indicator');
+      if (ind) {
+        ind.style.display = 'inline';
+        setTimeout(() => { ind.style.display = 'none'; }, 2500);
+      }
+    }
+
     let roster = [];
 
     function loadData() {
@@ -738,6 +784,7 @@
 
     // ================= Monthly Report (แบบที่ 2) =================
     function renderMonthlyReport() {
+      loadFeedbacks();
       const selectedName = document.getElementById('m_monthly_trainee').value;
       const selectedMonth = document.getElementById('m_monthly_month').value; // 'YYYY-MM'
       if (!selectedName || !selectedMonth) return;
@@ -804,6 +851,14 @@
       document.getElementById('m_rep2_tot_pass').textContent = totalPass;
       document.getElementById('m_rep2_tot_fail').textContent = totalFail;
       document.getElementById('m_rep2_tot_result').textContent = (totalPass >= totalFail && totalEval > 0) ? 'ผ่านเกณฑ์' : 'ไม่ผ่านเกณฑ์';
+
+      // Load saved custom feedback or default
+      const fbKey = `${selectedName}_${selectedMonth}`;
+      const savedFeedback = monthlyFeedbacks[fbKey] !== undefined ? monthlyFeedbacks[fbKey] : '- มีความตั้งใจปฏิบัติงานตามที่ได้รับมอบหมาย มีวินัย และพัฒนาการด้านงานสารบรรณและการตรวจพื้นที่ได้อย่างถูกต้อง -';
+      const inputEl = document.getElementById('m_rep2_feedback_input');
+      const printEl = document.getElementById('m_rep2_feedback_print');
+      if (inputEl) inputEl.value = savedFeedback;
+      if (printEl) printEl.textContent = savedFeedback || '- ไม่มีความเห็นเพิ่มเติม -';
     }
 
     // ================= Summary Report (แบบที่ 3) =================

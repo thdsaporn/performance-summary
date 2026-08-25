@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบคำนวณผลการประเมินฝึกหัดปฏิบัติราชการ นสต. | บช.ศ. & กฝ.บช.ตชด.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0e2a47;
+      --navy-dark: #09192c;
+      --navy-light: #163e69;
+      --gold: #d4af37;
+      --gold-deep: #b38e1b;
+      --gold-light: #fef9e7;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --radius: 10px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 15px;
+      padding-bottom: 60px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--navy-light) 100%);
+      color: white;
+      padding: 24px 20px;
+      box-shadow: var(--shadow-lg);
+      border-bottom: 3px solid var(--gold);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .badge-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .brand-title h1 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.2px;
+    }
+    .brand-title p {
+      font-size: 12.5px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-deep) 100%); color: #1e1b06; font-weight: 600; }
+    .btn-gold:hover { filter: brightness(1.08); box-shadow: 0 2px 8px rgba(212,175,55,0.4); }
+    .btn-outline { background: white; border-color: var(--border); color: var(--navy); }
+    .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+    .btn-print { background: var(--navy); color: white; }
+    .btn-print:hover { background: var(--navy-dark); }
+    .btn-sm { padding: 5px 10px; font-size: 12.5px; }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid var(--border-light);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .card-title {
+      font-family: 'Prompt', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .tag {
+      font-size: 12px;
+      background: var(--blue-bg);
+      color: var(--blue);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Trainee Info Form Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .form-group input, .form-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      background: #f8fafc;
+      color: var(--text);
+      transition: border 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    /* Score Summary Dashboard Grid */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: white;
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-box::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: var(--navy);
+    }
+    .stat-box.s1::before { background: var(--blue); }
+    .stat-box.s2::before { background: #8b5cf6; }
+    .stat-box.total::before { background: var(--gold-deep); }
+    .stat-box.weight::before { background: var(--success); }
+
+    .stat-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: 'Prompt', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .stat-value small {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+    .stat-footer {
+      margin-top: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    table.score-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: white;
+      text-align: left;
+    }
+    table.score-table th, table.score-table td {
+      padding: 9px 12px;
+      border: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+    table.score-table th {
+      background: #f8fafc;
+      color: var(--navy);
+      font-family: 'Prompt', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    table.score-table th.col-desc { text-align: left; }
+    table.score-table tr:hover { background: #fdfdfd; }
+
+    .row-header {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .row-total {
+      background: #fef9e7 !important;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    /* Number inputs in table */
+    .num-input {
+      width: 65px;
+      padding: 5px 6px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      background: white;
+      transition: all 0.15s;
+    }
+    .num-input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+      background: #eff6ff;
+    }
+    .num-disabled {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+    .score-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--navy);
+      text-align: center;
+    }
+    .score-cell.max {
+      color: var(--success);
+    }
+    .sub-item-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* Preset Bar */
+    .preset-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: white;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow);
+    }
+    .preset-bar span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* Notice Alert */
+    .alert-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--blue);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+      font-size: 13.5px;
+      color: #1e3a8a;
+      line-height: 1.6;
+    }
+    .alert-box strong { font-weight: 600; }
+
+    /* Print View (Only for Print) */
+    .print-only { display: none; }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+        font-size: 12pt;
+        padding: 0;
+      }
+      header, .preset-bar, .header-actions, .no-print {
+        display: none !important;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin-bottom: 12pt;
+      }
+      .card-header {
+        border-bottom: 1pt solid black;
+        padding-bottom: 4pt;
+        margin-bottom: 8pt;
+      }
+      .card-title {
+        color: black;
+        font-size: 14pt;
+      }
+      .table-wrap {
+        border: none;
+        margin-top: 6pt;
+      }
+      table.score-table {
+        border: 1pt solid black;
+        font-size: 10.5pt;
+      }
+      table.score-table th, table.score-table td {
+        border: 1pt solid black;
+        padding: 4pt 6pt;
+      }
+      table.score-table th {
+        background: #f0f0f0 !important;
+        color: black;
+      }
+      .row-header { background: #e5e5e5 !important; }
+      .row-total { background: #f0f0f0 !important; color: black; }
+      .num-input {
+        border: none;
+        background: transparent;
+        font-size: 10.5pt;
+        width: auto;
+        font-family: inherit;
+        font-weight: normal;
+      }
+      .num-disabled {
+        background: transparent;
+      }
+      .print-only { display: block; }
+      .page-break { page-break-after: always; }
+      .signature-block {
+        margin-top: 30pt;
+        display: flex;
+        justify-content: space-between;
+        text-align: center;
+        font-size: 11pt;
+      }
+      .signature-line {
+        margin-top: 40pt;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="no-print">
+    <div class="header-inner">
+      <div class="brand-title">
+        <div class="badge-icon">🎖️</div>
+        <div>
+          <h1>ระบบคำนวณผลการประเมินฝึกหัดปฏิบัติราชการ นสต.</h1>
+          <p>ตามระเบียบ ตร. พ.ศ. ๒๕๖๗ & หนังสือ บช.ศ. ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พ.ย. ๖๗ · กก.๕ บก.กฝ.บช.ตชด.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-outline btn-sm" onclick="window.location.href='./index.html'">
+          🏠 หน้าหลัก
+        </button>
+        <button type="button" class="btn btn-print btn-sm" onclick="window.print()">
+          🖨️ พิมพ์แบบสรุปผล (PDF)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Quick Presets -->
+    <div class="preset-bar no-print">
+      <span>⚡ โหลดชุดตัวอย่างด่วน:</span>
+      <button type="button" class="btn btn-gold btn-sm" onclick="loadPreset('sample1')">
+        ตัวอย่างที่ ๑ (ผ่านเต็ม 100% · ๑,๑๖๐ คะแนน)
+      </button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="loadPreset('sample2')">
+        ตัวอย่างที่ ๒ (ตามหนังสือ บช.ศ. · ๙๒๙ คะแนน)
+      </button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="resetForm()">
+        🔄 ล้างข้อมูล / เริ่มใหม่
+      </button>
+    </div>
+
+    <!-- Official Banner for Print -->
+    <div class="print-only" style="text-align:center;margin-bottom:16pt;">
+      <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ</h2>
+      <p style="font-size:11.5pt;">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.) ประจำปีงบประมาณ พ.ศ. ๒๕๖๗</p>
+      <p style="font-size:10.5pt;color:#444;">ตามหนังสือ กองบัญชาการศึกษา ที่ ๐๐๓๘.๒๔/๑๖๒๙ ลง ๑๘ พฤศจิกายน ๒๕๖๗</p>
+    </div>
+
+    <!-- Trainee Information Form -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>👤 ข้อมูลนักเรียนนายสิบตำรวจ (ผู้รับการประเมิน)</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="form-group">
+          <label>ยศ - ชื่อ - สกุล นสต.</label>
+          <input type="text" id="t_name" value="นสต. ทศพร สุมาลี" placeholder="เช่น นสต. สมชาย ใจดี">
+        </div>
+        <div class="form-group">
+          <label>เลขประจำตัว นสต.</label>
+          <input type="text" id="t_id" value="6705001" placeholder="เช่น 6705001">
+        </div>
+        <div class="form-group">
+          <label>เลขประจำตัวประชาชน (๑๓ หลัก)</label>
+          <input type="text" id="t_idcard" value="1589900078539" placeholder="13 หลัก">
+        </div>
+        <div class="form-group">
+          <label>หน่วยฝึกอบรม</label>
+          <input type="text" id="t_unit" value="กก.๕ บก.กฝ.บช.ตชด. (แม่แตง เชียงใหม่)">
+        </div>
+        <div class="form-group">
+          <label>สถานีตำรวจ/หน่วยงานที่ฝึกปฏิบัติ</label>
+          <input type="text" id="t_station" value="สภ.แม่แตง ภ.จว.เชียงใหม่" placeholder="เช่น สภ.แม่แตง">
+        </div>
+        <div class="form-group">
+          <label>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</label>
+          <input type="text" id="t_mentor" value="ร.ต.อ. อนุชา กล้าหาญ (รอง สวป.สภ.แม่แตง)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Overall Summary Score Dashboard Cards -->
+    <div class="summary-grid">
+      <div class="stat-box s1">
+        <div class="stat-label">ภาคเรียนที่ ๑ (๔ หัวข้อปฏิบัติ)</div>
+        <div class="stat-value">
+          <span id="sum_sem1">๓๔๐</span>
+          <small>/ ๓๔๐ คะแนน</small>
+        </div>
+        <div class="stat-footer">
+          <span>คิดเป็นร้อยละ</span>
+          <strong id="pct_sem1">100%</strong>
+        </div>
+      </div>
+
+      <div class="stat-box s2">
+        <div class="stat-label">ภาคเรียนที่ ๒ (๑๐ หัวข้อปฏิบัติ)</div>
+        <div class="stat-value">
+          <span id="sum_sem2">๘๒๐</span>
+          <small>/ ๘๒๐ คะแนน</small>
+        </div>
+        <div class="stat-footer">
+          <span>คิดเป็นร้อยละ</span>
+          <strong id="pct_sem2">100%</strong>
+        </div>
+      </div>
+
+      <div class="stat-box total">
+        <div class="stat-label">คะแนนรวมการฝึกหัดปฏิบัติราชการ</div>
+        <div class="stat-value" style="color:var(--gold-deep);">
+          <span id="sum_total">๑,๑๖๐</span>
+          <small>/ ๑,๑๖๐ คะแนน</small>
+        </div>
+        <div class="stat-footer">
+          <span>ผลรวมทั้ง ๒ ภาคเรียน</span>
+          <strong id="pct_total">100.00%</strong>
+        </div>
+      </div>
+
+      <div class="stat-box weight">
+        <div class="stat-label">คะแนนแปรผันตามค่าน้ำหนัก บช.ศ. (๑๐%)</div>
+        <div class="stat-value" style="color:var(--success);">
+          <span id="sum_weighted">๓๘๗.๐๐</span>
+          <small>/ ๓๘๗ คะแนน</small>
+        </div>
+        <div class="stat-footer">
+          <span>สูตร: คะแนนรวม × ๐.๓๓๓๖</span>
+          <strong id="status_pass" style="color:var(--success);">ผ่านเกณฑ์</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-box no-print">
+      💡 <strong>สูตรคำนวณตามหนังสือ บช.ศ.:</strong> คะแนนแต่ละหัวข้อ = <code>(จำนวนครั้งที่ผ่าน × คะแนนเต็มประจำข้อ) ÷ จำนวนครั้งที่ประเมิน</code> (ปัดเศษทศนิยมตามหลักคณิตศาสตร์มาตรฐานของ บช.ศ.)
+    </div>
+
+    <!-- Table 1: Semester 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📘 ภาคเรียนที่ ๑ : ผลการประเมินการฝึกหัดปฏิบัติราชการ</span>
+          <span class="tag">คะแนนเต็ม ๓๔๐</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);">
+          รวมคะแนนที่ได้: <strong id="head_sem1_score" style="color:var(--blue);font-size:15px;">340</strong> / 340 คะแนน
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="score-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">ลำดับ</th>
+              <th class="col-desc">รายการปฏิบัติ</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ประเมิน</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ผ่าน</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
+              <th style="width:90px;">คะแนนเต็ม</th>
+              <th style="width:100px;">คะแนนที่ได้</th>
+            </tr>
+          </thead>
+          <tbody id="tbody_sem1">
+            <!-- Injected by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="row-total">
+              <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๑</td>
+              <td style="text-align:center;" id="tot_sem1_eval">๑๑๘</td>
+              <td style="text-align:center;" id="tot_sem1_pass">๑๑๘</td>
+              <td style="text-align:center;" id="tot_sem1_fail">๐</td>
+              <td style="text-align:center;">๓๔๐</td>
+              <td class="score-cell" id="tot_sem1_score" style="font-size:16px;">๓๔๐</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Table 2: Semester 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📗 ภาคเรียนที่ ๒ : ผลการประเมินการฝึกหัดปฏิบัติราชการ</span>
+          <span class="tag">คะแนนเต็ม ๘๒๐</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);">
+          รวมคะแนนที่ได้: <strong id="head_sem2_score" style="color:#8b5cf6;font-size:15px;">820</strong> / 820 คะแนน
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="score-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">ลำดับ</th>
+              <th class="col-desc">รายการปฏิบัติ</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ประเมิน</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ผ่าน</th>
+              <th style="width:110px;">จำนวนครั้ง<br>ที่ไม่ผ่าน</th>
+              <th style="width:90px;">คะแนนเต็ม</th>
+              <th style="width:100px;">คะแนนที่ได้</th>
+            </tr>
+          </thead>
+          <tbody id="tbody_sem2">
+            <!-- Injected by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="row-total">
+              <td colspan="2" style="text-align:center;">รวมคะแนนภาคเรียนที่ ๒</td>
+              <td style="text-align:center;" id="tot_sem2_eval">๑๑๖</td>
+              <td style="text-align:center;" id="tot_sem2_pass">๑๑๖</td>
+              <td style="text-align:center;" id="tot_sem2_fail">๐</td>
+              <td style="text-align:center;">๘๒๐</td>
+              <td class="score-cell" id="tot_sem2_score" style="font-size:16px;">๘๒๐</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Final Evaluation Summary & Signature Block for Print -->
+    <div class="card print-only">
+      <div style="margin-top:10px;">
+        <h3 style="font-size:13pt;font-weight:700;margin-bottom:6pt;">สรุปผลการประเมินภาคการฝึกหัดปฏิบัติราชการ</h3>
+        <table style="width:100%;border-collapse:collapse;margin-top:6pt;" class="score-table">
+          <tr>
+            <td style="width:50%;padding:8pt;background:#f9f9f9;"><b>๑. คะแนนรวมภาคเรียนที่ ๑</b></td>
+            <td style="width:50%;padding:8pt;text-align:right;"><span id="p_sem1_val">340</span> / 340 คะแนน</td>
+          </tr>
+          <tr>
+            <td style="padding:8pt;background:#f9f9f9;"><b>๒. คะแนนรวมภาคเรียนที่ ๒</b></td>
+            <td style="padding:8pt;text-align:right;"><span id="p_sem2_val">820</span> / 820 คะแนน</td>
+          </tr>
+          <tr style="font-weight:700;background:#f0f0f0;">
+            <td style="padding:8pt;"><b>รวมคะแนนการฝึกหัดปฏิบัติราชการทั้งสิ้น</b></td>
+            <td style="padding:8pt;text-align:right;font-size:12pt;"><span id="p_total_val">1,160</span> / 1,160 คะแนน</td>
+          </tr>
+          <tr>
+            <td style="padding:8pt;background:#f9f9f9;"><b>คะแนนแปรผันตามค่าน้ำหนัก (๑๐% เพื่อจัดลำดับเลือกตำแหน่ง)</b></td>
+            <td style="padding:8pt;text-align:right;font-weight:700;color:#059669;"><span id="p_weight_val">387.00</span> / 387 คะแนน</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="signature-block">
+        <div style="width:30%;">
+          <p>ลงชื่อ......................................................</p>
+          <p style="margin-top:4pt;">(<span id="sig_trainee">นสต. ทศพร สุมาลี</span>)</p>
+          <p>ผู้รับการประเมิน</p>
+        </div>
+        <div style="width:30%;">
+          <p>ลงชื่อ......................................................</p>
+          <p style="margin-top:4pt;">(<span id="sig_mentor">ร.ต.อ. อนุชา กล้าหาญ</span>)</p>
+          <p>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</p>
+        </div>
+        <div style="width:30%;">
+          <p>ลงชื่อ......................................................</p>
+          <p style="margin-top:4pt;">(......................................................)</p>
+          <p>หัวหน้าสถานีตำรวจ / ผู้บังคับบัญชา</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Configuration of All Items according to Police Education Bureau (บช.ศ.)
+    const SEMESTER_1_ITEMS = [
+      {
+        id: 's1_1',
+        no: '๑.',
+        title: 'ความพร้อมก่อนการปฏิบัติงาน',
+        sub: 'เช่น การแต่งกาย, การตรงต่อเวลา, ความพร้อมเครื่องมืออุปกรณ์ฯ ร่างกายและจิตใจ',
+        maxScore: 10,
+        defaultEval: 30,
+        defaultPass: 30
+      },
+      {
+        id: 's1_2_1',
+        no: '๒.๑',
+        title: 'ความรู้ด้านงานสารบรรณ',
+        sub: 'เช่น การรับ-ส่ง หนังสือ, ทักษะร่างหนังสือ, ชั้นความลับ/ความเร็ว, คำขึ้นต้น-ลงท้าย, เลขหนังสือ, สวัสดิการ',
+        maxScore: 80,
+        defaultEval: 20,
+        defaultPass: 20
+      },
+      {
+        id: 's1_2_2',
+        no: '๒.๒',
+        title: 'การเขียนบันทึกต่างๆ',
+        sub: 'เช่น บันทึกจับกุม/ตรวจค้น, รายงานประจำวันชนิดต่างๆ, ใบสั่ง, รายงานการสืบสวน, เปรียบเทียบปรับ',
+        maxScore: 80,
+        defaultEval: 13,
+        defaultPass: 13
+      },
+      {
+        id: 's1_2_3',
+        no: '๒.๓',
+        title: 'ความรู้ทางด้านเทคโนโลยีสารสนเทศและการสื่อสาร',
+        sub: 'เช่น พื้นฐานโปรแกรมคอมพิวเตอร์, การสืบค้น Polis, E-cop, การใช้วิทยุสื่อสาร โทรศัพท์ โทรสาร, สมุดคุมรับแจ้งเหตุ',
+        maxScore: 80,
+        defaultEval: 18,
+        defaultPass: 18
+      },
+      {
+        id: 's1_2_4',
+        no: '๒.๔',
+        title: 'การมีมนุษยสัมพันธ์ที่ดีในการปฏิบัติงานกับประชาชน ผู้บังคับบัญชาและเพื่อนร่วมงาน',
+        sub: 'เช่น การให้คำแนะนำ ปรึกษา, การมีส่วนร่วมกับประชาชน (มวลชนสัมพันธ์)',
+        maxScore: 80,
+        defaultEval: 7,
+        defaultPass: 7
+      },
+      {
+        id: 's1_3',
+        no: '๓.',
+        title: 'หลังปฏิบัติงาน',
+        sub: 'เช่น การเก็บและบำรุงรักษาเครื่องมือ/อุปกรณ์/ยานพาหนะ, จัดทำบันทึกรายงานผล, แลกเปลี่ยนประสบการณ์',
+        maxScore: 10,
+        defaultEval: 30,
+        defaultPass: 30
+      }
+    ];
+
+    const SEMESTER_2_ITEMS = [
+      {
+        id: 's2_1',
+        no: '๑.',
+        title: 'ความพร้อมก่อนการปฏิบัติงาน',
+        sub: 'เช่น การแต่งกาย, การตรงต่อเวลา, ความพร้อมเครื่องมืออุปกรณ์ฯ ร่างกายและจิตใจ',
+        maxScore: 10,
+        defaultEval: 30,
+        defaultPass: 30
+      },
+      {
+        id: 's2_2_5',
+        no: '๒.๕',
+        title: 'ความรู้เบื้องต้นเกี่ยวกับงานป้องกันปราบปราม',
+        sub: 'เช่น คำสั่ง ตร. ๔๑๗/๒๕๕๕ อำนาจหน้าที่ สว.ป./ผบ.หมู่ ป., คดีอาญา ๕ กลุ่ม, นาฬิกาอาชญากรรม, แผนเผชิญเหตุ',
+        maxScore: 80,
+        defaultEval: 8,
+        defaultPass: 8
+      },
+      {
+        id: 's2_2_6',
+        no: '๒.๖',
+        title: 'การควบคุม ตรวจสอบ ดูแล ผู้ต้องหา',
+        sub: 'เช่น การค้นตัว, พันธนาการ, ทรัพย์สิน/อาหารญาติ, พิมพ์ลายนิ้วมือ, ผัดฟ้อง/ฝากขัง',
+        maxScore: 80,
+        defaultEval: 7,
+        defaultPass: 7
+      },
+      {
+        id: 's2_2_7',
+        no: '๒.๗',
+        title: 'การเผชิญเหตุ/ตรวจค้น/จับกุม',
+        sub: 'เช่น รับแจ้งเหตุ/ไกล่เกลี่ย, บันทึกจับกุม, ตรวจค้นบุคคล/สถานที่/ยานพาหนะ, จุดตรวจ/จุดสกัด, ควบคุมฝูงชน',
+        maxScore: 80,
+        defaultEval: 5,
+        defaultPass: 5
+      },
+      {
+        id: 's2_2_8',
+        no: '๒.๘',
+        title: 'การปฏิบัติงานสายตรวจ',
+        sub: 'เช่น สายตรวจเดินเท้า, รถจักรยานยนต์, รถยนต์, สายตรวจตำบล',
+        maxScore: 80,
+        defaultEval: 10,
+        defaultPass: 10
+      },
+      {
+        id: 's2_2_9',
+        no: '๒.๙',
+        title: 'การปฏิบัติงานด้านชุมชนสัมพันธ์',
+        sub: 'เช่น มวลชนสัมพันธ์, การลงพื้นที่ชุมชน, การประสานงานผู้นำชุมชน',
+        maxScore: 80,
+        defaultEval: 5,
+        defaultPass: 5
+      },
+      {
+        id: 's2_2_10',
+        no: '๒.๑๐',
+        title: 'ความรู้ ทักษะการถวายความปลอดภัย/อารักขาบุคคลสำคัญ',
+        sub: 'เช่น มาตรการรักษาความปลอดภัยขบวนเสด็จ, บุคคลสำคัญ, การสังเกตและระวังป้องกัน',
+        maxScore: 80,
+        defaultEval: 3,
+        defaultPass: 3
+      },
+      {
+        id: 's2_2_11',
+        no: '๒.๑๑',
+        title: 'ความรู้ความเข้าใจเกี่ยวกับงานจราจรและกฎหมายอื่น ๆ ที่เกี่ยวข้อง',
+        sub: 'เช่น พ.ร.บ.จราจรทางบก, พ.ร.บ.รถยนต์, กฎหมายขนส่งทางบก',
+        maxScore: 80,
+        defaultEval: 3,
+        defaultPass: 3
+      },
+      {
+        id: 's2_2_12',
+        no: '๒.๑๒',
+        title: 'การปฏิบัติงานด้านการจราจร',
+        sub: 'เช่น อำนวยการจราจรสัญญาณมือ/ไฟ, เขียนใบสั่ง, เครื่องตรวจจับความเร็ว, กรวยยาง, เครื่องเป่าแอลกอฮอล์, จัดการอุบัติเหตุ',
+        maxScore: 80,
+        defaultEval: 5,
+        defaultPass: 5
+      },
+      {
+        id: 's2_2_13',
+        no: '๒.๑๓',
+        title: 'ความรู้ความเข้าใจเกี่ยวกับงานด้านสืบสวน/สอบสวน',
+        sub: 'เช่น ข้อมูลท้องถิ่น บุคคล เส้นทาง แผนประทุษกรรม ประวัติบุคคลต้องสงสัย สมุดภาพคนร้าย',
+        maxScore: 80,
+        defaultEval: 6,
+        defaultPass: 6
+      },
+      {
+        id: 's2_2_14',
+        no: '๒.๑๔',
+        title: 'การปฏิบัติงานด้านสืบสวน/สอบสวน',
+        sub: 'เช่น เฝ้าจุด สังเกตการณ์ สะกดรอย ล่อซื้อ ข่าวกรอง ซักถามบุคคล สืบสวนตามหมายจับ',
+        maxScore: 80,
+        defaultEval: 4,
+        defaultPass: 4
+      },
+      {
+        id: 's2_3',
+        no: '๓.',
+        title: 'หลังปฏิบัติงาน',
+        sub: 'เช่น การเก็บและบำรุงรักษาเครื่องมือ/อุปกรณ์/ยานพาหนะ, จัดทำบันทึกรายงานผล, แลกเปลี่ยนประสบการณ์',
+        maxScore: 10,
+        defaultEval: 30,
+        defaultPass: 30
+      }
+    ];
+
+    // Presets based on Official Royal Thai Police / Education Bureau documents
+    const PRESETS = {
+      sample1: {
+        sem1: [
+          { eval: 30, pass: 30 },
+          { eval: 20, pass: 20 },
+          { eval: 13, pass: 13 },
+          { eval: 18, pass: 18 },
+          { eval: 7, pass: 7 },
+          { eval: 30, pass: 30 }
+        ],
+        sem2: [
+          { eval: 30, pass: 30 },
+          { eval: 8, pass: 8 },
+          { eval: 7, pass: 7 },
+          { eval: 5, pass: 5 },
+          { eval: 10, pass: 10 },
+          { eval: 5, pass: 5 },
+          { eval: 3, pass: 3 },
+          { eval: 3, pass: 3 },
+          { eval: 5, pass: 5 },
+          { eval: 6, pass: 6 },
+          { eval: 4, pass: 4 },
+          { eval: 30, pass: 30 }
+        ]
+      },
+      sample2: {
+        sem1: [
+          { eval: 30, pass: 28 }, // 10 pts -> (28*10)/30 = 9
+          { eval: 20, pass: 15 }, // 80 pts -> (15*80)/20 = 60
+          { eval: 13, pass: 11 }, // 80 pts -> (11*80)/13 = 68
+          { eval: 18, pass: 16 }, // 80 pts -> (16*80)/18 = 71
+          { eval: 7, pass: 6 },   // 80 pts -> (6*80)/7 = 69
+          { eval: 30, pass: 27 }  // 10 pts -> (27*10)/30 = 9
+        ],
+        sem2: [
+          { eval: 30, pass: 29 }, // 10 pts -> 10
+          { eval: 8, pass: 6 },   // 80 pts -> 60
+          { eval: 7, pass: 4 },   // 80 pts -> 46
+          { eval: 5, pass: 4 },   // 80 pts -> 64
+          { eval: 10, pass: 8 },  // 80 pts -> 64
+          { eval: 5, pass: 5 },   // 80 pts -> 80
+          { eval: 3, pass: 3 },   // 80 pts -> 80
+          { eval: 3, pass: 2 },   // 80 pts -> 53
+          { eval: 5, pass: 4 },   // 80 pts -> 64
+          { eval: 6, pass: 4 },   // 80 pts -> 53
+          { eval: 4, pass: 3 },   // 80 pts -> 60
+          { eval: 30, pass: 27 }  // 10 pts -> 9
+        ]
+      }
+    };
+
+    function renderTables() {
+      // Render Sem 1
+      const tbody1 = document.getElementById('tbody_sem1');
+      tbody1.innerHTML = '';
+      SEMESTER_1_ITEMS.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${item.no}</td>
+          <td>
+            <div style="font-weight:600;color:var(--navy);">${item.title}</div>
+            <div class="sub-item-text">${item.sub}</div>
+          </td>
+          <td style="text-align:center;">
+            <input type="number" min="1" class="num-input" id="eval_${item.id}" value="${item.defaultEval}" oninput="handleInput('${item.id}', ${item.maxScore})">
+          </td>
+          <td style="text-align:center;">
+            <input type="number" min="0" class="num-input" id="pass_${item.id}" value="${item.defaultPass}" oninput="handleInput('${item.id}', ${item.maxScore})">
+          </td>
+          <td style="text-align:center;">
+            <input type="text" class="num-input num-disabled" id="fail_${item.id}" value="0" readonly>
+          </td>
+          <td style="text-align:center;font-weight:600;color:var(--text-muted);">${item.maxScore}</td>
+          <td class="score-cell" id="score_${item.id}">${item.maxScore}</td>
+        `;
+        tbody1.appendChild(tr);
+      });
+
+      // Render Sem 2
+      const tbody2 = document.getElementById('tbody_sem2');
+      tbody2.innerHTML = '';
+      SEMESTER_2_ITEMS.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center;font-weight:600;">${item.no}</td>
+          <td>
+            <div style="font-weight:600;color:var(--navy);">${item.title}</div>
+            <div class="sub-item-text">${item.sub}</div>
+          </td>
+          <td style="text-align:center;">
+            <input type="number" min="1" class="num-input" id="eval_${item.id}" value="${item.defaultEval}" oninput="handleInput('${item.id}', ${item.maxScore})">
+          </td>
+          <td style="text-align:center;">
+            <input type="number" min="0" class="num-input" id="pass_${item.id}" value="${item.defaultPass}" oninput="handleInput('${item.id}', ${item.maxScore})">
+          </td>
+          <td style="text-align:center;">
+            <input type="text" class="num-input num-disabled" id="fail_${item.id}" value="0" readonly>
+          </td>
+          <td style="text-align:center;font-weight:600;color:var(--text-muted);">${item.maxScore}</td>
+          <td class="score-cell" id="score_${item.id}">${item.maxScore}</td>
+        `;
+        tbody2.appendChild(tr);
+      });
+
+      calculateAll();
+    }
+
+    function handleInput(id, maxScore) {
+      const evalEl = document.getElementById(`eval_${id}`);
+      const passEl = document.getElementById(`pass_${id}`);
+      const failEl = document.getElementById(`fail_${id}`);
+      const scoreEl = document.getElementById(`score_${id}`);
+
+      let evalVal = parseInt(evalEl.value, 10) || 0;
+      let passVal = parseInt(passEl.value, 10) || 0;
+
+      if (evalVal < 1) { evalVal = 1; evalEl.value = 1; }
+      if (passVal < 0) { passVal = 0; passEl.value = 0; }
+      if (passVal > evalVal) {
+        passVal = evalVal;
+        passEl.value = evalVal;
+      }
+
+      const failVal = evalVal - passVal;
+      failEl.value = failVal;
+
+      // Official Police Formula: (pass * maxScore) / eval rounded to nearest integer
+      const calculatedScore = Math.round((passVal * maxScore) / evalVal);
+      scoreEl.textContent = calculatedScore;
+      if (calculatedScore === maxScore) {
+        scoreEl.className = 'score-cell max';
+      } else {
+        scoreEl.className = 'score-cell';
+      }
+
+      calculateAll();
+    }
+
+    function calculateAll() {
+      let sem1Eval = 0, sem1Pass = 0, sem1Fail = 0, sem1Score = 0;
+      SEMESTER_1_ITEMS.forEach(item => {
+        const evalVal = parseInt(document.getElementById(`eval_${item.id}`).value, 10) || 0;
+        const passVal = parseInt(document.getElementById(`pass_${item.id}`).value, 10) || 0;
+        const failVal = evalVal - passVal;
+        const score = Math.round((passVal * item.maxScore) / (evalVal || 1));
+
+        document.getElementById(`fail_${item.id}`).value = failVal;
+        document.getElementById(`score_${item.id}`).textContent = score;
+
+        sem1Eval += evalVal;
+        sem1Pass += passVal;
+        sem1Fail += failVal;
+        sem1Score += score;
+      });
+
+      let sem2Eval = 0, sem2Pass = 0, sem2Fail = 0, sem2Score = 0;
+      SEMESTER_2_ITEMS.forEach(item => {
+        const evalVal = parseInt(document.getElementById(`eval_${item.id}`).value, 10) || 0;
+        const passVal = parseInt(document.getElementById(`pass_${item.id}`).value, 10) || 0;
+        const failVal = evalVal - passVal;
+        const score = Math.round((passVal * item.maxScore) / (evalVal || 1));
+
+        document.getElementById(`fail_${item.id}`).value = failVal;
+        document.getElementById(`score_${item.id}`).textContent = score;
+
+        sem2Eval += evalVal;
+        sem2Pass += passVal;
+        sem2Fail += failVal;
+        sem2Score += score;
+      });
+
+      // Update Sem 1 Totals
+      document.getElementById('tot_sem1_eval').textContent = sem1Eval;
+      document.getElementById('tot_sem1_pass').textContent = sem1Pass;
+      document.getElementById('tot_sem1_fail').textContent = sem1Fail;
+      document.getElementById('tot_sem1_score').textContent = sem1Score;
+      document.getElementById('head_sem1_score').textContent = sem1Score;
+      document.getElementById('sum_sem1').textContent = sem1Score;
+      document.getElementById('pct_sem1').textContent = ((sem1Score / 340) * 100).toFixed(1) + '%';
+
+      // Update Sem 2 Totals
+      document.getElementById('tot_sem2_eval').textContent = sem2Eval;
+      document.getElementById('tot_sem2_pass').textContent = sem2Pass;
+      document.getElementById('tot_sem2_fail').textContent = sem2Fail;
+      document.getElementById('tot_sem2_score').textContent = sem2Score;
+      document.getElementById('head_sem2_score').textContent = sem2Score;
+      document.getElementById('sum_sem2').textContent = sem2Score;
+      document.getElementById('pct_sem2').textContent = ((sem2Score / 820) * 100).toFixed(1) + '%';
+
+      // Update Overall Totals
+      const grandTotal = sem1Score + sem2Score;
+      const grandPct = ((grandTotal / 1160) * 100).toFixed(2);
+      // Weight 10%: 1160 pts maps to 387 scaled score -> multiplier is (387 / 1160) = 0.33362068965
+      const weightedScore = (grandTotal * (387 / 1160)).toFixed(2);
+
+      document.getElementById('sum_total').textContent = grandTotal.toLocaleString('th-TH');
+      document.getElementById('pct_total').textContent = grandPct + '%';
+      document.getElementById('sum_weighted').textContent = weightedScore;
+
+      const passStatusEl = document.getElementById('status_pass');
+      if (grandTotal >= 696) { // >= 60%
+        passStatusEl.textContent = 'ผ่านเกณฑ์ (ได้ ' + grandPct + '%)';
+        passStatusEl.style.color = 'var(--success)';
+      } else {
+        passStatusEl.textContent = 'ไม่ผ่านเกณฑ์ (< 60%)';
+        passStatusEl.style.color = 'var(--danger)';
+      }
+
+      // Update Print Elements
+      document.getElementById('p_sem1_val').textContent = sem1Score;
+      document.getElementById('p_sem2_val').textContent = sem2Score;
+      document.getElementById('p_total_val').textContent = grandTotal.toLocaleString('th-TH');
+      document.getElementById('p_weight_val').textContent = weightedScore;
+
+      // Update signatures
+      document.getElementById('sig_trainee').textContent = document.getElementById('t_name').value || '......................................................';
+      document.getElementById('sig_mentor').textContent = document.getElementById('t_mentor').value || '......................................................';
+    }
+
+    function loadPreset(presetKey) {
+      const preset = PRESETS[presetKey];
+      if (!preset) return;
+
+      preset.sem1.forEach((data, index) => {
+        const item = SEMESTER_1_ITEMS[index];
+        const evalEl = document.getElementById(`eval_${item.id}`);
+        const passEl = document.getElementById(`pass_${item.id}`);
+        if (evalEl && passEl) {
+          evalEl.value = data.eval;
+          passEl.value = data.pass;
+        }
+      });
+
+      preset.sem2.forEach((data, index) => {
+        const item = SEMESTER_2_ITEMS[index];
+        const evalEl = document.getElementById(`eval_${item.id}`);
+        const passEl = document.getElementById(`pass_${item.id}`);
+        if (evalEl && passEl) {
+          evalEl.value = data.eval;
+          passEl.value = data.pass;
+        }
+      });
+
+      calculateAll();
+    }
+
+    function resetForm() {
+      loadPreset('sample1');
+    }
+
+    // Sync input names with signatures
+    document.getElementById('t_name').addEventListener('input', (e) => {
+      document.getElementById('sig_trainee').textContent = e.target.value || '......................................................';
+    });
+    document.getElementById('t_mentor').addEventListener('input', (e) => {
+      document.getElementById('sig_mentor').textContent = e.target.value || '......................................................';
+    });
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTables();
+    });
+  </script>
+</body>
+</html>

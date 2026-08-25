@@ -135,7 +135,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label>เลือกหรือพิมพ์ ยศ-ชื่อ-สกุล นสต.</label>
-          <input type="text" id="trainee_name" list="trainee_roster_list" value="นสต. ทศพร สุมาลี" onchange="onTraineeChange()">
+          <input type="text" id="trainee_name" list="trainee_roster_list" value="นสต. ทศพร สุมาลี" onchange="onTraineeChange">
           <datalist id="trainee_roster_list"></datalist>
         </div>
         <div class="form-group">
@@ -163,7 +163,7 @@
           </div>
           <div class="form-group">
             <label>ภาคเรียน</label>
-            <select id="log_semester" onchange="updateTopics()" required>
+            <select id="log_semester" onchange="updateTopics" required>
               <option value="1">ภาคเรียนที่ ๑ (งานสารบรรณ, บันทึก, ไอที, มวลชน)</option>
               <option value="2">ภาคเรียนที่ ๒ (ปป, ผู้ต้องหา, สายตรวจ, จราจร, สืบสวน)</option>
             </select>
@@ -184,7 +184,7 @@
             📌 เมื่อกดบันทึก ข้อมูลจะส่งไปยัง <b>ระบบครูพี่เลี้ยง</b> ทันที
           </span>
           <div style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-outline" id="btn_cancel_edit" style="display:none;" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
+            <button type="button" class="btn btn-outline" id="btn_cancel_edit" style="display:none;" onclick="cancelEdit">ยกเลิกการแก้ไข</button>
             <button type="submit" class="btn btn-primary" id="btn_submit_log">💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ</button>
           </div>
         </div>
@@ -251,7 +251,7 @@
     let roster = [];
     let logs = [];
 
-    function loadData() {
+    function loadData {
       try {
         const storedRoster = localStorage.getItem(ROSTER_KEY);
         roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
@@ -272,25 +272,25 @@
       });
     }
 
-    function saveData() {
+    function saveData {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
         localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
       } catch(e) {}
     }
 
-    function onTraineeChange() {
-      const name = document.getElementById('trainee_name').value.trim();
+    function onTraineeChange {
+      const name = document.getElementById('trainee_name').value.trim;
       const match = roster.find(r => r.name === name);
       if (match) {
         document.getElementById('trainee_station').value = match.station;
         document.getElementById('trainee_mentor').value = match.mentor;
       }
       document.getElementById('lbl_current_trainee').textContent = name;
-      renderTable();
+      renderTable;
     }
 
-    function updateTopics() {
+    function updateTopics {
       const sem = document.getElementById('log_semester').value;
       const select = document.getElementById('log_topic');
       select.innerHTML = '';
@@ -304,15 +304,15 @@
     }
 
     function handleTraineeSubmit(e) {
-      e.preventDefault();
+      e.preventDefault;
       const editId = document.getElementById('edit_log_id').value;
-      const tName = document.getElementById('trainee_name').value.trim();
-      const station = document.getElementById('trainee_station').value.trim();
-      const mentor = document.getElementById('trainee_mentor').value.trim();
+      const tName = document.getElementById('trainee_name').value.trim;
+      const station = document.getElementById('trainee_station').value.trim;
+      const mentor = document.getElementById('trainee_mentor').value.trim;
       const date = document.getElementById('log_date').value;
       const semester = document.getElementById('log_semester').value;
       const topicCode = document.getElementById('log_topic').value;
-      const content = document.getElementById('log_content').value.trim();
+      const content = document.getElementById('log_content').value.trim;
 
       const topicObj = (semester === '1' ? TOPICS_S1 : TOPICS_S2).find(t => t.code === topicCode);
       const topicName = topicObj ? topicObj.name : topicCode;
@@ -334,10 +334,10 @@
           log.topicName = topicName;
           log.traineeNote = content;
         }
-        cancelEdit();
+        cancelEdit;
       } else {
         const newLog = {
-          id: 'log_' + Date.now(),
+          id: 'log_' + Date.now,
           traineeName: tName,
           station: station,
           mentor: mentor,
@@ -355,10 +355,10 @@
         logs.unshift(newLog);
       }
 
-      saveData();
+      saveData;
       document.getElementById('log_content').value = '';
       alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
-      renderTable();
+      renderTable;
     }
 
     function editLog(logId) {
@@ -371,7 +371,7 @@
       document.getElementById('edit_log_id').value = log.id;
       document.getElementById('log_date').value = log.date;
       document.getElementById('log_semester').value = log.semester;
-      updateTopics();
+      updateTopics;
       document.getElementById('log_topic').value = log.topicCode;
       document.getElementById('log_content').value = log.traineeNote;
 
@@ -380,7 +380,7 @@
       window.scrollTo({ top: 200, behavior: 'smooth' });
     }
 
-    function cancelEdit() {
+    function cancelEdit {
       document.getElementById('edit_log_id').value = '';
       document.getElementById('log_content').value = '';
       document.getElementById('btn_submit_log').textContent = '💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ';
@@ -396,12 +396,12 @@
         return;
       }
       logs = logs.filter(l => l.id !== logId);
-      saveData();
-      renderTable();
+      saveData;
+      renderTable;
     }
 
-    function renderTable() {
-      const currentName = document.getElementById('trainee_name').value.trim();
+    function renderTable {
+      const currentName = document.getElementById('trainee_name').value.trim;
       const filtered = logs.filter(l => l.traineeName === currentName);
       document.getElementById('count_logs').textContent = filtered.length;
 
@@ -446,12 +446,12 @@
     }
 
     // Set today date
-    document.getElementById('log_date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('log_date').value = new Date.toISOString.split('T')[0];
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadData();
-      updateTopics();
-      onTraineeChange();
+    window.addEventListener('DOMContentLoaded',  => {
+      loadData;
+      updateTopics;
+      onTraineeChange;
     });
   </script>
 </body>

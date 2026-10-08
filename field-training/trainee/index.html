@@ -108,6 +108,9 @@
     .badge { display: inline-flex; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
     .badge-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
     .badge-evaluated { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+    /* มือถือ: กันช่องกรอกล้นจอ */
+    .form-grid > * { min-width: 0; }
+    select, input, textarea { max-width: 100%; }
   </style>
 </head>
 <body>
@@ -217,6 +220,7 @@
 
   </div>
 
+  <script src="../ft-common.js"></script>
   <script>
     const TOPICS_S1 = [
       { code: 's1_2_1', name: '2.1 ความรู้ด้านงานสารบรรณ' },
@@ -254,14 +258,28 @@
     function loadData() {
       try {
         const storedRoster = localStorage.getItem(ROSTER_KEY);
-        roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
-      } catch(e) { roster = DEFAULT_ROSTER; }
+        roster = storedRoster ? JSON.parse(storedRoster) : (FT_SYNC.enabled() ? [] : DEFAULT_ROSTER);
+      } catch(e) { roster = FT_SYNC.enabled() ? [] : DEFAULT_ROSTER; }
 
       try {
         const storedLogs = localStorage.getItem(STORAGE_KEY);
         logs = storedLogs ? JSON.parse(storedLogs) : [];
       } catch(e) { logs = []; }
+      ftRepairIds();
+      refreshRosterList();
+    }
 
+    // แก้รหัสบันทึกที่ซ้ำกัน (รุ่นก่อนสร้างรหัสผิด ทำให้ทุกบันทึกได้รหัสเดียวกัน)
+    function ftRepairIds() {
+      const seen = new Set(); let fixed = false;
+      logs.forEach(l => {
+        if (!l.id || /function|native code/.test(l.id) || seen.has(l.id)) { l.id = ftNewId(); fixed = true; }
+        seen.add(l.id);
+      });
+      if (fixed) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); } catch(e) {} }
+    }
+
+    function refreshRosterList() {
       // Update Roster datalist
       const dl = document.getElementById('trainee_roster_list');
       dl.innerHTML = '';
@@ -277,7 +295,15 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
         localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
       } catch(e) {}
+      // นสต. เพิ่มรายชื่อตัวเองได้ แต่ไม่ลบรายชื่อในที่เก็บกลาง
+      FT_SYNC.push({ logs: logs, roster: roster }, { noDelete: ['roster'] });
     }
+
+    FT_SYNC.onData(d => {
+      logs = d.logs; roster = d.roster;
+      refreshRosterList();
+      renderTable();   // ไม่เรียก onTraineeChange เพื่อไม่ทับสถานี/ครูที่ผู้ใช้กำลังพิมพ์
+    });
 
     function onTraineeChange() {
       const name = document.getElementById('trainee_name').value.trim();
@@ -337,7 +363,7 @@
         cancelEdit();
       } else {
         const newLog = {
-          id: 'log_' + Date.now,
+          id: ftNewId(),
           traineeName: tName,
           station: station,
           mentor: mentor,
@@ -423,22 +449,22 @@
         if (isEval) {
           resultSummary = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
           if (log.mentorFeedback) {
-            resultSummary += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>แนะ:</b> ${log.mentorFeedback}</div>`;
+            resultSummary += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>แนะ:</b> ${ftEsc(log.mentorFeedback)}</div>`;
           }
         }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${log.date}</td>
-          <td style="text-align:center;">ภาค ${log.semester}</td>
-          <td><b>${log.topicName}</b></td>
-          <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
+          <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
+          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td>${resultSummary}</td>
           <td style="text-align:center;white-space:nowrap;">
-            ${!isEval ? `<button type="button" class="btn btn-outline btn-sm" onclick="editLog('${log.id}')" title="แก้ไข">✏️</button>` : ''}
-            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog('${log.id}')" title="ลบ">🗑️</button>
+            ${!isEval ? `<button type="button" class="btn btn-outline btn-sm" onclick="editLog(${ftJs(log.id)})" title="แก้ไข">✏️</button>` : ''}
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog(${ftJs(log.id)})" title="ลบ">🗑️</button>
           </td>
         `;
         tbody.appendChild(tr);

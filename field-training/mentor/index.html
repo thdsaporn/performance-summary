@@ -180,6 +180,9 @@
       th { background: #f0f0f0 !important; color: black; }
       
     }
+    /* มือถือ: กันช่องกรอกล้นจอ */
+    .form-grid > * { min-width: 0; }
+    select, input, textarea { max-width: 100%; }
   </style>
 </head>
 <body>
@@ -519,6 +522,7 @@
     </div>
   </div>
 
+  <script src="../ft-common.js"></script>
   <script>
     const STORAGE_KEY = 'police_field_training_logs_v1';
     const ROSTER_KEY = 'police_field_training_roster_v1';
@@ -546,6 +550,7 @@
       try {
         localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(monthlyFeedbacks));
       } catch(e) {}
+      FT_SYNC.push({ feedback: monthlyFeedbacks });
 
       // Update print view
       const printBox = document.getElementById('m_rep2_feedback_print');
@@ -571,14 +576,39 @@
         const storedRoster = localStorage.getItem(ROSTER_KEY);
         roster = storedRoster ? JSON.parse(storedRoster) : [];
       } catch(e) { roster = []; }
-
+      loadFeedbacks();
+      ftRepairIds();
       populateFilterDropdowns();
     }
+
+    function ftRepairIds() {
+      const seen = new Set(); let fixed = false;
+      logs.forEach(l => {
+        if (!l.id || /function|native code/.test(l.id) || seen.has(l.id)) { l.id = ftNewId(); fixed = true; }
+        seen.add(l.id);
+      });
+      if (fixed) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); } catch(e) {} }
+    }
+
+    FT_SYNC.onData(d => {
+      logs = d.logs; roster = d.roster; monthlyFeedbacks = d.feedback;
+      // คงค่าตัวเลือกที่ผู้ใช้เลือกไว้
+      const keep = ['filter_trainee', 'm_monthly_trainee', 'm_summary_trainee'].map(id => [id, document.getElementById(id).value]);
+      populateFilterDropdowns();
+      keep.forEach(([id, v]) => { const el = document.getElementById(id); if (v && [...el.options].some(o => o.value === v)) el.value = v; });
+      renderDailyTable();
+      // ไม่วาดแบบที่ 2 ใหม่ระหว่างพิมพ์ความเห็น เพื่อไม่ให้ข้อความที่กำลังพิมพ์หาย
+      if (document.activeElement && document.activeElement.id === 'm_rep2_feedback_input') { renderSummaryReport(); return; }
+      renderMonthlyReport();
+      renderSummaryReport();
+    });
 
     function saveData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
       } catch(e) {}
+      // ครูพี่เลี้ยงแก้เฉพาะบันทึกประจำวัน (ไม่แตะรายชื่อ)
+      FT_SYNC.push({ logs: logs });
     }
 
     function switchMentorTab(tab) {
@@ -764,18 +794,18 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${log.date}</td>
-          <td><b>${log.traineeName || '-'}</b></td>
-          <td style="text-align:center;">ภาค ${log.semester}</td>
-          <td><b>${log.topicName}</b></td>
-          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
+          <td><b>${ftEsc(log.traineeName || '-')}</b></td>
+          <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
+          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td style="text-align:center;">${evalSummary}</td>
           <td style="text-align:center;white-space:nowrap;" class="no-print">
-            <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal('${log.id}')">
+            <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal(${ftJs(log.id)})">
               ${isEval ? '✏️ แก้ไขผล' : '🔍 ตรวจประเมิน'}
             </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog('${log.id}')" title="ลบ">🗑️</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog(${ftJs(log.id)})" title="ลบ">🗑️</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -791,8 +821,8 @@
 
       const matchRoster = roster.find(r => r.name === selectedName);
       document.getElementById('m_rep2_name').textContent = selectedName;
-      document.getElementById('m_rep2_station').textContent = matchRoster ? matchRoster.station : 'สภ.แม่แตง ภ.จว.เชียงใหม่';
-      document.getElementById('m_rep2_mentor').textContent = matchRoster ? matchRoster.mentor : 'ร.ต.อ. อนุชา กล้าหาญ';
+      document.getElementById('m_rep2_station').textContent = matchRoster ? matchRoster.station : '-';
+      document.getElementById('m_rep2_mentor').textContent = matchRoster ? matchRoster.mentor : '-';
       
       
 
@@ -803,7 +833,7 @@
       document.getElementById('m_rep2_month_text').textContent = `${thaiMonths[parseInt(month)]} พ.ศ. ${thaiYear}`;
 
       // Filter logs in this month
-      const monthLogs = logs.filter(l => l.traineeName === selectedName && l.date.startsWith(selectedMonth));
+      const monthLogs = logs.filter(l => l.traineeName === selectedName && l.status === 'evaluated' && String(l.date || '').startsWith(selectedMonth));
 
       // Aggregate by topic
       const topicStats = {};
@@ -835,7 +865,7 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td style="text-align:center;font-weight:600;">${idx + 1}</td>
-            <td><b>${topicName}</b></td>
+            <td><b>${ftEsc(topicName)}</b></td>
             <td style="text-align:center;font-weight:600;">${st.eval}</td>
             <td style="text-align:center;font-weight:600;color:var(--success);">${st.pass}</td>
             <td style="text-align:center;font-weight:600;color:${st.fail > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${st.fail}</td>
@@ -871,21 +901,20 @@
       
       
 
-      // Compute scores
-      const userLogs = logs.filter(l => l.traineeName === selectedName && l.status === 'evaluated');
-      let s1Score = 340, s2Score = 820; // Default full if logs present or calculated
-      if (userLogs.length > 0) {
-        const s1Pass = userLogs.filter(l => l.semester === '1' && l.evalWork === 'ผ่าน').length;
-        const s1Total = userLogs.filter(l => l.semester === '1').length;
-        if (s1Total > 0) s1Score = Math.round((s1Pass / s1Total) * 340);
-
-        const s2Pass = userLogs.filter(l => l.semester === '2' && l.evalWork === 'ผ่าน').length;
-        const s2Total = userLogs.filter(l => l.semester === '2').length;
-        if (s2Total > 0) s2Score = Math.round((s2Pass / s2Total) * 820);
+      // คำนวณด้วยสูตรกลางเดียวกับหน้าฝ่ายฝึก (ft-common.js)
+      const res = FT_SCORE.compute(logs, selectedName);
+      const s1Score = res.s1Score, s2Score = res.s2Score, totalScore = res.totalScore;
+      const weightedScore = res.weightedScore.toFixed(2);
+      let note = document.getElementById('m_rep3_progress');
+      if (!note) {
+        note = document.createElement('div');
+        note.id = 'm_rep3_progress';
+        note.style.cssText = 'margin:8px 0;font-weight:600;';
+        const anchor = document.getElementById('m_rep3_total_val').closest('div').parentElement;
+        anchor.parentElement.insertBefore(note, anchor.nextSibling);
       }
-
-      const totalScore = s1Score + s2Score;
-      const weightedScore = (totalScore * (387 / 1160)).toFixed(2);
+      note.textContent = res.complete ? '' : '⚠ ' + FT_SCORE.statusText(res) + ' — คะแนนรวมเป็นคะแนนเฉพาะหัวข้อที่ประเมินแล้ว';
+      note.style.color = 'var(--danger)';
 
       document.getElementById('m_rep3_s1_val').textContent = s1Score;
       document.getElementById('m_rep3_s2_val').textContent = s2Score;

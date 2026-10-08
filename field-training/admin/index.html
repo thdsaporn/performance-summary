@@ -215,6 +215,9 @@
       .print-only { display: block; }
       
     }
+    /* มือถือ: กันช่องกรอกล้นจอ */
+    .form-grid > * { min-width: 0; }
+    select, input, textarea { max-width: 100%; }
   </style>
 </head>
 <body>
@@ -457,7 +460,7 @@
             <span>📋 บัญชีสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. ทั้งรุ่น (จัดลำดับที่)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="exportBatchCSV">📥 ส่งออก Excel/CSV</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="exportBatchCSV()">📥 ส่งออก Excel/CSV</button>
             <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์บัญชีรวม บช.ศ.</button>
           </div>
         </div>
@@ -539,6 +542,7 @@
     </div>
   </div>
 
+  <script src="../ft-common.js"></script>
   <script>
     const SEMESTER_1_CALC_ITEMS = [
       { id: 's1_1', no: '1.', title: 'ความพร้อมก่อนการปฏิบัติงาน', sub: 'การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกายและจิตใจ', maxScore: 10 },
@@ -581,24 +585,47 @@
     function loadData() {
       try {
         const storedRoster = localStorage.getItem(ROSTER_KEY);
-        roster = storedRoster ? JSON.parse(storedRoster) : DEFAULT_ROSTER;
-      } catch(e) { roster = DEFAULT_ROSTER; }
+        roster = storedRoster ? JSON.parse(storedRoster) : (FT_SYNC.enabled() ? [] : DEFAULT_ROSTER);
+      } catch(e) { roster = FT_SYNC.enabled() ? [] : DEFAULT_ROSTER; }
 
       try {
         const storedLogs = localStorage.getItem(STORAGE_KEY);
         logs = storedLogs ? JSON.parse(storedLogs) : [];
       } catch(e) { logs = []; }
 
-      if (logs.length === 0) {
+      ftRepairIds();
+      // โหลดข้อมูลตัวอย่างอัตโนมัติเฉพาะโหมดเก็บในเครื่อง (ห้ามปนกับข้อมูลจริงในที่เก็บกลาง)
+      if (logs.length === 0 && !FT_SYNC.enabled()) {
         loadSampleData(false);
       }
     }
+
+    function ftRepairIds() {
+      const seen = new Set(); let fixed = false;
+      logs.forEach(l => {
+        if (!l.id || /function|native code/.test(l.id) || seen.has(l.id)) { l.id = ftNewId(); fixed = true; }
+        seen.add(l.id);
+      });
+      if (fixed) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); } catch(e) {} }
+    }
+
+    FT_SYNC.onData(d => {
+      logs = d.logs; roster = d.roster;
+      const sel = document.getElementById('sel_individual_trainee').value;
+      populateTraineeDropdown();
+      const el = document.getElementById('sel_individual_trainee');
+      if (sel && [...el.options].some(o => o.value === sel)) el.value = sel;
+      renderIndividualView();
+      renderBatchView();
+      if (document.getElementById('rosterModal').style.display === 'flex') renderRosterModalList();
+    });
 
     function saveData() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
         localStorage.setItem(ROSTER_KEY, JSON.stringify(roster));
       } catch(e) {}
+      FT_SYNC.push({ logs: logs, roster: roster });
     }
 
     function switchAdminMode(mode) {
@@ -644,82 +671,8 @@
     }
 
     function computeTraineeScores(traineeName) {
-      const traineeLogs = logs.filter(l => l.traineeName === traineeName && l.status === 'evaluated');
-
-      const statsMap = {
-        s1_1: { eval: 0, pass: 0 },
-        s1_2_1: { eval: 0, pass: 0 },
-        s1_2_2: { eval: 0, pass: 0 },
-        s1_2_3: { eval: 0, pass: 0 },
-        s1_2_4: { eval: 0, pass: 0 },
-        s1_3: { eval: 0, pass: 0 },
-        s2_1: { eval: 0, pass: 0 },
-        s2_2_5: { eval: 0, pass: 0 },
-        s2_2_6: { eval: 0, pass: 0 },
-        s2_2_7: { eval: 0, pass: 0 },
-        s2_2_8: { eval: 0, pass: 0 },
-        s2_2_9: { eval: 0, pass: 0 },
-        s2_2_10: { eval: 0, pass: 0 },
-        s2_2_11: { eval: 0, pass: 0 },
-        s2_2_12: { eval: 0, pass: 0 },
-        s2_2_13: { eval: 0, pass: 0 },
-        s2_2_14: { eval: 0, pass: 0 },
-        s2_3: { eval: 0, pass: 0 },
-      };
-
-      traineeLogs.forEach(log => {
-        const sem = log.semester;
-        // Prep
-        const prepKey = sem === '1' ? 's1_1' : 's2_1';
-        statsMap[prepKey].eval++;
-        if (log.evalPrep === 'ผ่าน') statsMap[prepKey].pass++;
-
-        // Work Topic
-        if (statsMap[log.topicCode]) {
-          statsMap[log.topicCode].eval++;
-          if (log.evalWork === 'ผ่าน') statsMap[log.topicCode].pass++;
-        }
-
-        // Post
-        const postKey = sem === '1' ? 's1_3' : 's2_3';
-        statsMap[postKey].eval++;
-        if (log.evalPost === 'ผ่าน') statsMap[postKey].pass++;
-      });
-
-      // Calculate Sem 1
-      let s1Score = 0, s1Eval = 0, s1Pass = 0, s1Fail = 0;
-      const s1Rows = SEMESTER_1_CALC_ITEMS.map(item => {
-        const st = statsMap[item.id] || { eval: 0, pass: 0 };
-        const ev = st.eval > 0 ? st.eval : 1;
-        const ps = st.eval > 0 ? st.pass : 1;
-        const fl = ev - ps;
-        const sc = Math.round((ps * item.maxScore) / ev);
-        s1Score += sc; s1Eval += ev; s1Pass += ps; s1Fail += fl;
-        return { item, ev, ps, fl, sc };
-      });
-
-      // Calculate Sem 2
-      let s2Score = 0, s2Eval = 0, s2Pass = 0, s2Fail = 0;
-      const s2Rows = SEMESTER_2_CALC_ITEMS.map(item => {
-        const st = statsMap[item.id] || { eval: 0, pass: 0 };
-        const ev = st.eval > 0 ? st.eval : 1;
-        const ps = st.eval > 0 ? st.pass : 1;
-        const fl = ev - ps;
-        const sc = Math.round((ps * item.maxScore) / ev);
-        s2Score += sc; s2Eval += ev; s2Pass += ps; s2Fail += fl;
-        return { item, ev, ps, fl, sc };
-      });
-
-      const totalScore = s1Score + s2Score;
-      const weightedScore = +(totalScore * (387 / 1160)).toFixed(2);
-      const isPass = totalScore >= 696;
-
-      return {
-        traineeLogs,
-        s1Rows, s1Score, s1Eval, s1Pass, s1Fail,
-        s2Rows, s2Score, s2Eval, s2Pass, s2Fail,
-        totalScore, weightedScore, isPass
-      };
+      // สูตรกลางใน ft-common.js: หัวข้อที่ยังไม่ประเมินไม่นับคะแนน และยังไม่สรุปผ่าน/ไม่ผ่าน
+      return FT_SCORE.compute(logs, traineeName, SEMESTER_1_CALC_ITEMS, SEMESTER_2_CALC_ITEMS);
     }
 
     function renderIndividualView() {
@@ -746,7 +699,10 @@
       document.getElementById('ind_sum_weighted').textContent = res.weightedScore.toFixed(2);
 
       const statusEl = document.getElementById('ind_status_pass');
-      if (res.isPass) {
+      if (!res.complete) {
+        statusEl.textContent = FT_SCORE.statusText(res);
+        statusEl.style.color = 'var(--gold-deep, #b38e1b)';
+      } else if (res.isPass) {
         statusEl.textContent = 'ผ่านเกณฑ์ (' + ((res.totalScore / 1160) * 100).toFixed(1) + '%)';
         statusEl.style.color = 'var(--success)';
       } else {
@@ -762,11 +718,12 @@
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${r.item.no}</td>
           <td><b>${r.item.title}</b><div class="sub-item-text">${r.item.sub}</div></td>
+          ${r.pending ? `<td colspan="3" style="text-align:center;color:var(--text-muted);font-style:italic;">ยังไม่ประเมิน</td>` : `
           <td style="text-align:center;font-weight:600;">${r.ev}</td>
           <td style="text-align:center;font-weight:600;color:var(--success);">${r.ps}</td>
-          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>
+          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>`}
           <td style="text-align:center;color:var(--text-muted);">${r.item.maxScore}</td>
-          <td class="score-cell ${r.sc === r.item.maxScore ? 'max' : ''}">${r.sc}</td>
+          <td class="score-cell ${!r.pending && r.sc === r.item.maxScore ? 'max' : ''}">${r.pending ? '-' : r.sc}</td>
         `;
         s1Tbody.appendChild(tr);
       });
@@ -783,11 +740,12 @@
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${r.item.no}</td>
           <td><b>${r.item.title}</b><div class="sub-item-text">${r.item.sub}</div></td>
+          ${r.pending ? `<td colspan="3" style="text-align:center;color:var(--text-muted);font-style:italic;">ยังไม่ประเมิน</td>` : `
           <td style="text-align:center;font-weight:600;">${r.ev}</td>
           <td style="text-align:center;font-weight:600;color:var(--success);">${r.ps}</td>
-          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>
+          <td style="text-align:center;font-weight:600;color:${r.fl > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${r.fl}</td>`}
           <td style="text-align:center;color:var(--text-muted);">${r.item.maxScore}</td>
-          <td class="score-cell ${r.sc === r.item.maxScore ? 'max' : ''}">${r.sc}</td>
+          <td class="score-cell ${!r.pending && r.sc === r.item.maxScore ? 'max' : ''}">${r.pending ? '-' : r.sc}</td>
         `;
         s2Tbody.appendChild(tr);
       });
@@ -812,21 +770,21 @@
         if (isEval) {
           evalDetails = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
           if (log.mentorFeedback) {
-            evalDetails += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>ครูแนะ:</b> ${log.mentorFeedback}</div>`;
+            evalDetails += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>ครูแนะ:</b> ${ftEsc(log.mentorFeedback)}</div>`;
           }
         }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${log.date}</td>
-          <td style="text-align:center;">ภาค ${log.semester}</td>
-          <td><b>${log.topicName}</b></td>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.traineeNote}">${log.traineeNote}</td>
+          <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
+          <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
+          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td>${evalDetails}</td>
           <td style="text-align:center;">
-            <button type="button" class="btn btn-outline btn-sm" onclick="adminDeleteLog('${log.id}')" title="ลบรายการนี้">🗑️</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="adminDeleteLog(${ftJs(log.id)})" title="ลบรายการนี้">🗑️</button>
           </td>
         `;
         logsTbody.appendChild(tr);
@@ -845,14 +803,16 @@
         const userLogsCount = logs.filter(l => l.traineeName === name).length;
         return {
           name,
-          station: match ? match.station : 'สภ.แม่แตง',
-          mentor: match ? match.mentor : 'ร.ต.อ. อนุชา กล้าหาญ',
+          station: match ? match.station : '-',
+          mentor: match ? match.mentor : '-',
           logsCount: userLogsCount,
           s1Score: res.s1Score,
           s2Score: res.s2Score,
           totalScore: res.totalScore,
           weightedScore: res.weightedScore,
-          isPass: res.isPass
+          isPass: res.isPass,
+          complete: res.complete,
+          statusText: FT_SCORE.statusText(res)
         };
       });
 
@@ -881,19 +841,19 @@
           <td style="text-align:center;">
             <span class="rank-pill ${rankBadgeClass}">${rank}</span>
           </td>
-          <td><b>${row.name}</b></td>
-          <td>${row.station}</td>
-          <td>${row.mentor}</td>
+          <td><b>${ftEsc(row.name)}</b></td>
+          <td>${ftEsc(row.station)}</td>
+          <td>${ftEsc(row.mentor)}</td>
           <td style="text-align:center;font-weight:600;">${row.logsCount}</td>
           <td style="text-align:center;font-weight:600;color:var(--blue);">${row.s1Score}</td>
           <td style="text-align:center;font-weight:600;color:var(--purple);">${row.s2Score}</td>
           <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--navy);">${row.totalScore.toLocaleString('th-TH')}</td>
           <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--success);">${row.weightedScore.toFixed(2)}</td>
           <td style="text-align:center;">
-            <span class="badge ${row.isPass ? 'badge-evaluated' : 'badge-pending'}">${row.isPass ? '✓ ผ่าน' : '✕ ไม่ผ่าน'}</span>
+            <span class="badge ${row.isPass ? 'badge-evaluated' : 'badge-pending'}">${!row.complete ? ftEsc(row.statusText) : (row.isPass ? '✓ ผ่าน' : '✕ ไม่ผ่าน')}</span>
           </td>
           <td style="text-align:center;" class="no-print">
-            <button type="button" class="btn btn-outline btn-sm" onclick="selectAndShowTrainee('${row.name}')">🔍 ดูผล</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="selectAndShowTrainee(${ftJs(row.name)})">🔍 ดูผล</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -931,20 +891,20 @@
         const count = logs.filter(l => l.traineeName === name).length;
         return {
           name,
-          station: match ? match.station : 'สภ.แม่แตง',
-          mentor: match ? match.mentor : 'ร.ต.อ. อนุชา กล้าหาญ',
+          station: match ? match.station : '-',
+          mentor: match ? match.mentor : '-',
           count,
           s1: res.s1Score,
           s2: res.s2Score,
           total: res.totalScore,
           weight: res.weightedScore,
-          pass: res.isPass ? 'ผ่าน' : 'ไม่ผ่าน'
+          pass: FT_SCORE.statusText(res)
         };
       }).sort((a, b) => b.total - a.total);
 
       let csv = '\uFEFFอันดับที่,ยศ-ชื่อ-สกุล,สภ.ที่ฝึก,ครูพี่เลี้ยง,จำนวนวันบันทึก,ภาค1(340),ภาค2(820),รวมคะแนน(1160),ค่าน้ำหนัก10%(387),ผลการฝึก\n';
       batchData.forEach((row, i) => {
-        csv += `"${i+1}","${row.name}","${row.station}","${row.mentor}","${row.count}","${row.s1}","${row.s2}","${row.total}","${row.weight}","${row.pass}"\n`;
+        csv += [i+1, row.name, row.station, row.mentor, row.count, row.s1, row.s2, row.total, row.weight, row.pass].map(ftCsv).join(',') + '\n';
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -996,8 +956,8 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;">${i+1}</td>
-          <td><b>${r.name}</b></td>
-          <td>${r.station}</td>
+          <td><b>${ftEsc(r.name)}</b></td>
+          <td>${ftEsc(r.station)}</td>
           <td style="text-align:center;">
             <button type="button" class="btn btn-outline btn-sm" onclick="deleteRosterTrainee(${i})" style="color:var(--danger);">✕</button>
           </td>
@@ -1007,6 +967,10 @@
     }
 
     function loadSampleData(showAlert = true) {
+      if (FT_SYNC.enabled()) {
+        alert('ระบบเชื่อมที่เก็บข้อมูลกลางอยู่ จึงไม่โหลดข้อมูลตัวอย่าง เพื่อไม่ให้ปนกับข้อมูลจริงของรุ่น');
+        return;
+      }
       roster = DEFAULT_ROSTER;
       logs = [
         // นสต. ทศพร สุมาลี

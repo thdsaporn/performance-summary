@@ -1,7 +1,7 @@
 /* ft-common.js — ส่วนกลางของระบบประเมินผลฝึกปฏิบัติราชการ (นสต.)
  * ใช้ร่วมกันใน trainee/ mentor/ admin/
  *  1) FT_SYNC  : ซิงก์ข้อมูลข้ามเครื่องผ่าน Google Sheets (Apps Script Web App)
- *  2) FT_SCORE : สูตรคำนวณคะแนนกลาง (ใช้ทั้งหน้าฝ่ายฝึกและแบบที่ 3 ของครูพี่เลี้ยง)
+ *  2) FT_CUR / FT_SCORE : หัวข้อและสูตรคะแนนตามหลักสูตร นสต. พ.ศ. 2567 (ใช้ทั้ง 3 หน้า)
  *  3) ftEsc    : ป้องกันข้อความแปลกปลอมแทรกโค้ดในหน้าเว็บ
  *
  * ===== ตั้งค่า =====
@@ -21,18 +21,85 @@ function ftNewId() {
   return 'log_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
 }
 
-/* ===================== FT_SCORE ===================== */
-var FT_SCORE = (function () {
-  var S1 = [['s1_1', 10], ['s1_2_1', 80], ['s1_2_2', 80], ['s1_2_3', 80], ['s1_2_4', 80], ['s1_3', 10]];
-  var S2 = [['s2_1', 10], ['s2_2_5', 80], ['s2_2_6', 80], ['s2_2_7', 80], ['s2_2_8', 80], ['s2_2_9', 80],
-            ['s2_2_10', 80], ['s2_2_11', 80], ['s2_2_12', 80], ['s2_2_13', 80], ['s2_2_14', 80], ['s2_3', 10]];
-  function toItems(a) { return a.map(function (x) { return { id: x[0], maxScore: x[1] }; }); }
+/* ===================== FT_CUR / FT_SCORE =====================
+ * เกณฑ์การฝึกหัดปฏิบัติราชการ ตามหลักสูตรนักเรียนนายสิบตำรวจ พ.ศ. 2567 (ผนวก ง)
+ * - ภาคเรียนที่ 1 เต็ม 450: ความพร้อม 50, งานสารบรรณ 100, การเขียนรายงาน 100, เทคโนโลยีสารสนเทศ 100, มนุษยสัมพันธ์ 50, หลังปฏิบัติ 50
+ * - ภาคเรียนที่ 2 เต็ม 400: ความพร้อม 50, สายตรวจ 100, จราจร 100, สืบสวน 100, หลังปฏิบัติ 50
+ * - คะแนนรายการ = (จำนวนครั้งที่ทำได้ถูกต้อง × คะแนนเต็มรายการ) ÷ จำนวนครั้งทั้งหมด
+ * - เต็ม 850 ผ่านเมื่อ ≥ 510 (ร้อยละ 60) และผ่านทุกประเภทงาน (แต่ละประเภทงาน ≥ ร้อยละ 60)
+ * - ระดับ: ร้อยละ 80–100 ผ่าน (ดี), 60–79 ผ่าน (พอใช้), ต่ำกว่า 60 ไม่ผ่าน
+ * - บัญชีรวมคะแนน (รบ 4): น้ำหนัก 10% = 310 คะแนน (ค่าน้ำหนัก 310/850 ≈ 0.365)
+ */
+var FT_CUR = (function () {
+  function it(prefix, names) { return names.map(function (n, i) { return { code: prefix + '_' + (i + 1), name: n }; }); }
+  var PREP = 'แต่งกายถูกต้องตามระเบียบ, ตรงต่อเวลา, เครื่องมือ/อุปกรณ์ประจำกายครบถ้วนพร้อมใช้งาน';
+  var POST = 'เก็บ/บำรุงรักษาเครื่องมือ อุปกรณ์ ยานพาหนะ, จัดทำบันทึกรายงานผล, แลกเปลี่ยนประสบการณ์';
+  var SEMS = {
+    '1': { max: 450, prep: 50, post: 50, cats: [
+      { id: 'k1_doc', no: '2.1', name: 'งานสารบรรณ', max: 100,
+        items: it('k1_doc', ['พิมพ์ร่างหนังสือ', 'รับหนังสือ', 'ส่งหนังสือ']) },
+      { id: 'k1_rep', no: '2.2', name: 'การเขียนรายงานในหน้าที่ตำรวจ', max: 100,
+        items: it('k1_rep', ['เขียนบันทึกจับกุม', 'เขียนบันทึกตรวจค้น', 'เขียนรายงานประจำวัน', 'เขียนบันทึกเปรียบเทียบปรับ', 'เขียนรายงานการสืบสวน']) },
+      { id: 'k1_it', no: '2.3', name: 'การใช้เทคโนโลยีสารสนเทศ', max: 100,
+        items: it('k1_it', ['สืบค้นข้อมูลผ่านเครือข่าย Internet', 'สืบค้นและบันทึกข้อมูล ระบบ POLIS', 'สืบค้นและบันทึกข้อมูล ระบบ CRIMES',
+                            'รับ - ส่ง จดหมายอิเล็กทรอนิกส์', 'ใช้งานเครื่องโทรศัพท์', 'ใช้งานเครื่องโทรสาร', 'ใช้งานเครื่องวิทยุสื่อสาร']) },
+      { id: 'k1_hr', no: '2.4', name: 'การมีมนุษยสัมพันธ์ที่ดี', max: 50,
+        items: it('k1_hr', ['ให้คำแนะนำ/คำปรึกษาที่ดีแก่ประชาชน']) }
+    ] },
+    '2': { max: 400, prep: 50, post: 50, cats: [
+      { id: 'k2_pat', no: '2.1', name: 'การปฏิบัติงานสายตรวจ (รวมการเผชิญเหตุ/ตรวจค้น/จับกุม)', max: 100,
+        items: it('k2_pat', ['สายตรวจเดินเท้า', 'สายตรวจรถจักรยานยนต์', 'สายตรวจรถยนต์', 'รับแจ้งเหตุ', 'ระงับเหตุ',
+                             'ตรวจค้นตัวบุคคล/สถานที่/รถยนต์', 'รักษาสถานที่เกิดเหตุ', 'ตั้งจุดตรวจ/จุดสกัด']) },
+      { id: 'k2_trf', no: '2.2', name: 'การปฏิบัติงานด้านจราจร', max: 100,
+        items: it('k2_trf', ['อำนวยการจราจรโดยใช้สัญญาณมือ', 'ควบคุมสัญญาณไฟ', 'ใช้กรวยยาง', 'ใช้ไฟฉายกะพริบ', 'ใช้ไซเรน',
+                             'ใช้เครื่องตรวจวัดปริมาณแอลกอฮอล์', 'ใช้อุปกรณ์เครื่องตรวจจับความเร็ว', 'จัดการอุบัติเหตุ/เหตุฉุกเฉิน']) },
+      { id: 'k2_inv', no: '2.3', name: 'การปฏิบัติงานด้านสืบสวน (รวมการควบคุม/ตรวจสอบ/ดูแลผู้ต้องหา)', max: 100,
+        items: it('k2_inv', ['เฝ้าจุด/สังเกตการณ์', 'สะกดรอย/ติดตาม', 'ล่อซื้อ', 'หาข่าว', 'จับกุมผู้ต้องหาตามหมายจับ',
+                             'ค้นตัวผู้ต้องหา', 'ใช้เครื่องพันธนาการ', 'ลงบัญชีสิ่งของในการเก็บรักษา',
+                             'ควบคุม/ตรวจสอบสิ่งของ อาหารที่ญาติผู้ต้องหานำมาให้', 'นำตัวผู้ต้องหาไปผัดฟ้อง/ฝากขัง']) }
+    ] }
+  };
+  // บันทึกเก่า (เกณฑ์ บช.ศ. 1,160 คะแนน) → ประเภทงานตามหลักสูตร 2567
+  var LEGACY = { s1_2_1: 'k1_doc', s1_2_2: 'k1_rep', s1_2_3: 'k1_it', s1_2_4: 'k1_hr',
+    s2_2_5: 'k2_pat', s2_2_6: 'k2_inv', s2_2_7: 'k2_pat', s2_2_8: 'k2_pat', s2_2_9: 'k2_pat', s2_2_10: 'k2_pat',
+    s2_2_11: 'k2_trf', s2_2_12: 'k2_trf', s2_2_13: 'k2_inv', s2_2_14: 'k2_inv' };
+  var byItem = {}, byCat = {};
+  Object.keys(SEMS).forEach(function (sem) {
+    SEMS[sem].cats.forEach(function (c) {
+      c.sem = sem; byCat[c.id] = c;
+      c.items.forEach(function (i) { i.cat = c.id; i.sem = sem; byItem[i.code] = i; });
+    });
+  });
+  function catOf(code) {
+    if (byItem[code]) return byItem[code].cat;
+    if (byCat[code]) return code;
+    return LEGACY[code] || null;
+  }
+  function topicLabel(code) {
+    var i = byItem[code];
+    if (i) return byCat[i.cat].name.replace(/ \(.*\)$/, '') + ' › ' + i.name;
+    var c = byCat[catOf(code)];
+    return c ? c.name : String(code || '');
+  }
+  return { version: 'หลักสูตร นสต. พ.ศ. 2567', total: 850, passScore: 510, weightTotal: 310,
+           sems: SEMS, catOf: catOf, cat: function (id) { return byCat[id] || null; }, item: function (c) { return byItem[c] || null; },
+           topicLabel: topicLabel, prepText: PREP, postText: POST };
+})();
 
-  /* หัวข้อที่ยังไม่มีผลประเมิน: ไม่นับคะแนน (sc = 0) และติดสถานะ pending
-   * ผลผ่าน/ไม่ผ่านจะสรุปได้เมื่อประเมินครบทุกหัวข้อ (complete) */
-  function compute(allLogs, traineeName, s1Items, s2Items) {
-    s1Items = s1Items || toItems(S1);
-    s2Items = s2Items || toItems(S2);
+var FT_SCORE = (function () {
+  function rowsFor(sem) {
+    var S = FT_CUR.sems[sem], p = 'k' + sem;
+    var out = [{ id: p + '_prep', kind: 'prep', no: '1.', title: 'ความพร้อมก่อนปฏิบัติงาน', sub: FT_CUR.prepText, maxScore: S.prep }];
+    S.cats.forEach(function (c) {
+      out.push({ id: c.id, kind: 'work', no: c.no, title: c.name, sub: c.items.map(function (i) { return i.name; }).join(', '), maxScore: c.max });
+    });
+    out.push({ id: p + '_post', kind: 'post', no: '3.', title: 'หลังปฏิบัติงาน', sub: FT_CUR.postText, maxScore: S.post });
+    return out;
+  }
+  function grade(pct) { return pct >= 80 ? 'ผ่าน (ดี)' : pct >= 60 ? 'ผ่าน (พอใช้)' : 'ไม่ผ่าน'; }
+
+  /* หัวข้อที่ยังไม่มีผลประเมิน: คะแนน 0 และสถานะ "ยังไม่ประเมิน" — สรุปผ่าน/ไม่ผ่านเมื่อประเมินครบทุกหัวข้อ */
+  function compute(allLogs, traineeName) {
     var traineeLogs = (allLogs || []).filter(function (l) { return l.traineeName === traineeName && l.status === 'evaluated'; });
     var stats = {};
     function bump(key, passed) {
@@ -41,46 +108,55 @@ var FT_SCORE = (function () {
       if (passed) stats[key].pass++;
     }
     traineeLogs.forEach(function (log) {
-      var sem = String(log.semester);
-      bump(sem === '1' ? 's1_1' : 's2_1', log.evalPrep === 'ผ่าน');
-      bump(log.topicCode, log.evalWork === 'ผ่าน');
-      bump(sem === '1' ? 's1_3' : 's2_3', log.evalPost === 'ผ่าน');
+      var sem = String(log.semester) === '2' ? '2' : '1';
+      if (log.evalPrep === 'ผ่าน' || log.evalPrep === 'ไม่ผ่าน') bump('k' + sem + '_prep', log.evalPrep === 'ผ่าน');
+      var cat = FT_CUR.catOf(log.topicCode);
+      if (cat && (log.evalWork === 'ผ่าน' || log.evalWork === 'ไม่ผ่าน')) bump(cat, log.evalWork === 'ผ่าน');
+      if (log.evalPost === 'ผ่าน' || log.evalPost === 'ไม่ผ่าน') bump('k' + sem + '_post', log.evalPost === 'ผ่าน');
     });
-    function calc(items) {
+    var workOk = true;
+    function calc(sem) {
       var out = { rows: [], score: 0, ev: 0, ps: 0, fl: 0, done: 0 };
-      items.forEach(function (item) {
+      rowsFor(sem).forEach(function (item) {
         var st = stats[item.id];
         if (!st || st.eval === 0) {
-          out.rows.push({ item: item, ev: 0, ps: 0, fl: 0, sc: 0, pending: true });
+          out.rows.push({ item: item, ev: 0, ps: 0, fl: 0, sc: 0, pct: 0, pending: true });
           return;
         }
         var sc = Math.round((st.pass * item.maxScore) / st.eval);
-        out.rows.push({ item: item, ev: st.eval, ps: st.pass, fl: st.eval - st.pass, sc: sc, pending: false });
+        var pct = (sc / item.maxScore) * 100;
+        if (item.kind === 'work' && pct < 60) workOk = false;
+        out.rows.push({ item: item, ev: st.eval, ps: st.pass, fl: st.eval - st.pass, sc: sc, pct: pct, pending: false });
         out.score += sc; out.ev += st.eval; out.ps += st.pass; out.fl += st.eval - st.pass; out.done++;
       });
       return out;
     }
-    var a = calc(s1Items), b = calc(s2Items);
+    var a = calc('1'), b = calc('2');
     var totalScore = a.score + b.score;
-    var itemsTotal = s1Items.length + s2Items.length;
+    var itemsTotal = a.rows.length + b.rows.length;
     var itemsDone = a.done + b.done;
     var complete = itemsDone === itemsTotal;
+    var pct = (totalScore / FT_CUR.total) * 100;
+    var isPass = complete && totalScore >= FT_CUR.passScore && workOk;
     return {
       traineeLogs: traineeLogs,
-      s1Rows: a.rows, s1Score: a.score, s1Eval: a.ev, s1Pass: a.ps, s1Fail: a.fl,
-      s2Rows: b.rows, s2Score: b.score, s2Eval: b.ev, s2Pass: b.ps, s2Fail: b.fl,
-      totalScore: totalScore,
-      weightedScore: +(totalScore * (387 / 1160)).toFixed(2),   // คงสูตรเดิมไว้ก่อน (รอตรวจกับเอกสาร บช.ศ.)
+      s1Rows: a.rows, s1Score: a.score, s1Eval: a.ev, s1Pass: a.ps, s1Fail: a.fl, s1Max: FT_CUR.sems['1'].max,
+      s2Rows: b.rows, s2Score: b.score, s2Eval: b.ev, s2Pass: b.ps, s2Fail: b.fl, s2Max: FT_CUR.sems['2'].max,
+      totalScore: totalScore, totalMax: FT_CUR.total, percent: pct,
+      weightedScore: +(totalScore * (FT_CUR.weightTotal / FT_CUR.total)).toFixed(2),
+      workAllPass: workOk,
       itemsDone: itemsDone, itemsTotal: itemsTotal, complete: complete,
-      isPass: complete && totalScore >= 696
+      isPass: isPass,
+      grade: !complete ? '' : (isPass ? grade(pct) : 'ไม่ผ่าน')
     };
   }
   /* ข้อความสถานะสำหรับแสดงผล */
   function statusText(res) {
     if (!res.complete) return 'ยังประเมินไม่ครบ (' + res.itemsDone + '/' + res.itemsTotal + ' หัวข้อ)';
-    return res.isPass ? 'ผ่าน' : 'ไม่ผ่าน';
+    if (res.isPass) return res.grade;
+    return res.workAllPass ? 'ไม่ผ่าน (คะแนนรวมต่ำกว่า ' + FT_CUR.passScore + ')' : 'ไม่ผ่าน (มีประเภทงานต่ำกว่าร้อยละ 60)';
   }
-  return { compute: compute, statusText: statusText };
+  return { compute: compute, statusText: statusText, rowsFor: rowsFor };
 })();
 
 /* ===================== FT_SYNC ===================== */

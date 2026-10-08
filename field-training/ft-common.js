@@ -8,7 +8,7 @@
  * ใส่ URL ของ Web App (ลงท้าย /exec) ที่ได้จากการติดตั้ง google_apps_script/Code.gs
  * ถ้าเว้นว่าง ระบบจะทำงานแบบเดิม (เก็บข้อมูลเฉพาะในเบราว์เซอร์เครื่องนี้)
  */
-var FT_SYNC_URL = '';
+var FT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyLkQvV8yNgGgAqHz0P83LebMRn4trnSQiMG7v2ole3Va4QvxeLX2Ac75ZRN0w39iuQ/exec';
 
 /* ------------------------------------------------------------------ */
 function ftEsc(s) {
@@ -91,7 +91,7 @@ var FT_SYNC = (function () {
   var SAMPLE_LOG_IDS = /^l\d{1,2}$/;
   var SAMPLE_NAMES = ['นสต. ทศพร สุมาลี', 'นสต. สมชาย ใจดี', 'นสต. วิชัย รักชาติ', 'นสต. กิตติพงษ์ สิทธิชัย', 'นสต. ธีรภัทร ชัยมงคล'];
   var MAX_RECORD = 40000;   // ตัวอักษรต่อรายการ (Google Sheets รับได้ 50,000 ต่อเซลล์)
-  var TIMEOUT = 25000;
+  var TIMEOUT = 60000;   // Apps Script ตอบช้าได้ถึง ~30 วินาทีเมื่อไม่ได้ใช้งานนาน
 
   var state = loadState();       // { snap:{logs:{},roster:{},feedback:{}}, queue:[{seq,...}], seq, lastPull }
   var listeners = [];

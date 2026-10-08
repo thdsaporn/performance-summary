@@ -168,6 +168,9 @@ table.data-table tbody tr:hover{background:#f2f6fa;}
 .cal-cell .hrs{color:var(--ink-soft);margin-top:4px;}
 .cal-cell .hrs b{color:var(--navy);}
 
+.sch-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fdf6e3;border:1px solid #ecd9a0;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:14px;color:#1b2a41;}
+.sch-bar-edit{background:#eef3fa;border-color:#c9d6ea;}
+.sch-bar select{max-width:100%;padding:4px 6px;font:inherit;}
 .footer-note{color:var(--ink-soft);font-size:13px;text-align:center;margin-top:30px;}
 
 @media (max-width:640px){
@@ -210,7 +213,7 @@ table.print-table tr{break-inside:avoid;page-break-inside:avoid;}
 
 @media print{
   body{background:#fff;}
-  .topbar, .app > .card, .app > #printPreviewWrap ~ *, .footer-note{display:none !important;}
+  .topbar, .app > .card, .app > #printPreviewWrap ~ *, .footer-note, .sch-bar{display:none !important;}
   body *{visibility:hidden;}
   #printArea, #printArea *{visibility:visible;}
   #printArea{position:absolute;left:0;top:0;width:100%;}
@@ -450,6 +453,41 @@ function hoursBetween(start,end){
 function timesOverlap(startA,endA,startB,endB){
   return startA < endB && startB < endA;
 }
+// แยกชื่อวิทยากรในช่องเดียว (เช่น "ร.ต.อ.ก / ส.ต.อ.ข และคณะ") เป็นรายชื่อสำหรับเทียบ
+function teacherNames(t){
+  return String(t || '').replace(/และคณะ/g, ' ').split(/\s*(?:\/|,|\sและ\s)\s*/)
+    .map(s => s.replace(/\s+/g, ' ').trim()).filter(s => s.length >= 3);
+}
+function teacherKey(n){
+  // ตัดยศ/คำนำหน้าออกเพื่อให้ "พ.ต.ท.สมชาย ใจดี" กับ "สมชาย ใจดี" ตรงกัน
+  return n.replace(/^(?:[ก-ฮ]{1,4}\.){1,4}\s*/, '').replace(/^(?:นาย|นาง|นางสาว|ดร\.)\s*/, '').replace(/\s+/g, '').trim();
+}
+// คาบอื่นของวิทยากรคนเดียวกันที่เวลาซ้อนกัน — ตรวจทุกหลักสูตร (ใช้เตือนเท่านั้น ยังบันทึกได้)
+function findTeacherConflicts(teacher, date, start, end, excludeId){
+  const mine = teacherNames(teacher).map(teacherKey).filter(Boolean);
+  if(!mine.length) return [];
+  const out = [];
+  const curName = id => ((CURRICULA.find(c => c.id === id) || {}).name) || id;
+  const scan = (list, curId) => (list || []).forEach(e => {
+    if(!e || e.date !== date || (curId === activeCurId && e.id === excludeId)) return;
+    if(!(e.start < end && start < e.end)) return;
+    teacherNames(e.teacher).forEach(n => {
+      if(mine.indexOf(teacherKey(n)) !== -1 && !out.some(o => o.e === e)) out.push({ name: n, e, curName: curName(curId) });
+    });
+  });
+  scan(ENTRIES, activeCurId);
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k.indexOf('cur-entries-') !== 0 || k.indexOf('cur-entries-version-') === 0) continue;
+      const curId = k.slice('cur-entries-'.length);
+      if(curId === activeCurId || !CURRICULA.some(c => c.id === curId)) continue;
+      scan(JSON.parse(localStorage.getItem(k) || '[]'), curId);
+    }
+  }catch(e){ console.error(e); }
+  return out;
+}
+
 function findOverlap(date, start, end, excludeId){
   return ENTRIES.find(e =>
     e.date === date &&
@@ -606,6 +644,7 @@ async function seedDefaultEntriesIfEmpty(){
   let savedVer = 0;
   try{ savedVer = Number(await storageGetRaw(vKey)) || 0; }catch(e){}
   if(ENTRIES.length > 0 && savedVer >= DEFAULT_ENTRIES_VERSION) return; // มีข้อมูลแล้วและตรงกับเวอร์ชันไฟล์ล่าสุด
+  if(SCH.hasServer()) return;   // ใช้ระบบกลางแล้ว: ข้อมูลกลางคือข้อมูลจริง ไม่รีเซ็ตด้วยค่าเริ่มต้นในไฟล์
   // ยังไม่มีข้อมูล หรือข้อมูลเป็นเวอร์ชันเก่า → โหลดค่าเริ่มต้นล่าสุดจากไฟล์แทน (เฉพาะหลักสูตรที่ระบบ seed ให้เท่านั้น)
   ENTRIES = seed.map(e => ({...e, id: uid()}));
   await saveEntries();
@@ -621,6 +660,243 @@ let SETTINGS = {
   printOnlyWithData: false, // พิมพ์เฉพาะวันที่มีคาบเรียน (ซ่อนวันว่าง)
   printFrom: '', printTo: '', // ช่วงวันที่ที่ต้องการพิมพ์ ('YYYY-MM-DD' หรือค่าว่าง = ทั้งเดือน)
 };
+// ============================================================
+// ข้อมูลกลาง (Google Sheets) — ทุกเครื่องเห็นตารางเดียวกัน
+//  - ทุกคนเปิดดูตารางล่าสุดได้ (โหมดดูอย่างเดียว)
+//  - ผู้แก้ไขใส่ "รหัสผู้แก้ไข" ครั้งเดียวต่อเครื่อง แล้วแก้ได้ตามปกติ การแก้จะส่งขึ้นระบบกลางอัตโนมัติ
+//  - ถ้า SCH_SYNC_URL ว่าง = ทำงานแบบเดิม (เก็บเฉพาะในเบราว์เซอร์นี้)
+// ============================================================
+const SCH_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyLkQvV8yNgGgAqHz0P83LebMRn4trnSQiMG7v2ole3Va4QvxeLX2Ac75ZRN0w39iuQ/exec';
+const SCH = (function(){
+  const STATE_KEY = 'sch_sync_state_v1';
+  const EDIT_KEY = 'sch_edit_key_v1';
+  const SETTINGS_KEY_ = 'nst2567-settings';
+  const ENTRY_PREFIX = 'cur-entries-';
+  // ค่าที่เป็นของแต่ละเครื่อง (ไม่ส่งขึ้นระบบกลาง)
+  const LOCAL_ONLY = ['activeCurId', 'printFrom', 'printTo', 'printOnlyWithData', 'orgLine2', 'orgLine3', 'curricula'];
+  const TIMEOUT = 60000;
+  let state = load(), rejectedMsg = '', running = 0, lastError = '', chain = Promise.resolve(), applying = false;
+
+  function enabled(){ return !!(SCH_SYNC_URL && !(window.storage && typeof window.storage.get === 'function') && /^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)[:\/])/.test(SCH_SYNC_URL)); }
+  function editKey(){ try{ return localStorage.getItem(EDIT_KEY) || ''; }catch(e){ return ''; } }
+  function isEditor(){ return enabled() && !!editKey(); }
+  function readOnly(){ return enabled() && !editKey(); }
+  function load(){
+    try{ const s = JSON.parse(localStorage.getItem(STATE_KEY) || 'null'); if(s && s.snap){ s.queue = s.queue || []; s.seq = s.seq || 0; return s; } }catch(e){}
+    return { snap:{ sentry:{}, scur:{}, sset:{} }, queue:[], seq:0, lastPull:0 };
+  }
+  function fresh(){ state = load(); }
+  function save(){ try{ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }catch(e){} }
+  function enqueue(op){ op.seq = ++state.seq; state.queue.push(op); }
+  const same = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+  const isEntryKey = k => k.indexOf(ENTRY_PREFIX) === 0 && k.indexOf('cur-entries-version-') !== 0;
+
+  // แยก settings เป็น: ค่าร่วม (sset) + หลักสูตรรายตัว (scur)
+  function splitSettings(s){
+    const shared = {};
+    Object.keys(s || {}).forEach(k => { if(LOCAL_ONLY.indexOf(k) === -1) shared[k] = s[k]; });
+    shared.curOrder = (s.curricula || []).map(c => c.id);
+    const curs = {};
+    (s.curricula || []).forEach(c => {
+      if(!c || !c.id) return;
+      curs[c.id] = (c.id === s.activeCurId) ? Object.assign({}, c, { header2: s.orgLine2, header3: s.orgLine3 }) : c;
+    });
+    return { shared, curs };
+  }
+  function diffInto(kind, cur, filterFn){
+    const snap = state.snap[kind] || (state.snap[kind] = {});
+    Object.keys(cur).forEach(k => {
+      if(!same(snap[k], cur[k])){ enqueue({ kind, key:k, data:cur[k] }); snap[k] = JSON.parse(JSON.stringify(cur[k])); }
+    });
+    Object.keys(snap).forEach(k => {
+      if(filterFn(k) && !cur[k]){ enqueue({ kind, key:k, deleted:true }); delete snap[k]; }
+    });
+  }
+
+  // เรียกทุกครั้งที่หน้าเว็บบันทึกข้อมูลลงเครื่อง (จาก storageSetRaw)
+  function onLocalSet(key, value){
+    if(applying || !isEditor()) return;
+    fresh();
+    if(!state.lastPull) return;           // ยังไม่ได้ดึงข้อมูลกลางครั้งแรก — ไม่ส่งข้อมูลเก่าทับ
+    try{
+      if(key === SETTINGS_KEY_){
+        const { shared, curs } = splitSettings(JSON.parse(value));
+        diffInto('sset', { settings: shared }, () => false);
+        diffInto('scur', curs, () => true);
+      } else if(isEntryKey(key)){
+        const curId = key.slice(ENTRY_PREFIX.length), cur = {};
+        (JSON.parse(value) || []).forEach(e => { if(e && e.id) cur[curId + '|' + e.id] = Object.assign({}, e, { _cur: curId }); });
+        diffInto('sentry', cur, k => k.indexOf(curId + '|') === 0);
+      } else return;
+    }catch(e){ console.error(e); return; }
+    save(); flush();
+  }
+
+  function req(url, init){
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const t = ctl ? setTimeout(() => ctl.abort(), TIMEOUT) : null;
+    init = init || {}; if(ctl) init.signal = ctl.signal;
+    return fetch(url, init).then(r => r.json()).then(j => { if(t) clearTimeout(t); if(!j || !j.ok) throw new Error((j && j.error) || 'เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ'); return j; },
+                                                      e => { if(t) clearTimeout(t); throw e; });
+  }
+  function post(body){ return req(SCH_SYNC_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(body) }); }
+  function serial(fn){
+    running++; badge();
+    const p = chain.then(fn).catch(e => { lastError = String((e && e.message) || e); }).then(v => { running--; badge(); return v; });
+    chain = p.then(() => {}, () => {});
+    return p;
+  }
+
+  function flush(){
+    if(!isEditor()) return Promise.resolve();
+    return serial(function more(){
+      fresh();
+      if(!state.lastPull || !state.queue.length) return;
+      const batch = state.queue.slice(0, 200);
+      return post({ action:'apply', editKey: editKey(), ops: batch }).then(j => {
+        fresh();
+        const sent = {}; batch.forEach(o => sent[o.seq] = 1);
+        state.queue = state.queue.filter(o => !sent[o.seq]);
+        state.hasServer = true;              // ระบบกลางมีข้อมูลแล้ว (ส่งขึ้นสำเร็จ)
+        save();
+        lastError = '';
+        if(j.rejected && j.rejected.length){
+          // ให้รายการที่ระบบกลางไม่รับ ถูกส่งใหม่ในการบันทึกครั้งถัดไป และแจ้งผู้ใช้
+          j.rejected.forEach(r => { if(state.snap[r.kind]) delete state.snap[r.kind][r.key]; });
+          save();
+          rejectedMsg = 'ระบบกลางไม่รับข้อมูล ' + j.rejected.length + ' รายการ' + (j.rejected.some(r => r.reason === 'too large') ? ' (ข้อมูลใหญ่เกินไป)' : '');
+          alert('⚠️ ' + rejectedMsg + '\nข้อมูลยังอยู่ในเครื่องนี้ กรุณาแจ้งผู้ดูแลระบบ');
+        } else rejectedMsg = '';
+        if(state.queue.length) return more();
+      });
+    });
+  }
+
+  // ดึงข้อมูลกลาง → เขียนลงเครื่อง (ทับข้อมูลในเครื่อง ยกเว้นการแก้ที่ยังรอส่ง) → คืนค่า true ถ้ามีข้อมูลกลาง
+  function pull(){
+    if(!enabled()) return Promise.resolve(false);
+    return serial(() => req(SCH_SYNC_URL + (SCH_SYNC_URL.indexOf('?') === -1 ? '?' : '&') + 'action=all&kinds=sentry,scur,sset&t=' + Date.now()).then(j => {
+      fresh();
+      const server = { sentry:{}, scur:{}, sset:{} };
+      (j.records || []).forEach(r => { if(server[r.kind]) server[r.kind][r.key] = r.data; });
+      const empty = !Object.keys(server.sentry).length && !Object.keys(server.scur).length && !Object.keys(server.sset).length;
+      const firstSync = !state.lastPull;
+      state.snap = JSON.parse(JSON.stringify(server));
+      const view = JSON.parse(JSON.stringify(server));
+      state.queue.forEach(op => {
+        if(!view[op.kind]) return;
+        if(op.deleted){ delete view[op.kind][op.key]; delete state.snap[op.kind][op.key]; }
+        else { view[op.kind][op.key] = op.data; state.snap[op.kind][op.key] = JSON.parse(JSON.stringify(op.data)); }
+      });
+      state.lastPull = Date.now(); lastError = '';
+      if(empty){
+        state.hasServer = false;
+        // ระบบกลางยังว่าง: ผู้แก้ไขส่งข้อมูลในเครื่องขึ้นเป็นชุดแรก / ผู้ดูใช้ข้อมูลในเครื่องตามเดิม
+        save();
+        if(firstSync && isEditor()) uploadAllLocal();
+        return false;
+      }
+      state.hasServer = true;
+      save();
+      if(state.queue.length) flush();
+      return writeLocal(view);
+    }));
+  }
+
+  function uploadAllLocal(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY_);
+      if(raw) onLocalSet(SETTINGS_KEY_, raw);
+      // หลักสูตรเริ่มต้นที่ยังไม่เคยเปิดในเครื่องนี้ → ใส่คาบเริ่มต้นจากไฟล์ก่อนส่งขึ้น (ไม่ให้หายจากระบบกลาง)
+      let curs = [];
+      try{ curs = (JSON.parse(raw || '{}').curricula || []).map(c => c.id); }catch(e){}
+      if(typeof DEFAULT_ENTRIES !== 'undefined'){
+        curs.forEach(id => {
+          const k = ENTRY_PREFIX + id, seed = DEFAULT_ENTRIES[k];
+          if(localStorage.getItem(k) === null && seed && seed.length){
+            localStorage.setItem(k, JSON.stringify(seed.map(e => Object.assign({}, e, { id: (typeof uid === 'function' ? uid() : 'e' + Date.now() + Math.random().toString(36).slice(2)) }))));
+            if(typeof DEFAULT_ENTRIES_VERSION !== 'undefined') localStorage.setItem('cur-entries-version-' + id, String(DEFAULT_ENTRIES_VERSION));
+          }
+        });
+      }
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(isEntryKey(k)) onLocalSet(k, localStorage.getItem(k));
+      }
+    }catch(e){ console.error(e); }
+  }
+
+  // คืนค่า true ถ้าข้อมูลในเครื่องเปลี่ยน
+  function writeLocal(view){
+    applying = true;
+    let changed = false;
+    const put = (k, v) => { if(localStorage.getItem(k) !== v){ localStorage.setItem(k, v); changed = true; } };
+    try{
+      let local = {};
+      try{ local = JSON.parse(localStorage.getItem(SETTINGS_KEY_) || '{}') || {}; }catch(e){}
+      const shared = (view.sset.settings) || {};
+      const order = shared.curOrder || [];
+      const curs = Object.keys(view.scur).map(k => view.scur[k])
+        .sort((a,b) => { const ia = order.indexOf(a.id), ib = order.indexOf(b.id); return (ia < 0 ? 1e9 : ia) - (ib < 0 ? 1e9 : ib); });
+      const merged = Object.assign({}, local, shared);
+      delete merged.curOrder;
+      LOCAL_ONLY.forEach(k => { if(k !== 'curricula' && k in local) merged[k] = local[k]; });
+      if(curs.length) merged.curricula = curs;
+      if(merged.curricula && !merged.curricula.some(c => c.id === merged.activeCurId)) merged.activeCurId = merged.curricula[0].id;
+      const act = (merged.curricula || []).find(c => c.id === merged.activeCurId);
+      if(act){ if(act.header2) merged.orgLine2 = act.header2; if(act.header3) merged.orgLine3 = act.header3; }
+      put(SETTINGS_KEY_, JSON.stringify(merged));
+      // ป้องกันการรีเซ็ตด้วยข้อมูลเริ่มต้นในไฟล์ (ข้อมูลกลางคือข้อมูลจริง)
+      (merged.curricula || []).forEach(c => {
+        localStorage.setItem('cur-curriculum-version-' + c.id, String(typeof DEFAULT_CURRICULA_VERSION !== 'undefined' ? DEFAULT_CURRICULA_VERSION : 0));
+      });
+      const byCur = {};
+      Object.keys(view.sentry).forEach(k => {
+        const e = Object.assign({}, view.sentry[k]); const c = e._cur || k.split('|')[0]; delete e._cur;
+        (byCur[c] = byCur[c] || []).push(e);
+      });
+      const curIds = new Set([...(merged.curricula || []).map(c => c.id), ...Object.keys(byCur)]);
+      curIds.forEach(c => {
+        const arr = (byCur[c] || []).sort((a,b) => String(a.date + a.start).localeCompare(String(b.date + b.start)));
+        put(ENTRY_PREFIX + c, JSON.stringify(arr));
+        localStorage.setItem('cur-entries-version-' + c, String(typeof DEFAULT_ENTRIES_VERSION !== 'undefined' ? DEFAULT_ENTRIES_VERSION : 0));
+      });
+    }catch(e){ lastError = 'บันทึกลงเครื่องไม่ได้: ' + e.message; }
+    applying = false;
+    return changed;
+  }
+
+  // ตรวจรหัสผู้แก้ไขกับระบบกลาง แล้วจำไว้ในเครื่องนี้
+  async function login(){
+    const k = (prompt('ใส่รหัสผู้แก้ไขตารางฝึกอบรม') || '').trim();
+    if(!k) return false;
+    try{
+      const j = await post({ action:'checkKey', editKey:k });
+      if(!j.valid){ alert('รหัสผู้แก้ไขไม่ถูกต้อง'); return false; }
+    }catch(e){ alert('ตรวจรหัสไม่ได้ (เชื่อมต่อระบบกลางไม่ได้)'); return false; }
+    try{ localStorage.setItem(EDIT_KEY, k); }catch(e){}
+    fresh(); state.lastPull = 0; save();          // ดึงใหม่ทั้งหมดก่อนเริ่มแก้
+    return true;
+  }
+  function logout(){ try{ localStorage.removeItem(EDIT_KEY); }catch(e){} }
+
+  // ข้อความสถานะ (แสดงที่ท้ายหน้า)
+  function statusText(){
+    if(!enabled()) return '';
+    const q = state.queue.length;
+    if(running) return 'กำลังซิงก์กับระบบกลาง…';
+    if(rejectedMsg) return '⚠️ ' + rejectedMsg;
+    if(lastError) return '⚠️ เชื่อมต่อระบบกลางไม่ได้' + (q ? ' · รอส่ง ' + q + ' รายการ' : '');
+    if(!state.lastPull) return 'ยังไม่ได้เชื่อมระบบกลาง';
+    if(q) return 'รอส่ง ' + q + ' รายการ';
+    return '✓ ตรงกับระบบกลาง ' + new Date(state.lastPull).toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  }
+  function badge(){ const el = document.getElementById('schSyncStatus'); if(el) el.textContent = statusText(); }
+
+  function hasServer(){ return enabled() && !!state.hasServer; }
+  return { enabled, hasServer, isEditor, readOnly, onLocalSet, pull, flush, login, logout, statusText, badge, _state: () => state };
+})();
+
 const hasClaudeStorage = (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function');
 let lastSaveOk = true;
 
@@ -646,6 +922,7 @@ async function storageSetRaw(key, value){
   }
   try{ localStorage.setItem(key, value); ok = true; }
   catch(e){ console.error('localStorage.setItem failed', e); }
+  if(ok) SCH.onLocalSet(key, value);   // ผู้แก้ไข: ส่งการเปลี่ยนแปลงขึ้นระบบกลาง
   return ok;
 }
 
@@ -702,6 +979,7 @@ async function ensureSettingsShape(){
     let savedVer = 0;
     try{ savedVer = Number(await storageGetRaw(vKey)) || 0; }catch(e){}
     if(!existing){
+      if(SCH.hasServer()) continue;   // หลักสูตรที่ผู้แก้ไขลบออกจากระบบกลางแล้ว ไม่ต้องเพิ่มกลับ
       SETTINGS.curricula.push({
         id:def.id, name:def.name, locked:def.locked,
         printHeader2:def.printHeader2, header2:def.header2,
@@ -710,7 +988,7 @@ async function ensureSettingsShape(){
       });
       await storageSetRaw(vKey, String(DEFAULT_CURRICULA_VERSION));
       curriculaSynced = true;
-    } else if(savedVer < DEFAULT_CURRICULA_VERSION){
+    } else if(savedVer < DEFAULT_CURRICULA_VERSION && !SCH.hasServer()){
       // ข้อมูลหลักสูตรเก่ากว่าไฟล์ → อัปเดตตามไฟล์ (เฉพาะหลักสูตรเริ่มต้น; หลักสูตรที่ผู้ใช้สร้างเองไม่เข้าเงื่อนไขนี้)
       existing.name = def.name;
       existing.locked = def.locked;
@@ -790,13 +1068,71 @@ const TABS = [
   {id:'manage', label:'จัดการหลักสูตร'},
 ];
 
+const EDIT_TABS = ['entry', 'manage'];
+function visibleTabs(){ return SCH.readOnly() ? TABS.filter(t => EDIT_TABS.indexOf(t.id) === -1) : TABS; }
 function switchTab(id){
+  if(SCH.readOnly() && EDIT_TABS.indexOf(id) !== -1) id = 'print';
   currentTab = id;
   editingId = null;
   renderApp();
 }
 
+function syncBarHtml(){
+  if(!SCH.enabled()) return '';
+  if(SCH.readOnly()){
+    return `<div class="sch-bar"><span>👁️ โหมดดูอย่างเดียว — แสดงตารางล่าสุดจากระบบกลาง</span>
+      <label>หลักสูตร <select onchange="viewerSwitchCurriculum(this.value)">${CURRICULA.map(c=>`<option value="${escapeHtml(c.id)}" ${c.id===activeCurId?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}</select></label>
+      <button class="btn btn-ghost" onclick="schLogin()">✏️ เข้าสู่โหมดแก้ไข</button></div>`;
+  }
+  return `<div class="sch-bar sch-bar-edit"><span>✏️ โหมดแก้ไข — การแก้ไขจะส่งขึ้นระบบกลางอัตโนมัติ ทุกเครื่องเห็นตารางเดียวกัน</span>
+    <button class="btn btn-ghost" onclick="schLogout()">ออกจากโหมดแก้ไข</button></div>`;
+}
+async function viewerSwitchCurriculum(id){
+  const target = CURRICULA.find(c=>c.id===id);
+  if(!target || id === activeCurId) return;
+  activeCurId = id; SETTINGS.activeCurId = id;
+  SETTINGS.orgLine2 = target.header2 || target.printHeader2 || SETTINGS.orgLine2;
+  SETTINGS.orgLine3 = target.header3 || target.printHeader3 || SETTINGS.orgLine3;
+  await saveSettings();
+  try{ const raw = await storageGetRaw(entriesKey()); ENTRIES = raw ? JSON.parse(raw) : []; }catch(e){ ENTRIES = []; }
+  await seedDefaultEntriesIfEmpty();
+  recomputeCurriculum();
+  renderApp();
+}
+async function schLogin(){
+  if(!(await SCH.login())) return;
+  await SCH.pull();
+  if(!SCH._state().lastPull){
+    SCH.logout();
+    alert('ดึงข้อมูลจากระบบกลางไม่สำเร็จ จึงยังเข้าโหมดแก้ไขไม่ได้ (กันข้อมูลทับกัน)\nกรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่');
+    renderApp(); return;
+  }
+  await loadAll();
+  currentTab = 'entry';
+  renderApp();
+}
+function schLogout(){
+  if(SCH._state().queue.length && !confirm('ยังมีการแก้ไขที่รอส่งขึ้นระบบกลาง ' + SCH._state().queue.length + ' รายการ\nออกจากโหมดแก้ไขตอนนี้ การแก้ไขเหล่านี้จะไม่ถูกส่ง — ต้องการออกหรือไม่?')) return;
+  SCH.logout();
+  if(EDIT_TABS.indexOf(currentTab) !== -1) currentTab = 'print';
+  renderApp();
+}
+// ดึงข้อมูลกลาง แล้วโหลด/แสดงใหม่ถ้ามีการเปลี่ยนแปลง (ไม่รบกวนขณะกำลังพิมพ์หรือแก้ไขคาบ)
+let schRefreshing = false, schNeedRender = false;
+async function schRefresh(force){
+  if(!SCH.enabled() || schRefreshing) return;
+  schRefreshing = true;
+  try{
+    const changed = await SCH.pull();
+    const ae = document.activeElement;
+    const busy = editingId || (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName));
+    if(changed){ await loadAll(); schNeedRender = true; }
+    if(schNeedRender && (force || !busy)){ schNeedRender = false; renderApp(); }
+  }finally{ schRefreshing = false; SCH.badge(); }
+}
+
 function renderApp(){
+  if(SCH.readOnly() && EDIT_TABS.indexOf(currentTab) !== -1) currentTab = 'print';
   const root = document.getElementById('root');
   root.innerHTML = `
     <div class="topbar">
@@ -809,13 +1145,14 @@ function renderApp(){
           </div>
         </div>
         <div class="tabs">
-          ${TABS.map(t => `<button class="tab-btn ${currentTab===t.id?'active':''}" onclick="switchTab('${t.id}')">${t.label}</button>`).join('')}
+          ${visibleTabs().map(t => `<button class="tab-btn ${currentTab===t.id?'active':''}" onclick="switchTab('${t.id}')">${t.label}</button>`).join('')}
         </div>
       </div>
     </div>
     <div class="app">
+      ${syncBarHtml()}
       <div class="panel active" id="panel-${currentTab}"></div>
-      <div class="footer-note">ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์นี้โดยอัตโนมัติ · <span id="saveIndicator"></span></div>
+      <div class="footer-note">${SCH.enabled() ? 'ข้อมูลเก็บที่ระบบกลาง (Google Sheets) และสำรองไว้ในเบราว์เซอร์นี้ · <span id="schSyncStatus">' + escapeHtml(SCH.statusText()) + '</span>' : 'ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์นี้โดยอัตโนมัติ'} · <span id="saveIndicator"></span></div>
       <div class="footer-note">จัดทำโดย ส.ต.อ.ทศพร สุมาลี ตำแหน่ง ผบ.หมู่ กก.5 บก.กฝ.บช.ตชด. · จัดทำ/ปรับปรุงล่าสุด ${fileModifiedDateText()}</div>
     </div>
   `;
@@ -956,6 +1293,12 @@ function renderEntryPanel(el){
       return;
     }
 
+    const tConf = findTeacherConflicts(teacher, date, start, end, editing ? editing.id : null);
+    if(tConf.length){
+      const lines = tConf.slice(0, 8).map(c => `• ${c.name}: ${c.e.start}-${c.e.end} ${c.e.subjectName || ''} (${c.curName})`).join('\n');
+      if(!confirm(`⚠️ วิทยากรมีคาบอื่นในช่วงเวลาเดียวกัน (${thaiDateFull(date)}):\n\n${lines}${tConf.length > 8 ? '\n…และอีก ' + (tConf.length - 8) + ' คาบ' : ''}\n\nกด "ตกลง" เพื่อบันทึกต่อ หรือ "ยกเลิก" เพื่อกลับไปแก้ไข`)) return;
+    }
+
     const subj = subjectByName(subjectName);
     if(!subj){
       const proceed = confirm(
@@ -976,7 +1319,7 @@ function renderEntryPanel(el){
     };
     if(editing){
       const idx = ENTRIES.findIndex(e=>e.id===editing.id);
-      ENTRIES[idx] = rec;
+      if(idx >= 0) ENTRIES[idx] = rec; else ENTRIES.push(rec);
     } else {
       ENTRIES.push(rec);
       lastDraft = { date, start, end, type, subjectName: rec.subjectName, place, teacher };
@@ -2083,7 +2426,23 @@ async function restoreDefaultCurriculum(){
 async function init(){
   document.getElementById('root').innerHTML = `<div style="padding:60px;text-align:center;color:#5b6b7a;">กำลังโหลดข้อมูล...</div>`;
   await loadAll();
+  if(SCH.readOnly()) currentTab = 'print';
   renderApp();
+  if(SCH.enabled()){
+    await schRefresh(true);
+    // อัปเดตอัตโนมัติเมื่อกลับมาที่หน้านี้ และทุก 2 นาที
+    window.addEventListener('focus', () => schRefresh(false));
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) schRefresh(false); });
+    window.addEventListener('online', () => { SCH.flush(); schRefresh(false); });
+    // แท็บอื่นในเบราว์เซอร์เดียวกันแก้ข้อมูล → โหลดข้อมูลในหน่วยความจำใหม่ทันที (กันแท็บเก่าบันทึกทับ)
+    window.addEventListener('storage', async ev => {
+      if(!ev.key || !(ev.key === SETTINGS_KEY || /^cur-entries-/.test(ev.key))) return;
+      await loadAll();
+      const ae = document.activeElement;
+      if(editingId || (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))) schNeedRender = true; else renderApp();
+    });
+    setInterval(() => { if(!document.hidden) schRefresh(false); }, 120000);
+  }
 }
 init();
 // วัดความกว้างชื่อวิทยากรด้วยฟอนต์จริง — เรนเดอร์ตารางพิมพ์ใหม่อีกครั้งเมื่อฟอนต์โหลดเสร็จ

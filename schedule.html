@@ -667,6 +667,67 @@ let SETTINGS = {
 //  - ถ้า SCH_SYNC_URL ว่าง = ทำงานแบบเดิม (เก็บเฉพาะในเบราว์เซอร์นี้)
 // ============================================================
 const SCH_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyLkQvV8yNgGgAqHz0P83LebMRn4trnSQiMG7v2ole3Va4QvxeLX2Ac75ZRN0w39iuQ/exec';
+
+// กล่องข้อความและรับรหัสผ่านแบบ In-Page (ทำงานได้ 100% ทุกเบราว์เซอร์ รวมถึง In-App Webview ที่ปิด prompt)
+function inPagePrompt(title, defaultValue = '', isPassword = false) {
+  return new Promise((resolve) => {
+    let overlay = document.getElementById('inpage-prompt-overlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'inpage-prompt-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(14,42,71,0.65);z-index:999999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);';
+
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,0.25);width:100%;max-width:440px;padding:24px;border:1px solid #cbd5e1;font-family:Sarabun,sans-serif;color:#1e293b;';
+
+    const h3 = document.createElement('div');
+    h3.style.cssText = 'font-size:16px;font-weight:700;color:#0e2a47;margin-bottom:12px;line-height:1.4;';
+    h3.textContent = title;
+
+    const input = document.createElement('input');
+    input.type = isPassword ? 'password' : 'text';
+    input.value = defaultValue || '';
+    input.placeholder = isPassword ? 'กรอกรหัสผ่าน...' : '';
+    input.style.cssText = 'width:100%;padding:10px 14px;border:1.5px solid #94a3b8;border-radius:8px;font-size:15px;margin-bottom:18px;outline:none;box-sizing:border-box;font-family:inherit;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;justify-content:flex-end;gap:10px;';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'ยกเลิก';
+    cancelBtn.type = 'button';
+    cancelBtn.style.cssText = 'padding:8px 16px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;font-family:inherit;font-size:14px;color:#475569;';
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'ตกลง';
+    okBtn.type = 'button';
+    okBtn.style.cssText = 'padding:8px 20px;background:#0e2a47;border:none;border-radius:6px;color:#fff;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(okBtn);
+
+    box.appendChild(h3);
+    box.appendChild(input);
+    box.appendChild(actions);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    input.focus();
+    input.select();
+
+    const cleanup = () => { if (overlay) overlay.remove(); };
+
+    cancelBtn.onclick = () => { cleanup(); resolve(null); };
+    okBtn.onclick = () => { const val = input.value; cleanup(); resolve(val); };
+
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { okBtn.click(); }
+      else if (e.key === 'Escape') { cancelBtn.click(); }
+    };
+  });
+}
+
 const SCH = (function(){
   const STATE_KEY = 'sch_sync_state_v1';
   const EDIT_KEY = 'sch_edit_key_v1';
@@ -868,7 +929,7 @@ const SCH = (function(){
 
   // ตรวจรหัสผู้แก้ไขกับระบบกลาง แล้วจำไว้ในเครื่องนี้
   async function login(){
-    const k = (prompt('ใส่รหัสผู้แก้ไขตารางฝึกอบรม') || '').trim();
+    const k = ((await inPagePrompt('🔑 ใส่รหัสผู้แก้ไขตารางฝึกอบรม', '', true)) || '').trim();
     if(!k) return false;
     try{
       const j = await post({ action:'checkKey', editKey:k });
@@ -2319,7 +2380,7 @@ async function renameCurriculum(){
   const id = (sel && sel.value) ? sel.value : activeCurId;
   const cur = CURRICULA.find(c=>c.id===id) || curProfile();
   if(cur.locked){ alert('หลักสูตรมาตรฐานถูกล็อกไว้ — ไม่สามารถเปลี่ยนชื่อได้'); return; }
-  const newName = prompt('ชื่อหลักสูตรใหม่ (ชื่อนี้แสดงในแถบด้านบนและรายการสลับหลักสูตร):', cur.name);
+  const newName = await inPagePrompt('ชื่อหลักสูตรใหม่ (ชื่อนี้แสดงในแถบด้านบนและรายการสลับหลักสูตร):', cur.name, false);
   if(newName === null) return; // กดยกเลิก
   const nm = normalizeSpace(newName);
   if(!nm){ alert('กรุณากรอกชื่อหลักสูตร'); return; }
@@ -2332,7 +2393,7 @@ async function renameCurriculum(){
   alert(`เปลี่ยนชื่อหลักสูตรเป็น "${nm}" แล้ว`);
 }
 async function createCurriculum(){
-  const name = prompt('ชื่อหลักสูตรใหม่ (เช่น หลักสูตรนายสิบตำรวจชั้นประทวน 2568):');
+  const name = await inPagePrompt('ชื่อหลักสูตรใหม่ (เช่น หลักสูตรนายสิบตำรวจชั้นประทวน 2568):', '', false);
   if(name === null) return; // กดยกเลิก
   if(!normalizeSpace(name)){ alert('กรุณากรอกชื่อหลักสูตร'); return; }
   const newId = 'cur' + Date.now().toString(36);

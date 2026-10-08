@@ -1,0 +1,9 @@
+# ห้ามอัปไฟล์ข้อมูลส่วนบุคคลขึ้น GitHub สาธารณะ
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.db
+*.sqlite
+*.csv
+.env

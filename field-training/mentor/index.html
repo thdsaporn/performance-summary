@@ -340,6 +340,16 @@
           </div>
         </div>
 
+
+        <!-- ครู – อาจารย์/ฝ่ายปกครองฯ ของหน่วยฝึกอบรม (ช่องลงชื่อในแบบที่ 2) -->
+        <div class="no-print ut-box" style="background:#f8fafc;border:1px solid var(--border-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;">
+          <b style="color:var(--navy);">ครู – อาจารย์/ฝ่ายปกครองฯ ของหน่วยฝึกอบรม (ช่องลงชื่อในแบบพิมพ์ — ใช้ร่วมทุกคน)</b>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center;">
+            <input type="text" id="ut_name2" class="ut-name" placeholder="ยศ ชื่อ - สกุล" style="flex:1 1 200px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <input type="text" id="ut_pos2" class="ut-pos" placeholder="ตำแหน่ง" style="flex:2 1 240px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <button type="button" class="btn btn-purple btn-sm" onclick="saveUnitTeacher('2')">💾 บันทึก</button>
+          </div>
+        </div>
         <div id="m_rep2_form" class="ft-doc"></div>
 
         <!-- Monthly Feedback Section (Editable & Savable) -->
@@ -416,6 +426,16 @@
           </div>
         </div>
 
+
+        <!-- ครู – อาจารย์/ฝ่ายปกครองฯ ของหน่วยฝึกอบรม (ช่องลงชื่อในแบบที่ 2) -->
+        <div class="no-print ut-box" style="background:#f8fafc;border:1px solid var(--border-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;">
+          <b style="color:var(--navy);">ครู – อาจารย์/ฝ่ายปกครองฯ ของหน่วยฝึกอบรม (ช่องลงชื่อในแบบพิมพ์ — ใช้ร่วมทุกคน)</b>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center;">
+            <input type="text" id="ut_name3" class="ut-name" placeholder="ยศ ชื่อ - สกุล" style="flex:1 1 200px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <input type="text" id="ut_pos3" class="ut-pos" placeholder="ตำแหน่ง" style="flex:2 1 240px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <button type="button" class="btn btn-purple btn-sm" onclick="saveUnitTeacher('3')">💾 บันทึก</button>
+          </div>
+        </div>
         <div id="m_rep3_form" class="ft-doc"></div>
         <div id="m_rep3_sign" class="ft-doc"></div>
 
@@ -769,7 +789,7 @@
       const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
       const box = document.getElementById('form1_print');
       box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
-        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, mentorPos: r.mentorPos || anyLog.mentorPos || '', tid: r.tid || '' });
+        station: r.station || anyLog.station, mentor: mentorOf(name).mentor, mentorPos: mentorOf(name).mentorPos, tid: r.tid || '' });
       ftPrintOnly(box);
     }
     // พิมพ์เฉพาะแบบฟอร์ม (คัดลอกไปที่กล่องพิมพ์ แล้วซ่อนส่วนอื่นของหน้า)
@@ -893,6 +913,32 @@
     }
 
     // ================= แบบประเมินแบบที่ 2: แบบสรุปผลการปฏิบัติงาน =================
+    // ครูพี่เลี้ยงของ นสต.: จากรายชื่อ ถ้าไม่มีใช้ค่าจากบันทึกประจำวันล่าสุด
+    function mentorOf(name) {
+      const r = roster.find(x => x.name === name) || {};
+      const last = logs.filter(l => l.traineeName === name && l.mentor).sort((a, b) => String(b.date).localeCompare(String(a.date)))[0] || {};
+      const mentor = r.mentor || last.mentor || '';
+      let pos = r.mentorPos || last.mentorPos || '';
+      if (!pos && mentor) { const o = roster.find(x => x.mentor === mentor && x.mentorPos); if (o) pos = o.mentorPos; }
+      return { mentor, mentorPos: pos };
+    }
+    // ครู – อาจารย์/ฝ่ายปกครองฯ ของหน่วยฝึกอบรม: เก็บในข้อมูลกลาง (ชนิด feedback คีย์ __unit_teacher)
+    const UT_KEY = '__unit_teacher';
+    function unitTeacher() {
+      try { const v = JSON.parse(monthlyFeedbacks[UT_KEY] || '{}'); return { name: v.name || '', pos: v.pos || '' }; } catch (e) { return { name: '', pos: '' }; }
+    }
+    function fillUnitTeacher() {
+      const ut = unitTeacher(), act = document.activeElement;
+      document.querySelectorAll('.ut-name').forEach(el => { if (el !== act) el.value = ut.name; });
+      document.querySelectorAll('.ut-pos').forEach(el => { if (el !== act) el.value = ut.pos; });
+    }
+    function saveUnitTeacher(n) {
+      const name = document.getElementById('ut_name' + n).value.trim(), pos = document.getElementById('ut_pos' + n).value.trim();
+      monthlyFeedbacks[UT_KEY] = JSON.stringify({ name, pos });
+      try { localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(monthlyFeedbacks)); } catch (e) {}
+      FT_SYNC.push({ feedback: monthlyFeedbacks });
+      renderMonthlyReport(); renderSummaryReport();
+    }
     function rep2FeedbackKey() {
       const name = document.getElementById('m_monthly_trainee').value;
       const month = document.getElementById('m_monthly_month').value;
@@ -907,7 +953,8 @@
       const box = document.getElementById('m_rep2_form');
       if (!selectedName) { box.innerHTML = '<p style="color:var(--text-muted)">ยังไม่มีรายชื่อ นสต.</p>'; return; }
       const r = roster.find(x => x.name === selectedName) || {};
-      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: r.mentor, mentorPos: r.mentorPos || '', tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
+      const mi = mentorOf(selectedName), ut = unitTeacher(); fillUnitTeacher();
+      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos, tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
       box.innerHTML = out.html;
       document.getElementById('m_rep2_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
 
@@ -944,7 +991,8 @@
       document.getElementById('m_rep3_total_val').textContent = res.totalScore.toLocaleString('th-TH');
       document.getElementById('m_rep3_weight_val').textContent = res.weightedScore.toFixed(2);
       document.getElementById('m_rep3_form').innerHTML =
-        FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: r.mentor, mentorPos: r.mentorPos || '' });
+        (() => { const mi = mentorOf(selectedName), ut = unitTeacher(); fillUnitTeacher();
+          return FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos }); })();
       document.getElementById('m_rep3_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
     }
 

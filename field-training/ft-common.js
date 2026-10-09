@@ -402,12 +402,12 @@ var FT_FORMS = (function () {
     });
     return h + '<tr class="sum"><td class="c"><b>รวม</b></td><td class="c"><b>' + r.ev + '</b></td><td class="c"><b>' + r.ps + '</b></td><td class="c"><b>' + r.score + '</b></td></tr></tbody></table>';
   }
-  function signBoxes(mentor, mentorPos) {
+  function signBoxes(mentor, mentorPos, teacher, teacherPos) {
     function box(t1, t2, name, pos) {
       return '<div class="bx"><div class="c"><b>' + t1 + '</b></div><div class="c"><b>' + t2 + '</b></div>'
         + '<div class="ln2 fx">ยศ ชื่อ – สกุล' + fdot(name, 1) + '</div><div class="ln2 fx">ตำแหน่ง' + fdot(pos, 1) + '</div></div>';
     }
-    return '<div class="bxrow">' + box('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ', 'ประจำสถานีตำรวจ', mentor, mentorPos) + box('ครู – อาจารย์/ฝ่ายปกครองฯ', 'ของหน่วยฝึกอบรม', '', '') + '</div>';
+    return '<div class="bxrow">' + box('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ', 'ประจำสถานีตำรวจ', mentor, mentorPos) + box('ครู – อาจารย์/ฝ่ายปกครองฯ', 'ของหน่วยฝึกอบรม', teacher, teacherPos) + '</div>';
   }
   function evalBoxes(max, score, pct, res) {
     var g = res ? FT_SCORE.statusText(res) : '';
@@ -442,7 +442,7 @@ var FT_FORMS = (function () {
     pages.push('<div class="hd">บันทึกผลคะแนน</div><div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 120) + ' เลขประจำตัว' + dot(o.tid, 70) + '</div>'
       + '<div class="frame">' + scoreTable(o.sem, r) + '</div>'
       + (r.done < r.rows.length ? '<div class="no-print" style="color:#c00">ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ</div>' : '')
-      + signBoxes(o.mentor, o.mentorPos) + formulaNote());
+      + signBoxes(o.mentor, o.mentorPos, o.teacher, o.teacherPos) + formulaNote());
     var html = sheets('แบบประเมินแบบที่ 2', pages);
     var all = cb.tot.ok + cb.tot.bad;
     return { tally: t, rows: r, html: thHtml(html) + (o.totalId ? '<span id="' + o.totalId + '" hidden>' + all + '</span>' : '') };
@@ -454,7 +454,7 @@ var FT_FORMS = (function () {
       + (o.name ? nameLine(o) : '')
       + '<div class="frame">' + scoreTable('1', { rows: res.s1Rows, ev: res.s1Eval, ps: res.s1Pass, score: res.s1Score })
       + scoreTable('2', { rows: res.s2Rows, ev: res.s2Eval, ps: res.s2Pass, score: res.s2Score }) + '</div>'
-      + signBoxes(o.mentor, o.mentorPos) + evalBoxes(FT_CUR.total, res.totalScore, res.percent, res) + formulaNote();
+      + signBoxes(o.mentor, o.mentorPos, o.teacher, o.teacherPos) + evalBoxes(FT_CUR.total, res.totalScore, res.percent, res) + formulaNote();
     return thHtml(sheets('แบบประเมินแบบที่ 2', [body]));
   }
   /* (เข้ากันกับหน้าเดิม) ลายมือชื่ออยู่ในแบบพิมพ์แล้ว */
@@ -515,7 +515,7 @@ function ftPrintOnly(el, landscape) {
       '.ft-doc .ttl{text-align:center;font-weight:700;font-size:13.5pt}.ft-doc .ttl2{text-align:center;margin-bottom:2pt}',
       '.ft-doc .hd{font-weight:700;margin:4pt 0}.ft-doc .ln{margin:4pt 0}.ft-doc .ln2{margin:6pt 0}',
       '.ft-doc .dt{display:inline-block;border-bottom:1px dotted #000;text-align:center;padding:0 4pt;line-height:1.2}',
-      '.ft-doc .fx{display:flex;align-items:flex-end;white-space:nowrap;gap:3pt}.ft-doc .fd{flex:1 1 auto;min-width:24pt;padding:0 4pt;border-bottom:1px dotted #000;text-align:center;overflow:hidden;text-overflow:clip;line-height:1.2}.ft-doc .gap{height:10pt}.ft-doc .fw{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2pt 6pt}.ft-doc .fw>.g1{flex:1 1 auto}.ft-doc .fd{white-space:normal}.ft-doc .sg .fx{display:flex}',
+      '.ft-doc .fx{display:flex;align-items:flex-end;white-space:nowrap;gap:3pt}.ft-doc .fd{flex:1 1 auto;min-width:24pt;padding:0 4pt 0 8pt;border-bottom:1px dotted #000;text-align:left;overflow:hidden;text-overflow:clip;line-height:1.2}.ft-doc .gap{height:10pt}.ft-doc .fw{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2pt 6pt}.ft-doc .fw>.g1{flex:1 1 auto}.ft-doc .fd{white-space:normal}.ft-doc .sg .fx{display:flex}',
       '.ft-doc .it .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .it .cat{font-weight:700}.ft-doc tr.hx td{vertical-align:bottom}',
       '.ft-doc table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6pt}',
       '.ft-doc th,.ft-doc td{border:1px solid #000;padding:0.5pt 5pt;font-size:12.5pt;line-height:1.22;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',

@@ -304,7 +304,7 @@
             <span>📊 แบบสรุปผลการปฏิบัติงาน เพื่อใช้วัดผลสัมฤทธิ์การฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ 2)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบที่ 2 (PDF)</button>
+            <button type="button" class="btn btn-print btn-sm" onclick="printDoc('m_rep2_form')">🖨️ พิมพ์แบบที่ 2 (PDF)</button>
           </div>
         </div>
 
@@ -365,7 +365,7 @@
             <span>🎖️ บันทึกผลคะแนนการฝึกหัดปฏิบัติราชการ 2 ภาคเรียน (แบบประเมินแบบที่ 2 หน้าบันทึกผลคะแนน)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์บันทึกผลคะแนน (PDF)</button>
+            <button type="button" class="btn btn-print btn-sm" onclick="printDoc('m_rep3_form')">🖨️ พิมพ์บันทึกผลคะแนน (PDF)</button>
           </div>
         </div>
 
@@ -758,7 +758,13 @@
       const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
       const box = document.getElementById('form1_print');
       box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
-        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor });
+        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, tid: r.tid || '' });
+      ftPrintOnly(box);
+    }
+    // พิมพ์เฉพาะแบบฟอร์ม (คัดลอกไปที่กล่องพิมพ์ แล้วซ่อนส่วนอื่นของหน้า)
+    function printDoc(id) {
+      const box = document.getElementById('form1_print');
+      box.innerHTML = document.getElementById(id).innerHTML.replace(/ id="[^"]*"/g, '');
       ftPrintOnly(box);
     }
     function printForm1FromFilter() {
@@ -862,7 +868,7 @@
       const box = document.getElementById('m_rep2_form');
       if (!selectedName) { box.innerHTML = '<p style="color:var(--text-muted)">ยังไม่มีรายชื่อ นสต.</p>'; return; }
       const r = roster.find(x => x.name === selectedName) || {};
-      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, totalId: 'm_rep2_tot_eval' });
+      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: r.mentor, tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
       box.innerHTML = out.html;
       document.getElementById('m_rep2_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
 
@@ -899,7 +905,7 @@
       document.getElementById('m_rep3_total_val').textContent = res.totalScore.toLocaleString('th-TH');
       document.getElementById('m_rep3_weight_val').textContent = res.weightedScore.toFixed(2);
       document.getElementById('m_rep3_form').innerHTML =
-        `<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>${ftEsc(selectedName)}</b> &nbsp; สังกัด/สถานที่ฝึก <b>${ftEsc(r.station || '-')}</b></div>` + FT_FORMS.scoreSummary(res);
+        FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: r.mentor });
       document.getElementById('m_rep3_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
     }
 

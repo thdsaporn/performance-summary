@@ -520,6 +520,7 @@
           <input type="text" id="m_add_station" placeholder="สภ. ที่ฝึกปฏิบัติ" required style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
         </div>
         <div style="display:flex;gap:8px;">
+          <input type="text" id="m_add_tid" placeholder="เลขประจำตัว นสต." style="width:130px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <input type="text" id="m_add_mentor" placeholder="ครูพี่เลี้ยง / ผู้ควบคุมการฝึก" required style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <button type="submit" class="btn btn-primary btn-sm">+ เพิ่มในรุ่น</button>
         </div>
@@ -531,6 +532,7 @@
             <tr>
               <th style="width:40px;">ลำดับ</th>
               <th>ยศ-ชื่อ-สกุล</th>
+              <th style="width:120px;">เลขประจำตัว</th>
               <th>สภ. ที่ฝึก</th>
               <th style="width:60px;">ลบ</th>
             </tr>
@@ -867,10 +869,10 @@
     // รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (หลักสูตร นสต. 2567) — เรียงตามรายชื่อ
     function printRb3(sem) {
       const names = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
-      const people = names.map(name => ({ name, res: computeTraineeScores(name) }));
+      const people = names.map(name => ({ name, tid: (roster.find(r => r.name === name) || {}).tid || '', res: computeTraineeScores(name) }));
       const box = document.getElementById('rb3_print');
       box.innerHTML = FT_FORMS.rb3(sem, people, 'กก.5 บก.กฝ.บช.ตชด.');
-      ftPrintOnly(box);
+      ftPrintOnly(box, true);
     }
 
     function exportBatchCSV() {
@@ -922,17 +924,24 @@
       const name = document.getElementById('m_add_name').value.trim();
       const station = document.getElementById('m_add_station').value.trim();
       const mentor = document.getElementById('m_add_mentor').value.trim();
+      const tid = document.getElementById('m_add_tid').value.trim();
 
       if (roster.some(r => r.name === name)) {
         alert('มีชื่อ นสต. ท่านนี้ในรุ่นอยู่แล้ว');
         return;
       }
-      roster.push({ name, station, mentor });
+      roster.push(tid ? { name, station, mentor, tid } : { name, station, mentor });
       saveData();
+      document.getElementById('m_add_tid').value = '';
       document.getElementById('m_add_name').value = '';
       document.getElementById('m_add_station').value = '';
       document.getElementById('m_add_mentor').value = '';
       renderRosterModalList();
+    }
+    function setRosterTid(index, v) {
+      if (!roster[index]) return;
+      roster[index].tid = String(v || '').trim();
+      saveData();
     }
     function deleteRosterTrainee(index) {
       if (!confirm(`ต้องการลบรายชื่อ ${roster[index].name} ออกจากรุ่นหรือไม่?`)) return;
@@ -948,6 +957,7 @@
         tr.innerHTML = `
           <td style="text-align:center;">${i+1}</td>
           <td><b>${ftEsc(r.name)}</b></td>
+          <td><input type="text" value="${ftEsc(r.tid || '')}" placeholder="ใส่เลขประจำตัว" onchange="setRosterTid(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12.5px;"></td>
           <td>${ftEsc(r.station)}</td>
           <td style="text-align:center;">
             <button type="button" class="btn btn-outline btn-sm" onclick="deleteRosterTrainee(${i})" style="color:var(--danger);">✕</button>

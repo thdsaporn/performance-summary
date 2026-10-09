@@ -262,121 +262,205 @@ var FT_SCORE = (function () {
 /* ===================== FT_FORMS =====================
  * แบบฟอร์มตามหลักสูตร นสต. พ.ศ. 2567 (ผนวก ง): แบบประเมินแบบที่ 1, แบบที่ 2, รบ 3 */
 var FT_FORMS = (function () {
+  /* แบบพิมพ์ตามผนวก ง หลักสูตร นสต. พ.ศ. 2567 (แบบประเมินแบบที่ 1, 2) และ รบ 3 (ผนวก ก)
+   * - จัดเป็นแผ่น (.ft-sheet) ตามฟอร์มกระดาษ: หัวกระดาษ/หัวตารางซ้ำทุกแผ่น, "แบบประเมินแบบที่ … หน้า …/…"
+   * - ตัวเลขในแบบพิมพ์เป็นเลขไทย */
+  var TH = '๐๑๒๓๔๕๖๗๘๙';
+  function th(v) { return String(v == null ? '' : v).replace(/[0-9]/g, function (d) { return TH[+d]; }); }
+  /* แปลงเลขอารบิกเป็นเลขไทยเฉพาะข้อความ (ไม่แตะแท็ก/แอตทริบิวต์) */
+  function thHtml(h) { return h.replace(/>([^<]+)</g, function (m, t) { return '>' + th(t) + '<'; }); }
   function e(v) { return ftEsc(v == null ? '' : v); }
-  function n(v) { return v ? String(v) : ''; }
-  /* ตารางจำนวนการปฏิบัติ (ถูกต้อง/ไม่ถูกต้อง) ตามแบบประเมินแบบที่ 1 และ 2 */
-  function countTable(sem, t, opts) {
-    opts = opts || {};
-    var S = FT_CUR.sems[sem], h = [];
-    var tot = { ok: 0, bad: 0 };
-    function row(label, c, cls) { h.push('<tr class="' + (cls || '') + '"><td' + (cls === 'item' ? ' class="ind"' : '') + '>' + label + '</td><td class="c">' + n(c && c.ok) + '</td><td class="c">' + n(c && c.bad) + '</td><td></td></tr>'); }
-    function sumRow(c) { h.push('<tr class="sum"><td class="right">รวมจำนวนการปฏิบัติ</td><td class="c">' + c.ok + '</td><td class="c">' + c.bad + '</td><td></td></tr>'); tot.ok += c.ok; tot.bad += c.bad; }
-    function grp(label) { h.push('<tr class="grp"><td colspan="4">' + label + '</td></tr>'); }
-    h.push('<table><thead><tr><th rowspan="2">รายการปฏิบัติ</th><th colspan="2" class="c">ผลการปฏิบัติ</th><th rowspan="2" class="c" style="width:16%">หมายเหตุ</th></tr>'
-      + '<tr><th class="c" style="width:12%">ถูกต้อง</th><th class="c" style="width:12%">ไม่ถูกต้อง</th></tr></thead><tbody>');
-    grp('ความพร้อมก่อนปฏิบัติงาน');
-    FT_CUR.prepItems.forEach(function (it, i) { row((i + 1) + '. ' + e(it), t.prep[i], 'item'); });
-    if (t.prepLegacy.ok + t.prepLegacy.bad) row('(บันทึกตามเกณฑ์เดิม)', t.prepLegacy, 'item');
-    sumRow(t.prepTotal);
-    grp('การปฏิบัติงาน');
-    S.cats.forEach(function (c) {
-      h.push('<tr class="grp"><td colspan="4">' + e(c.formName || c.name) + '</td></tr>');
-      c.items.forEach(function (it, i) {
-        if (c.breaks && c.breaks[i + 1]) h.push('<tr><td class="ind"><b>' + e(c.breaks[i + 1]) + '</b></td><td></td><td></td><td></td></tr>');
-        row((i + 1) + '. ' + e(it.name), t.items[it.code], 'item');
+  function dot(v, w) { return '<span class="dt" style="min-width:' + Math.round((w || 90) * 0.8) + 'pt">' + (v ? e(v) : '&nbsp;') + '</span>'; }
+  var DOTS = '..........................................................';
+  function dateParts(d) {
+    var m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return null;
+    var long = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    return { d: +m[3], m: long[+m[2] - 1], y: +m[1] + 543 };
+  }
+  function dateLine(d) {
+    var p = dateParts(d) || {};
+    return 'วันที่' + dot(p.d, 24) + 'เดือน' + dot(p.m, 70) + 'ปี' + dot(p.y, 40);
+  }
+  function nameLine(o) {
+    return '<div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 110) + ' สังกัด' + dot(o.station, 90) + ' <span style="white-space:nowrap">เลขประจำตัว' + dot(o.tid, 60) + '</span></div>';
+  }
+  function sheets(label, pages, cls) {
+    return pages.map(function (body, i) {
+      return '<section class="ft-sheet' + (cls ? ' ' + cls : '') + '"><div class="pg">' + label + (pages.length > 1 ? ' หน้า ' + (i + 1) + '/' + pages.length : '') + '</div>' + body + '</section>';
+    }).join('');
+  }
+
+  /* ---------- ตารางรายการปฏิบัติ (แบบที่ 1 และ 2) แบ่งเป็นบล็อก แล้วจัดลงแผ่น ---------- */
+  function countBlocks(sem, t, mode) {
+    var S = FT_CUR.sems[sem], blocks = [], tot = { ok: 0, bad: 0 };
+    function cell(v, used) {
+      if (mode === 'day') return !used ? '-' : (v ? (v === 1 ? '✓' : String(v)) : '');
+      return v ? String(v) : '';
+    }
+    function item(label, c, noDash) {
+      var used = !!(c && (c.ok || c.bad)) || noDash;
+      return '<tr><td class="it">' + label + '</td><td class="c">' + cell(c && c.ok, used) + '</td><td class="c">' + cell(c && c.bad, used) + '</td><td></td></tr>';
+    }
+    function sum(c) {
+      tot.ok += c.ok; tot.bad += c.bad;
+      return '<tr class="sum"><td class="r">รวมจำนวนการปฏิบัติ</td><td class="c pk">' + (c.ok || (c.bad ? '' : '')) + '</td><td class="c">' + (c.bad || '') + '</td><td></td></tr>';
+    }
+    function sec(label) { return '<tr><td class="sec">' + label + '</td><td></td><td></td><td></td></tr>'; }
+    function cat(label) { return '<tr><td class="cat">' + e(label) + '</td><td></td><td></td><td></td></tr>'; }
+    function lst(items, arr, legacy) {
+      return items.map(function (x, i) { return item((i + 1) + '. ' + e(x), arr[i], mode === 'day'); }).join('')
+        + (legacy && legacy.ok + legacy.bad ? item('(บันทึกตามเกณฑ์เดิม)', legacy) : '');
+    }
+    blocks.push({ w: 6, h: sec('ความพร้อมก่อนปฏิบัติงาน') + lst(FT_CUR.prepItems, t.prep, t.prepLegacy) + sum(t.prepTotal) });
+    S.cats.forEach(function (c, ci) {
+      var h = (ci === 0 ? sec('การปฏิบัติงาน') : '') + cat(c.formName || c.name), w = (ci === 0 ? 1 : 0) + 2 + c.items.length;
+      c.items.forEach(function (x, i) {
+        if (c.breaks && c.breaks[i + 1]) { h += '<tr><td class="brk">' + e(c.breaks[i + 1]) + '</td><td></td><td></td><td></td></tr>'; w++; }
+        if (x.name.length > 40) w += 0.6;
+        h += item((i + 1) + '. ' + e(x.name), t.items[x.code]);
       });
-      if (t.legacy[c.id]) row('(บันทึกตามเกณฑ์เดิม) ' + e(Object.keys(t.legacyNames[c.id] || {}).join(', ')), t.legacy[c.id], 'item');
-      sumRow(t.catTotal[c.id]);
+      if (t.legacy[c.id]) { h += item('(บันทึกตามเกณฑ์เดิม) ' + e(Object.keys(t.legacyNames[c.id] || {}).join(', ')), t.legacy[c.id]); w++; }
+      blocks.push({ w: w, h: h + sum(t.catTotal[c.id]) });
     });
-    grp('หลังปฏิบัติงาน');
-    FT_CUR.postItems.forEach(function (it, i) { row((i + 1) + '. ' + e(it), t.post[i], 'item'); });
-    if (t.postLegacy.ok + t.postLegacy.bad) row('(บันทึกตามเกณฑ์เดิม)', t.postLegacy, 'item');
-    sumRow(t.postTotal);
-    h.push('<tr class="sum"><td class="right">รวมจำนวนการปฏิบัติทั้งหมด</td><td class="c">' + tot.ok + '</td><td class="c">' + tot.bad + '</td><td class="c">ทั้งหมด <span' + (opts.totalId ? ' id="' + opts.totalId + '"' : '') + '>' + (tot.ok + tot.bad) + '</span> ครั้ง</td></tr>');
-    h.push('</tbody></table>');
-    return h.join('');
+    var post = sec('หลังปฏิบัติงาน') + lst(FT_CUR.postItems, t.post, t.postLegacy) + sum(t.postTotal);
+    blocks.push({ w: 7, h: post + '<tr class="sum"><td class="r"><b>รวมจำนวนการปฏิบัติทั้งหมด</b></td><td class="c pk"><b>' + tot.ok + '</b></td><td class="c"><b>' + (tot.bad || '') + '</b></td><td></td></tr>', tot: tot });
+    return { blocks: blocks, tot: tot };
   }
-  /* บันทึกผลคะแนนของภาคเรียน (แบบประเมินแบบที่ 2 หน้าบันทึกผลคะแนน) */
-  function scoreTable(sem, r) {
-    var h = ['<table><thead><tr><th>ภาคเรียนที่ ' + sem + ' — รายการปฏิบัติ</th><th class="c">จำนวนการปฏิบัติทั้งหมด</th><th class="c">จำนวนการปฏิบัติที่ทำได้ถูกต้อง</th><th class="c">คะแนนเต็ม</th><th class="c">คะแนน</th></tr></thead><tbody>'];
-    r.rows.forEach(function (x) {
-      var label = x.item.kind === 'work' ? '<span class="ind">' + e(x.item.title.replace(/ \(.*\)$/, '')) + '</span>' : '<b>' + e(x.item.title) + '</b>';
-      if (x.item.kind === 'work' && r.rows.indexOf(x) === 1) h.push('<tr><td><b>การปฏิบัติงาน</b></td><td></td><td></td><td></td><td></td></tr>');
-      h.push('<tr><td>' + label + '</td><td class="c">' + (x.pending ? '-' : x.ev) + '</td><td class="c">' + (x.pending ? '-' : x.ps) + '</td><td class="c">' + x.item.maxScore + '</td><td class="c"' + (!x.pending && x.item.kind === 'work' && x.pct < 60 ? ' style="color:#c00;font-weight:700"' : '') + '>' + (x.pending ? 'ยังไม่ประเมิน' : x.sc) + '</td></tr>');
+  function packTables(blocks, cap) {
+    var pages = [], cur = [], used = 0;
+    blocks.forEach(function (b) {
+      if (cur.length && used + b.w > cap) { pages.push(cur); cur = []; used = 0; }
+      cur.push(b); used += b.w;
     });
-    h.push('<tr class="sum"><td class="right">รวม</td><td class="c">' + r.ev + '</td><td class="c">' + r.ps + '</td><td class="c">' + FT_CUR.sems[sem].max + '</td><td class="c">' + r.score + '</td></tr></tbody></table>');
-    return h.join('');
+    if (cur.length) pages.push(cur);
+    var head = '<table class="ct"><colgroup><col><col style="width:13%"><col style="width:13%"><col style="width:17%"></colgroup>'
+      + '<thead><tr><th rowspan="2">รายการปฏิบัติ</th><th colspan="2">ผลการปฏิบัติ</th><th rowspan="2">หมายเหตุ</th></tr>'
+      + '<tr><th class="pk">ถูกต้อง</th><th>ไม่ถูกต้อง</th></tr></thead><tbody>';
+    return pages.map(function (p) { return head + p.map(function (b) { return b.h; }).join('') + '</tbody></table>'; });
   }
-  function formulaNote() {
-    return '<div style="font-size:11pt;margin-top:6pt"><b>สูตรการคำนวณผลคะแนน</b><br>'
-      + 'คะแนนความพร้อมก่อนปฏิบัติงาน / การมีมนุษยสัมพันธ์ที่ดี / หลังปฏิบัติงาน = (จำนวนการปฏิบัติที่ทำได้ถูกต้อง × 50) ÷ จำนวนการปฏิบัติทั้งหมด<br>'
-      + 'คะแนนการปฏิบัติตามประเภทงาน = (จำนวนการปฏิบัติที่ทำได้ถูกต้อง × 100) ÷ จำนวนการปฏิบัติทั้งหมด<br>'
-      + '<b>เกณฑ์การประเมิน</b> ร้อยละ 80 – 100 = ผ่าน (ดี) · ร้อยละ 60 – 79 = ผ่าน (พอใช้) · ร้อยละ 0 – 59 = ไม่ผ่าน</div>';
+  /* (ใช้ภายใน/ทดสอบ) ตารางเดียวไม่แบ่งแผ่น */
+  function countTable(sem, t, opts) {
+    var r = countBlocks(sem, t, (opts && opts.mode) || 'sum');
+    return thHtml(packTables(r.blocks, 1e9)[0]);
   }
-  function signBox(title, name) {
-    return '<div><div class="lines"></div><div>(' + (name ? e(name) : '..........................................') + ')</div>'
-      + '<div>ตำแหน่ง ..........................................</div><div>' + title + '</div></div>';
+
+  /* ---------- แบบประเมินแบบที่ 1: แบบบันทึกผลการปฏิบัติงาน (รายวัน) ---------- */
+  function ruled(text, lines) {
+    return '<div class="ruled" style="min-height:' + (lines * 22) + 'pt">' + e(text) + '</div>';
   }
-  /* ลายมือชื่อแบบที่ 2: ครูพี่เลี้ยงประจำสถานีตำรวจ + ครู – อาจารย์ ของหน่วยฝึกอบรม */
-  function signForm2(mentor) {
-    return '<div class="sign">' + signBox('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ<br>ประจำสถานีตำรวจ', mentor) + signBox('ครู – อาจารย์<br>ของหน่วยฝึกอบรม', '') + '</div>';
+  function signLine(role, name, extra) {
+    return '<div class="sg"><div>(ลงชื่อ) ' + DOTS.slice(0, 34) + role + '</div><div>(' + (name ? '&nbsp;' + e(name) + '&nbsp;' : DOTS.slice(0, 34)) + ')</div><div>ตำแหน่ง' + DOTS.slice(0, 34) + '</div>' + (extra || '') + '</div>';
   }
-  /* แบบประเมินแบบที่ 1: แบบบันทึกผลการปฏิบัติงาน (รายวัน) */
   function form1(o) {
     var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, from: o.date, to: o.date });
     var notes = t.logs.map(function (l) { return FT_DAY.isDay(l) ? (l.traineeNote || '') : '• ' + FT_DAY.summary(l) + (l.traineeNote ? ': ' + l.traineeNote : ''); }).filter(Boolean).join('\n');
     var fb = t.logs.map(function (l) { return l.mentorFeedback; }).filter(Boolean).join('\n');
     var pending = (o.logs || []).filter(function (l) { return l.traineeName === o.name && l.date === o.date && l.status !== 'evaluated'; }).length;
-    return '<div class="pg">แบบประเมินแบบที่ 1</div><h2>แบบบันทึกผลการปฏิบัติงาน (รายวัน)</h2>'
-      + '<div class="sub ft-sub">วันที่ ' + e(ftThaiDate(o.date, true)) + ' · ภาคเรียนที่ ' + e(o.sem) + '</div>'
-      + '<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>' + e(o.name) + '</b> &nbsp; สังกัด/สถานที่ฝึก <b>' + e(o.station || '-') + '</b></div>'
-      + '<div style="font-size:11pt">คำชี้แจง ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วบันทึกจำนวนครั้งที่ปฏิบัติถูกต้อง/ไม่ถูกต้อง'
-      + (pending ? ' <span class="no-print" style="color:#c00">(มี ' + pending + ' รายการของวันนี้ที่ยังไม่ได้ตรวจ — ไม่นับในแบบนี้)</span>' : '') + '</div>'
-      + countTable(o.sem, t)
-      + '<div class="sign">' + signBox('ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ', o.mentor) + '</div>'
-      + '<div style="page-break-before:always;margin-top:14pt"><div class="pg">แบบประเมินแบบที่ 1</div><b>บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ</b><div class="note">' + e(notes) + '</div>'
-      + '<div class="sign">' + signBox('ผู้ฝึกหัดปฏิบัติราชการ', o.name) + '</div>'
-      + '<b>ข้อเสนอแนะประจำวัน (เฉพาะครูพี่เลี้ยง)</b><div class="note">' + e(fb) + '</div>'
-      + '<div class="sign">' + signBox('ครูพี่เลี้ยง', o.mentor) + signBox('ผู้ฝึกหัด', o.name) + '</div></div>';
+    var head = '<div class="ttl">แบบบันทึกผลการปฏิบัติงาน (รายวัน)</div><div class="ttl2">' + dateLine(o.date) + '</div>'
+      + nameLine(o)
+      + '<div class="ln"><b>คำชี้แจง</b> ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วทำเครื่องหมาย ✓ ตามผลการปฏิบัติจริง'
+      + (pending ? ' <span class="no-print" style="color:#c00">(มี ' + pending + ' รายการของวันนี้ที่ยังไม่ได้ตรวจ — ไม่นับในแบบนี้)</span>' : '') + '</div>';
+    var foot = '<div class="foot"><b>ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ</b> ยศ ชื่อ - สกุล ' + dot(o.mentor, 120) + ' <span style="white-space:nowrap">ตำแหน่ง' + dot('', 90) + '</span></div>';
+    var pages = packTables(countBlocks(o.sem, t, 'day').blocks, 30).map(function (tb) { return head + tb + foot; });
+    pages.push('<div class="hd">บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ</div>' + ruled(notes, 10)
+      + '<div class="sgrow end">' + signLine('ผู้ฝึกหัดปฏิบัติราชการ', o.name) + '</div>'
+      + '<div class="hd" style="margin-top:14pt">ข้อเสนอแนะประจำวัน (เฉพาะครูพี่เลี้ยง)</div>' + ruled(fb, 9)
+      + '<div class="sgrow">' + signLine('ครูพี่เลี้ยง', o.mentor) + signLine('ผู้ฝึกหัดฯ/ทราบ', o.name) + '</div>');
+    return thHtml(sheets('แบบประเมินแบบที่ 1', pages));
   }
-  /* แบบประเมินแบบที่ 2: แบบสรุปผลการปฏิบัติงาน (รายภาคเรียน หรือเฉพาะเดือน) */
+
+  /* ---------- บันทึกผลคะแนน (แบบที่ 2 หน้าสุดท้าย) ---------- */
+  function scoreTable(sem, r) {
+    var h = '<div class="semh">ภาคเรียนที่ ' + sem + '</div><table class="st"><colgroup><col><col style="width:17%"><col style="width:19%"><col style="width:14%"></colgroup>'
+      + '<thead><tr><th>รายการปฏิบัติ</th><th>จำนวน<br>การปฏิบัติ<br>ทั้งหมด</th><th>จำนวน<br>การปฏิบัติ<br>ที่ทำได้ถูกต้อง</th><th>คะแนน</th></tr></thead><tbody>';
+    var workHead = false;
+    r.rows.forEach(function (x) {
+      var isW = x.item.kind === 'work';
+      if (isW && !workHead) { h += '<tr><td>การปฏิบัติงาน</td><td></td><td></td><td></td></tr>'; workHead = true; }
+      h += '<tr><td' + (isW ? ' class="ind"' : '') + '>' + e(isW ? x.item.title.replace(/ \(.*\)$/, '') : x.item.title) + '</td><td class="c">' + (x.pending ? '' : x.ev) + '</td><td class="c">' + (x.pending ? '' : x.ps) + '</td><td class="c' + (!x.pending && isW && x.pct < 60 ? ' low' : '') + '">' + (x.pending ? '<span class="no-print">ยังไม่ประเมิน</span>' : x.sc) + '</td></tr>';
+    });
+    return h + '<tr class="sum"><td class="c"><b>รวม</b></td><td class="c"><b>' + r.ev + '</b></td><td class="c"><b>' + r.ps + '</b></td><td class="c"><b>' + r.score + '</b></td></tr></tbody></table>';
+  }
+  function signBoxes(mentor) {
+    function box(t1, t2, name) {
+      return '<div class="bx"><div class="c"><b>' + t1 + '</b></div><div class="c"><b>' + t2 + '</b></div>'
+        + '<div class="ln2">ยศ ชื่อ – สกุล ' + dot(name, 130) + '</div><div class="ln2">ตำแหน่ง ' + dot('', 150) + '</div></div>';
+    }
+    return '<div class="bxrow">' + box('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ', 'ประจำสถานีตำรวจ', mentor) + box('ครู – อาจารย์/ฝ่ายปกครองฯ', 'ของหน่วยฝึกอบรม', '') + '</div>';
+  }
+  function evalBoxes(max, score, pct, res) {
+    var g = res ? FT_SCORE.statusText(res) : '';
+    function ck(lbl, on) { return '<span class="ck">' + (on ? '☑' : '☐') + ' ' + lbl + '</span>'; }
+    var done = res && res.complete;
+    var good = done && res.isPass && pct >= 80, fair = done && res.isPass && pct < 80, fail = done && !res.isPass;
+    return '<div class="bxrow"><div class="bx"><div class="c"><b>การประเมินผลตามเกณฑ์ที่กำหนด</b></div>'
+      + '<table class="st sm"><thead><tr><th>คะแนน<br>เต็ม</th><th>คะแนน<br>ที่ทำได้</th><th>คิดเป็น<br>ร้อยละ</th><th>ผลการ<br>ปฏิบัติงาน</th></tr></thead>'
+      + '<tbody><tr><td class="c">' + max + '</td><td class="c">' + score + '</td><td class="c">' + pct.toFixed(2) + '</td><td class="c">' + e(done ? (res.isPass ? (pct >= 80 ? 'ผ่าน (ดี)' : 'ผ่าน (พอใช้)') : 'ไม่ผ่าน') : '') + '</td></tr></tbody></table></div>'
+      + '<div class="bx"><div class="c"><b>ผลการประเมิน</b></div><div class="cks">' + ck('ผ่าน (ดี)', good) + ck('ไม่ผ่าน', fail) + '<br>' + ck('ผ่าน (พอใช้)', fair) + '</div>'
+      + (done ? '' : '<div class="no-print" style="color:#c00;font-size:11pt">' + e(g) + '</div>') + '</div></div>';
+  }
+  function formulaNote() {
+    return '<div class="no-print" style="font-size:11pt;margin-top:6pt"><b>สูตรการคำนวณผลคะแนน</b> (ผนวก ง)<br>'
+      + 'ความพร้อมก่อนปฏิบัติงาน / การมีมนุษยสัมพันธ์ที่ดี / หลังปฏิบัติงาน = (จำนวนที่ทำได้ถูกต้อง × 50) ÷ จำนวนการปฏิบัติทั้งหมด · '
+      + 'การปฏิบัติตามประเภทงาน = (จำนวนที่ทำได้ถูกต้อง × 100) ÷ จำนวนการปฏิบัติทั้งหมด<br>'
+      + '<b>เกณฑ์ตัดสิน</b> ร้อยละ 80 – 100 = ผ่าน (ดี) · ร้อยละ 60 – 79 = ผ่าน (พอใช้) · ร้อยละ 0 – 59 = ไม่ผ่าน</div>';
+  }
+
+  /* ---------- แบบประเมินแบบที่ 2: แบบสรุปผลการปฏิบัติงาน (รายภาคเรียน หรือเฉพาะเดือน) ---------- */
   function form2(o) {
     var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, month: o.month || '' });
     var r = FT_SCORE.semRows(o.sem, t);
     var first = t.days[0], last = t.days[t.days.length - 1];
-    return { tally: t, rows: r, html: '<div class="pg">แบบประเมินแบบที่ 2</div><h2>แบบสรุปผลการปฏิบัติงาน</h2>'
-      + '<div class="ft-sub">เพื่อใช้วัดผลสัมฤทธิ์การฝึกหัดปฏิบัติราชการ (ภาคเรียนที่ ' + e(o.sem) + ')' + (o.month ? ' — เฉพาะเดือน ' + e(ftThaiDate(o.month + '-01', true).replace(/^1 /, '')) : '') + '</div>'
-      + '<div>ระหว่างวันที่ ' + (first ? e(ftThaiDate(first, true)) : '……………') + ' ถึง วันที่ ' + (last ? e(ftThaiDate(last, true)) : '……………') + ' จำนวน ' + t.days.length + ' วัน</div>'
-      + '<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>' + e(o.name) + '</b> &nbsp; สังกัด/สถานที่ฝึก <b>' + e(o.station || '-') + '</b></div>'
-      + '<div style="font-size:11pt">คำชี้แจง สรุปผลการปฏิบัติงานจากแบบบันทึกผลการปฏิบัติงาน (รายวัน) โดยใส่ตัวเลขจำนวนการปฏิบัติตามผลการปฏิบัติจริง ตั้งแต่วันแรกจนถึงวันสุดท้ายของการฝึก</div>'
-      + countTable(o.sem, t, { totalId: o.totalId })
-      + '<div style="margin-top:12pt"><b>บันทึกผลคะแนน</b></div>' + scoreTable(o.sem, r)
-      + '<div style="margin-top:6pt">คะแนนเต็ม <b>' + FT_CUR.sems[o.sem].max + '</b> · คะแนนที่ทำได้ <b>' + r.score + '</b> · คิดเป็นร้อยละ <b>' + (r.score / FT_CUR.sems[o.sem].max * 100).toFixed(2) + '</b>'
-      + (r.done < r.rows.length ? ' <span style="color:#c00">(ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ)</span>' : '') + '</div>'
-      + formulaNote() };
+    var cb = countBlocks(o.sem, t, 'sum');
+    var head = '<div class="ttl">แบบสรุปผลการปฏิบัติงาน</div><div class="ttl2">เพื่อใช้วัดผลสัมฤทธิ์การฝึกหัดปฏิบัติราชการ (ภาคเรียนที่ ' + e(o.sem) + ')'
+      + (o.month ? ' <span class="no-print">— เฉพาะเดือน ' + e(ftThaiDate(o.month + '-01', true).replace(/^1 /, '')) + '</span>' : '') + '</div>'
+      + '<div class="ttl2">ระหว่าง' + dateLine(first) + ' ถึง ' + dateLine(last) + ' จำนวน' + dot(t.days.length, 26) + 'วัน</div>'
+      + nameLine(o)
+      + '<div class="ln"><b>คำชี้แจง</b> ให้สรุปผลการปฏิบัติงานของนักเรียนนายสิบตำรวจ จากแบบบันทึกผลการปฏิบัติงาน (รายวัน) โดยใส่ตัวเลขจำนวนการปฏิบัติงานตามผลการปฏิบัติจริง ตั้งแต่วันแรกจนถึงวันสุดท้ายของการฝึกหัดปฏิบัติราชการ</div>';
+    var pages = packTables(cb.blocks, 29).map(function (tb) { return head + tb; });
+    pages.push('<div class="hd">บันทึกผลคะแนน</div><div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 120) + ' เลขประจำตัว' + dot(o.tid, 70) + '</div>'
+      + '<div class="frame">' + scoreTable(o.sem, r) + '</div>'
+      + (r.done < r.rows.length ? '<div class="no-print" style="color:#c00">ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ</div>' : '')
+      + signBoxes(o.mentor) + formulaNote());
+    var html = sheets('แบบประเมินแบบที่ 2', pages);
+    var all = cb.tot.ok + cb.tot.bad;
+    return { tally: t, rows: r, html: thHtml(html) + (o.totalId ? '<span id="' + o.totalId + '" hidden>' + all + '</span>' : '') };
   }
-  /* บันทึกผลคะแนนรวม 2 ภาคเรียน (เต็ม 850) */
-  function scoreSummary(res) {
-    var h = scoreTable('1', { rows: res.s1Rows, ev: res.s1Eval, ps: res.s1Pass, score: res.s1Score })
-      + '<div style="height:8pt"></div>' + scoreTable('2', { rows: res.s2Rows, ev: res.s2Eval, ps: res.s2Pass, score: res.s2Score });
-    h += '<table style="margin-top:10pt"><thead><tr><th class="c">คะแนนเต็ม</th><th class="c">คะแนนที่ทำได้</th><th class="c">คิดเป็นร้อยละ</th><th class="c">ผลการปฏิบัติงาน</th></tr></thead><tbody>'
-      + '<tr><td class="c">' + FT_CUR.total + '</td><td class="c"><b>' + res.totalScore + '</b></td><td class="c">' + res.percent.toFixed(2) + '</td><td class="c"><b>' + e(FT_SCORE.statusText(res)) + '</b></td></tr></tbody></table>';
-    return h + formulaNote();
+  /* บันทึกผลคะแนนรวม 2 ภาคเรียน (แบบที่ 2 หน้าบันทึกผลคะแนน, เต็ม 850) */
+  function scoreSummary(res, o) {
+    o = o || {};
+    var body = '<div class="hd">บันทึกผลคะแนนการฝึกหัดปฏิบัติราชการ</div>'
+      + (o.name ? nameLine(o) : '')
+      + '<div class="frame">' + scoreTable('1', { rows: res.s1Rows, ev: res.s1Eval, ps: res.s1Pass, score: res.s1Score })
+      + scoreTable('2', { rows: res.s2Rows, ev: res.s2Eval, ps: res.s2Pass, score: res.s2Score }) + '</div>'
+      + signBoxes(o.mentor) + evalBoxes(FT_CUR.total, res.totalScore, res.percent, res) + formulaNote();
+    return thHtml(sheets('แบบประเมินแบบที่ 2', [body]));
   }
-  /* รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (รายภาคเรียน) */
-  function rb3(sem, people, unit) {
+  /* (เข้ากันกับหน้าเดิม) ลายมือชื่ออยู่ในแบบพิมพ์แล้ว */
+  function signForm2() { return ''; }
+
+  /* ---------- รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (รายภาคเรียน) ---------- */
+  var RB3_NAME = { k2_pat: 'งานสายตรวจ', k2_trf: 'งานจราจร', k2_inv: 'งานสืบสวน' };
+  function rb3(sem, people, unit, opts) {
+    opts = opts || {};
     var rowsDef = FT_SCORE.rowsFor(sem);
-    var head = rowsDef.map(function (x) { return '<th class="c" style="font-size:10pt">' + e(x.kind === 'work' ? x.title.replace(/ \(.*\)$/, '') : x.title) + '<br>(' + x.maxScore + ')</th>'; }).join('');
+    var vh = rowsDef.map(function (x) { return '<th class="v"><div>' + e(x.kind === 'work' ? (RB3_NAME[x.id] || x.title.replace(/ \(.*\)$/, '')) : x.title) + '</div></th>'; }).join('');
+    var mx = rowsDef.map(function (x) { return '<th>' + x.maxScore + '</th>'; }).join('');
     var body = people.map(function (p, i) {
       var r = sem === '1' ? p.res.s1Rows : p.res.s2Rows, sc = sem === '1' ? p.res.s1Score : p.res.s2Score;
-      return '<tr><td class="c">' + (i + 1) + '</td><td></td><td>' + e(p.name) + '</td>' + r.map(function (x) { return '<td class="c">' + (x.pending ? '-' : x.sc) + '</td>'; }).join('')
-        + '<td class="c"><b>' + sc + '</b></td><td style="font-size:10pt">' + (r.some(function (x) { return x.pending; }) ? 'ยังประเมินไม่ครบ' : '') + '</td></tr>';
+      var pend = r.some(function (x) { return x.pending; });
+      return '<tr><td class="c">' + (i + 1) + '</td><td class="c">' + e(p.tid || '') + '</td><td>' + e(p.name) + '</td>' + r.map(function (x) { return '<td class="c">' + (x.pending ? '-' : x.sc) + '</td>'; }).join('')
+        + '<td style="font-size:11pt">รวม ' + sc + (pend ? ' (ยังประเมินไม่ครบ)' : '') + '</td></tr>';
     }).join('');
-    return '<div class="pg">รบ 3</div><h2>บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ</h2><div class="ft-sub">(ภาคเรียนที่ ' + sem + ') ประจำปี พ.ศ. ' + (new Date().getFullYear() + 543) + '<br>ศูนย์ฝึกอบรม ' + e(unit || '...............................................') + '</div>'
-      + '<table><thead><tr><th class="c">ลำดับ</th><th class="c">เลขประจำตัว</th><th style="min-width:150px">ชื่อ - สกุล</th>' + head + '<th class="c">รวม<br>(' + FT_CUR.sems[sem].max + ')</th><th class="c">หมายเหตุ</th></tr></thead><tbody>'
-      + (body || '<tr><td colspan="' + (rowsDef.length + 5) + '" class="c">ไม่มีข้อมูล</td></tr>') + '</tbody></table>';
+    for (var k = people.length; k < (opts.minRows || 10); k++) body += '<tr><td>&nbsp;</td><td></td><td></td>' + rowsDef.map(function () { return '<td></td>'; }).join('') + '<td></td></tr>';
+    var y = new Date().getFullYear() + 543;
+    return thHtml('<section class="ft-sheet land"><div class="pg">รบ 3</div><div class="ttl">บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ</div><div class="ttl2"><b>(ภาคเรียนที่ ' + sem + ') ประจำปี พ.ศ. ' + y + '</b></div>'
+      + '<div class="ttl2"><b>ศูนย์ฝึกอบรม</b>' + dot(unit, 200) + '</div>'
+      + '<table class="rb"><thead><tr><th rowspan="3" style="width:6%">ลำดับ</th><th rowspan="3" style="width:11%">เลขประจำตัว</th><th rowspan="3" style="width:22%">ชื่อ - สกุล</th><th colspan="' + rowsDef.length + '">รายการฝึกปฏิบัติราชการ</th><th rowspan="3" style="width:15%">หมายเหตุ</th></tr>'
+      + '<tr>' + vh + '</tr><tr>' + mx + '</tr></thead><tbody>' + body + '</tbody></table></section>');
   }
-  return { countTable: countTable, scoreTable: scoreTable, form1: form1, form2: form2, scoreSummary: scoreSummary, signForm2: signForm2, rb3: rb3 };
+  return { th: th, countTable: countTable, scoreTable: scoreTable, form1: form1, form2: form2, scoreSummary: scoreSummary, signForm2: signForm2, rb3: rb3 };
 })();
 
 /* วันที่แบบไทย เช่น 8 ต.ค. 2569 */
@@ -389,10 +473,12 @@ function ftThaiDate(d, full) {
 }
 
 /* พิมพ์เฉพาะส่วนที่ระบุ (ซ่อนส่วนอื่นของหน้า) */
-function ftPrintOnly(el) {
+function ftPrintOnly(el, landscape) {
+  var pst = null;
+  if (landscape) { pst = document.createElement('style'); pst.textContent = '@page{size:A4 landscape;margin:10mm 12mm}'; document.head.appendChild(pst); }
   document.body.classList.add('ft-print-isolate');
   el.classList.add('ft-print-target');
-  var done = function () { document.body.classList.remove('ft-print-isolate'); el.classList.remove('ft-print-target'); window.removeEventListener('afterprint', done); };
+  var done = function () { if (pst && pst.parentNode) pst.parentNode.removeChild(pst); document.body.classList.remove('ft-print-isolate'); el.classList.remove('ft-print-target'); window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   window.print();
   setTimeout(done, 1000);
@@ -400,12 +486,42 @@ function ftPrintOnly(el) {
 (function () {
   try {
     var st = document.createElement('style');
-    st.textContent = '.ft-form{display:none}.ft-doc .scr-only{}@media print{.ft-doc{font-size:12pt}.ft-doc .no-print{display:none!important}body.ft-print-isolate .container>*:not(.ft-print-target),body.ft-print-isolate>*:not(.container){display:none!important}body.ft-print-isolate .ft-print-target{display:block!important}}'
-      + '.ft-doc{font-family:Sarabun,sans-serif;color:#000;font-size:13pt}.ft-doc h2{font-size:15pt;text-align:center;margin:0 0 4pt}.ft-doc .ft-sub{text-align:center;margin-bottom:6pt}'
-      + '.ft-doc table{width:100%;border-collapse:collapse;margin-top:6pt}.ft-doc th,.ft-doc td{border:1px solid #000;padding:3pt 6pt;font-size:12pt}.ft-doc .c{text-align:center}'
-      + '.ft-doc .grp td{font-weight:700;background:#f3f3f3}.ft-doc .ind{padding-left:18pt}.ft-doc .sum td{font-weight:700}.ft-doc .right{text-align:right}'
-      + '.ft-doc .sign{display:flex;justify-content:space-around;margin-top:22pt;text-align:center;gap:20pt}.ft-doc .lines{border-bottom:1px dotted #000;min-height:18pt;margin:2pt 0}'
-      + '.ft-doc .pg{text-align:right;font-size:11pt}.ft-doc .note{white-space:pre-wrap;border:1px solid #000;padding:6pt;min-height:60pt}';
+    st.textContent = [
+      '.ft-form{display:none}.ft-doc,.ft-doc *{box-sizing:border-box}',
+      /* แผ่นเอกสารบนจอ */
+      '.ft-doc .ft-sheet{background:#fff;color:#000;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18pt 22pt;margin:0 auto 14pt;max-width:820px;font-family:Sarabun,sans-serif;font-size:12pt;line-height:1.45}',
+      '.ft-doc .ft-sheet.land{max-width:1120px}',
+      '.ft-doc .pg{text-align:right;font-size:11pt}',
+      '.ft-doc .ttl{text-align:center;font-weight:700;font-size:13.5pt}.ft-doc .ttl2{text-align:center;margin-bottom:2pt}',
+      '.ft-doc .hd{font-weight:700;margin:4pt 0}.ft-doc .ln{margin:4pt 0}.ft-doc .ln2{margin:6pt 0}',
+      '.ft-doc .dt{display:inline-block;border-bottom:1px dotted #000;text-align:center;padding:0 4pt;line-height:1.2}',
+      '.ft-doc table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6pt}',
+      '.ft-doc th,.ft-doc td{border:1px solid #000;padding:1pt 5pt;font-size:12pt;line-height:1.25;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',
+      '.ft-doc th{font-weight:700;text-align:center}.ft-doc .c{text-align:center}.ft-doc .r{text-align:right}',
+      '.ft-doc .pk{background:#fbd5f3!important}@media screen{.ft-doc .low{color:#c00}}',
+      '.ft-doc .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .cat{font-weight:700}.ft-doc .it,.ft-doc .brk{padding-left:6pt}',
+      '.ft-doc .ind{padding-left:22pt}.ft-doc .sum td{font-weight:400}',
+      '.ft-doc .foot{margin-top:12pt}',
+      '.ft-doc .ruled{white-space:pre-wrap;line-height:22pt;padding:0 2pt;background-image:repeating-linear-gradient(to bottom,#fff 0,#fff 21pt,transparent 21pt,transparent 22pt),repeating-linear-gradient(to right,#000 0,#000 1.2pt,transparent 1.2pt,transparent 3.5pt)}',
+      '.ft-doc .sgrow{display:flex;justify-content:space-around;gap:16pt;margin-top:16pt}.ft-doc .sgrow.end{justify-content:flex-end}',
+      '.ft-doc .sg{text-align:center;line-height:1.9}',
+      '.ft-doc .semh{font-weight:700;margin:6pt 0 0}.ft-doc .frame{border:1px solid #000;padding:4pt 14pt 8pt}',
+      '.ft-doc .st th{background:#d9d9d9!important;font-weight:400}.ft-doc .st.sm th,.ft-doc .st.sm td{font-size:11pt}',
+      '.ft-doc .bxrow{display:flex;gap:16pt;margin-top:8pt}.ft-doc .bx{flex:1;border:1px solid #000;padding:6pt 10pt}',
+      '.ft-doc .cks{padding:4pt 18pt;line-height:1.8}.ft-doc .ck{display:inline-block;min-width:110pt}',
+      '.ft-doc .rb th,.ft-doc .rb td{font-size:12pt;padding:2pt 4pt}.ft-doc .rb td{height:16pt}',
+      '.ft-doc .rb th.v{height:182pt;padding:4pt 0;font-size:11.5pt;vertical-align:bottom}.ft-doc .rb th.v div{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;white-space:nowrap;font-weight:400;line-height:1.2}',
+      /* พิมพ์ */
+      '@page{size:A4;margin:12mm 14mm}',
+      '@media print{.ft-doc .no-print{display:none!important}',
+      'body.ft-print-isolate .container>*:not(.ft-print-target),body.ft-print-isolate>*:not(.container){display:none!important}',
+      'body.ft-print-isolate .ft-print-target{display:block!important}',
+      '.ft-doc .ft-sheet{border:none!important;box-shadow:none!important;margin:0!important;padding:0 3pt!important;max-width:none!important;break-after:page;page-break-after:always}',
+      '.ft-doc .ft-sheet:last-of-type{break-after:auto!important;page-break-after:auto!important}',
+      'body.ft-print-isolate,body.ft-print-isolate .container{padding:0!important;margin:0!important;min-height:0!important}',
+      '.ft-doc tr{break-inside:avoid}.ft-doc thead{display:table-header-group}',
+      '.ft-doc,.ft-doc *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+    ].join('');
     (document.head || document.documentElement).appendChild(st);
   } catch (e) {}
 })();

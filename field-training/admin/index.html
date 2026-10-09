@@ -228,7 +228,7 @@
         <div class="badge-icon">📊</div>
         <div>
           <h1>ระบบสรุปผลและคำนวณคะแนนการฝึกหัดปฏิบัติราชการ (งานการฝึกและวิชาการ)</h1>
-          <p>หลักสูตร นสต. พ.ศ. 2567 · เต็ม 850 คะแนน · ค่าน้ำหนัก 10% (310 คะแนน) · ดูรายคน / ดูทุกคนทั้งรุ่น · กก.5 บก.กฝ.บช.ตชด.</p>
+          <p>หลักสูตร นสต. · เต็ม 850 คะแนน · ค่าน้ำหนัก 10% (310 คะแนน) · ดูรายคน / ดูทุกคนทั้งรุ่น · กก.5 บก.กฝ.บช.ตชด.</p>
         </div>
       </div>
       <div class="header-actions">
@@ -496,7 +496,7 @@
       <div style="text-align:center;margin-bottom:14pt;">
         <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. </h2>
         <p style="font-size:11.5pt;">กองกำกับการ 5 กองบังคับการฝึกพิเศษ กองบัญชาการตำรวจตระเวนชายแดน (ค่ายนเรศวรมหาราช)</p>
-        <p style="font-size:10.5pt;color:#444;">ตามหลักสูตรนักเรียนนายสิบตำรวจ พ.ศ. 2567 (ผนวก ง)</p>
+        <p style="font-size:10.5pt;color:#444;">ตามหลักสูตร นสต. (ผนวก ง)</p>
       </div>
 
       </div>
@@ -652,7 +652,7 @@
     }
 
     function computeTraineeScores(traineeName) {
-      // สูตรกลางใน ft-common.js (หลักสูตร นสต. 2567): หัวข้อที่ยังไม่ประเมินไม่นับคะแนน และยังไม่สรุปผ่าน/ไม่ผ่าน
+      // สูตรกลางใน ft-common.js (หลักสูตร นสต.): หัวข้อที่ยังไม่ประเมินไม่นับคะแนน และยังไม่สรุปผ่าน/ไม่ผ่าน
       return FT_SCORE.compute(logs, traineeName);
     }
 
@@ -866,7 +866,7 @@
       renderBatchView();
     }
 
-    // รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (หลักสูตร นสต. 2567) — เรียงตามรายชื่อ
+    // รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (หลักสูตร นสต.) — เรียงตามรายชื่อ
     function printRb3(sem) {
       const names = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
       const people = names.map(name => ({ name, tid: (roster.find(r => r.name === name) || {}).tid || '', res: computeTraineeScores(name) }));

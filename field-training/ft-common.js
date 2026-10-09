@@ -361,8 +361,16 @@ var FT_FORMS = (function () {
   function ruled(text, lines) {
     return '<div class="ruled" style="min-height:' + (lines * 22) + 'pt">' + e(text) + '</div>';
   }
+  /* แยกยศออกจากชื่อ เช่น "ร.ต.อ. อนุชา กล้าหาญ" → {rank:"ร.ต.อ.", name:"อนุชา กล้าหาญ"} */
+  var RANK_RE = /^\s*((?:พล\.ต\.[อทต]\.|พ\.ต\.[อทต]\.|ร\.ต\.[อทต]\.|ด\.ต\.|จ\.ส\.ต\.|ส\.ต\.[อทต]\.|นสต\.|นรต\.|พลฯ)(?:\s*หญิง)?)\s*/;
+  function splitRank(full) {
+    var m = String(full || '').match(RANK_RE);
+    return m ? { rank: m[1], name: String(full).slice(m[0].length) } : { rank: '', name: String(full || '') };
+  }
+  /* ลายมือชื่อแบบหน่วย: (ลงชื่อ) ยศ ........ ตำแหน่งผู้ลงนาม / (ชื่อ สกุล) / ตำแหน่ง */
   function signLine(role, name, pos) {
-    return '<div class="sg"><div>(ลงชื่อ) ' + DOTS.slice(0, 34) + role + '</div><div>(' + (name ? '&nbsp;' + e(name) + '&nbsp;' : DOTS.slice(0, 34)) + ')</div><div>ตำแหน่ง' + (pos ? dot(pos, 150) : DOTS.slice(0, 34)) + '</div></div>';
+    var sp = splitRank(name);
+    return '<div class="sg"><div style="white-space:nowrap">(ลงชื่อ) ' + (sp.rank ? e(sp.rank) + ' ' : '') + DOTS.slice(0, sp.rank ? 26 : 34) + role + '</div><div>(' + (sp.name ? '&nbsp;' + e(sp.name) + '&nbsp;' : DOTS.slice(0, 34)) + ')</div><div>ตำแหน่ง' + (pos ? dot(pos, 150) : DOTS.slice(0, 34)) + '</div></div>';
   }
   function form1(o) {
     var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, from: o.date, to: o.date });
@@ -472,7 +480,7 @@ var FT_FORMS = (function () {
       + '<table class="rb"><thead><tr><th rowspan="3" style="width:6%">ลำดับ</th><th rowspan="3" style="width:11%">เลขประจำตัว</th><th rowspan="3" style="width:22%">ชื่อ - สกุล</th><th colspan="' + rowsDef.length + '">รายการฝึกปฏิบัติราชการ</th><th rowspan="3" style="width:15%">หมายเหตุ</th></tr>'
       + '<tr>' + vh + '</tr><tr>' + mx + '</tr></thead><tbody>' + body + '</tbody></table></section>');
   }
-  return { th: th, countTable: countTable, scoreTable: scoreTable, form1: form1, form2: form2, scoreSummary: scoreSummary, signForm2: signForm2, rb3: rb3 };
+  return { th: th, splitRank: splitRank, countTable: countTable, scoreTable: scoreTable, form1: form1, form2: form2, scoreSummary: scoreSummary, signForm2: signForm2, rb3: rb3 };
 })();
 
 /* วันที่แบบไทย เช่น 8 ต.ค. 2569 */

@@ -438,7 +438,7 @@
 
         let resultSummary = '<span style="color:var(--text-muted);">-</span>';
         if (isEval) {
-          resultSummary = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
+          resultSummary = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ถูกต้อง</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ถูกต้อง</span>'}</div>`;
           if (log.mentorFeedback) {
             resultSummary += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>แนะ:</b> ${ftEsc(log.mentorFeedback)}</div>`;
           }

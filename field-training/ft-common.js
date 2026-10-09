@@ -32,8 +32,10 @@ function ftNewId() {
  */
 var FT_CUR = (function () {
   function it(prefix, names) { return names.map(function (n, i) { return { code: prefix + '_' + (i + 1), name: n }; }); }
-  var PREP = 'แต่งกายถูกต้องตามระเบียบ, ตรงต่อเวลา, เครื่องมือ/อุปกรณ์ประจำกายครบถ้วนพร้อมใช้งาน';
-  var POST = 'เก็บ/บำรุงรักษาเครื่องมือ อุปกรณ์ ยานพาหนะ, จัดทำบันทึกรายงานผล, แลกเปลี่ยนประสบการณ์';
+  var PREP_ITEMS = ['แต่งกายถูกต้องตามระเบียบ', 'ตรงต่อเวลา', 'เครื่องมือ/อุปกรณ์ประจำกาย ครบถ้วนพร้อมใช้งาน'];
+  var POST_ITEMS = ['เก็บ, บำรุงรักษาเครื่องมือ/อุปกรณ์/ยานพาหนะ', 'จัดทำบันทึกรายงานผลการปฏิบัติ', 'แลกเปลี่ยนประสบการณ์ในการปฏิบัติงานร่วมกัน'];
+  var PREP = PREP_ITEMS.join(', ');
+  var POST = POST_ITEMS.join(', ');
   var SEMS = {
     '1': { max: 450, prep: 50, post: 50, cats: [
       { id: 'k1_doc', no: '2.1', name: 'งานสารบรรณ', max: 100,
@@ -47,13 +49,13 @@ var FT_CUR = (function () {
         items: it('k1_hr', ['ให้คำแนะนำ/คำปรึกษาที่ดีแก่ประชาชน']) }
     ] },
     '2': { max: 400, prep: 50, post: 50, cats: [
-      { id: 'k2_pat', no: '2.1', name: 'การปฏิบัติงานสายตรวจ (รวมการเผชิญเหตุ/ตรวจค้น/จับกุม)', max: 100,
+      { id: 'k2_pat', no: '2.1', name: 'การปฏิบัติงานสายตรวจ (รวมการเผชิญเหตุ/ตรวจค้น/จับกุม)', formName: 'การปฏิบัติงานสายตรวจ', breaks: { 4: 'การเผชิญเหตุ/ตรวจค้น/จับกุม' }, max: 100,
         items: it('k2_pat', ['สายตรวจเดินเท้า', 'สายตรวจรถจักรยานยนต์', 'สายตรวจรถยนต์', 'รับแจ้งเหตุ', 'ระงับเหตุ',
                              'ตรวจค้นตัวบุคคล/สถานที่/รถยนต์', 'รักษาสถานที่เกิดเหตุ', 'ตั้งจุดตรวจ/จุดสกัด']) },
       { id: 'k2_trf', no: '2.2', name: 'การปฏิบัติงานด้านจราจร', max: 100,
         items: it('k2_trf', ['อำนวยการจราจรโดยใช้สัญญาณมือ', 'ควบคุมสัญญาณไฟ', 'ใช้กรวยยาง', 'ใช้ไฟฉายกะพริบ', 'ใช้ไซเรน',
                              'ใช้เครื่องตรวจวัดปริมาณแอลกอฮอล์', 'ใช้อุปกรณ์เครื่องตรวจจับความเร็ว', 'จัดการอุบัติเหตุ/เหตุฉุกเฉิน']) },
-      { id: 'k2_inv', no: '2.3', name: 'การปฏิบัติงานด้านสืบสวน (รวมการควบคุม/ตรวจสอบ/ดูแลผู้ต้องหา)', max: 100,
+      { id: 'k2_inv', no: '2.3', name: 'การปฏิบัติงานด้านสืบสวน (รวมการควบคุม/ตรวจสอบ/ดูแลผู้ต้องหา)', formName: 'การปฏิบัติงานด้านสืบสวน', breaks: { 6: 'การควบคุม/ตรวจสอบ/ดูแลผู้ต้องหา' }, max: 100,
         items: it('k2_inv', ['เฝ้าจุด/สังเกตการณ์', 'สะกดรอย/ติดตาม', 'ล่อซื้อ', 'หาข่าว', 'จับกุมผู้ต้องหาตามหมายจับ',
                              'ค้นตัวผู้ต้องหา', 'ใช้เครื่องพันธนาการ', 'ลงบัญชีสิ่งของในการเก็บรักษา',
                              'ควบคุม/ตรวจสอบสิ่งของ อาหารที่ญาติผู้ต้องหานำมาให้', 'นำตัวผู้ต้องหาไปผัดฟ้อง/ฝากขัง']) }
@@ -83,10 +85,76 @@ var FT_CUR = (function () {
   }
   return { version: 'หลักสูตร นสต. พ.ศ. 2567', total: 850, passScore: 510, weightTotal: 310,
            sems: SEMS, catOf: catOf, cat: function (id) { return byCat[id] || null; }, item: function (c) { return byItem[c] || null; },
-           topicLabel: topicLabel, prepText: PREP, postText: POST };
+           topicLabel: topicLabel, prepText: PREP, postText: POST, prepItems: PREP_ITEMS, postItems: POST_ITEMS };
 })();
 
 var FT_SCORE = (function () {
+  var OK = 'ถูกต้อง', BAD = 'ไม่ถูกต้อง';
+  function isOk(v) { return v === 'ผ่าน' || v === OK; }
+  function isMarked(v) { return v === 'ผ่าน' || v === 'ไม่ผ่าน' || v === OK || v === BAD; }
+  function zero() { return { ok: 0, bad: 0 }; }
+  function add(c, v) { if (!isMarked(v)) return; if (isOk(v)) c.ok++; else c.bad++; }
+
+  /* นับจำนวนการปฏิบัติตามแบบบันทึกผลการปฏิบัติงาน (รายวัน) — หลักสูตร นสต. 2567
+   * - ความพร้อม/หลังปฏิบัติงาน: 3 ข้อย่อย นับวันละ 1 ครั้ง (ใช้ผลของบันทึกที่ตรวจล่าสุดของวันนั้น)
+   * - การปฏิบัติงาน: นับตามรายการของแต่ละบันทึก
+   * - บันทึกเก่าที่ยังไม่มีข้อย่อย: นับความพร้อม/หลังปฏิบัติ 1 ครั้งต่อบันทึก (legacy)
+   * opts: { semester: '1'|'2', from: 'YYYY-MM-DD', to: 'YYYY-MM-DD', month: 'YYYY-MM' } */
+  function tally(allLogs, traineeName, opts) {
+    opts = opts || {};
+    var sem = opts.semester ? String(opts.semester) : null;
+    var logs = (allLogs || []).filter(function (l) {
+      if (l.traineeName !== traineeName || l.status !== 'evaluated') return false;
+      var ls = String(l.semester) === '2' ? '2' : '1';
+      if (sem && ls !== sem) return false;
+      var d = String(l.date || '');
+      if (opts.month && d.indexOf(opts.month) !== 0) return false;
+      if (opts.from && d < opts.from) return false;
+      if (opts.to && d > opts.to) return false;
+      return true;
+    });
+    var t = { logs: logs, days: [], prep: [zero(), zero(), zero()], post: [zero(), zero(), zero()],
+              prepLegacy: zero(), postLegacy: zero(), items: {}, legacy: {}, legacyNames: {} };
+    var byDay = {};
+    logs.forEach(function (l) {
+      var key = (String(l.semester) === '2' ? '2' : '1') + '|' + l.date;
+      (byDay[key] = byDay[key] || []).push(l);
+      var code = l.topicCode, cat = FT_CUR.catOf(code);
+      if (FT_CUR.item(code)) { add(t.items[code] = t.items[code] || zero(), l.evalWork); }
+      else if (cat) {
+        add(t.legacy[cat] = t.legacy[cat] || zero(), l.evalWork);
+        (t.legacyNames[cat] = t.legacyNames[cat] || {})[l.topicName || code] = 1;
+      }
+    });
+    Object.keys(byDay).sort().forEach(function (key) {
+      var day = byDay[key];
+      t.days.push(key.split('|')[1]);
+      ['prep', 'post'].forEach(function (k) {
+        var withItems = day.filter(function (l) { return Array.isArray(l[k + 'Items']) && l[k + 'Items'].length === 3; });
+        if (withItems.length) {
+          withItems.sort(function (a, b) { return (a.evalAt || 0) - (b.evalAt || 0); });
+          var src = withItems[withItems.length - 1][k + 'Items'];
+          src.forEach(function (v, i) { add(t[k][i], v); });
+        }
+        day.forEach(function (l) {
+          if (!(Array.isArray(l[k + 'Items']) && l[k + 'Items'].length === 3) && !withItems.length) {
+            add(t[k + 'Legacy'], k === 'prep' ? l.evalPrep : l.evalPost);
+          }
+        });
+      });
+    });
+    function sum(list) { return list.reduce(function (a, c) { if (c) { a.ok += c.ok; a.bad += c.bad; } return a; }, zero()); }
+    t.prepTotal = sum(t.prep.concat([t.prepLegacy]));
+    t.postTotal = sum(t.post.concat([t.postLegacy]));
+    t.catTotal = {};
+    Object.keys(FT_CUR.sems).forEach(function (s) {
+      FT_CUR.sems[s].cats.forEach(function (c) {
+        t.catTotal[c.id] = sum(c.items.map(function (i) { return t.items[i.code]; }).concat([t.legacy[c.id]]));
+      });
+    });
+    return t;
+  }
+
   function rowsFor(sem) {
     var S = FT_CUR.sems[sem], p = 'k' + sem;
     var out = [{ id: p + '_prep', kind: 'prep', no: '1.', title: 'ความพร้อมก่อนปฏิบัติงาน', sub: FT_CUR.prepText, maxScore: S.prep }];
@@ -98,40 +166,27 @@ var FT_SCORE = (function () {
   }
   function grade(pct) { return pct >= 80 ? 'ผ่าน (ดี)' : pct >= 60 ? 'ผ่าน (พอใช้)' : 'ไม่ผ่าน'; }
 
+  /* คะแนนของภาคเรียน จากผลนับ (tally) */
+  function semRows(sem, t) {
+    var out = { rows: [], score: 0, ev: 0, ps: 0, fl: 0, done: 0, workOk: true };
+    rowsFor(sem).forEach(function (item) {
+      var c = item.kind === 'prep' ? t.prepTotal : item.kind === 'post' ? t.postTotal : t.catTotal[item.id];
+      var ev = c.ok + c.bad;
+      if (!ev) { out.rows.push({ item: item, ev: 0, ps: 0, fl: 0, sc: 0, pct: 0, pending: true }); return; }
+      var sc = Math.round((c.ok * item.maxScore) / ev);
+      var pct = (sc / item.maxScore) * 100;
+      if (item.kind === 'work' && pct < 60) out.workOk = false;
+      out.rows.push({ item: item, ev: ev, ps: c.ok, fl: c.bad, sc: sc, pct: pct, pending: false });
+      out.score += sc; out.ev += ev; out.ps += c.ok; out.fl += c.bad; out.done++;
+    });
+    return out;
+  }
+
   /* หัวข้อที่ยังไม่มีผลประเมิน: คะแนน 0 และสถานะ "ยังไม่ประเมิน" — สรุปผ่าน/ไม่ผ่านเมื่อประเมินครบทุกหัวข้อ */
   function compute(allLogs, traineeName) {
-    var traineeLogs = (allLogs || []).filter(function (l) { return l.traineeName === traineeName && l.status === 'evaluated'; });
-    var stats = {};
-    function bump(key, passed) {
-      if (!stats[key]) stats[key] = { eval: 0, pass: 0 };
-      stats[key].eval++;
-      if (passed) stats[key].pass++;
-    }
-    traineeLogs.forEach(function (log) {
-      var sem = String(log.semester) === '2' ? '2' : '1';
-      if (log.evalPrep === 'ผ่าน' || log.evalPrep === 'ไม่ผ่าน') bump('k' + sem + '_prep', log.evalPrep === 'ผ่าน');
-      var cat = FT_CUR.catOf(log.topicCode);
-      if (cat && (log.evalWork === 'ผ่าน' || log.evalWork === 'ไม่ผ่าน')) bump(cat, log.evalWork === 'ผ่าน');
-      if (log.evalPost === 'ผ่าน' || log.evalPost === 'ไม่ผ่าน') bump('k' + sem + '_post', log.evalPost === 'ผ่าน');
-    });
-    var workOk = true;
-    function calc(sem) {
-      var out = { rows: [], score: 0, ev: 0, ps: 0, fl: 0, done: 0 };
-      rowsFor(sem).forEach(function (item) {
-        var st = stats[item.id];
-        if (!st || st.eval === 0) {
-          out.rows.push({ item: item, ev: 0, ps: 0, fl: 0, sc: 0, pct: 0, pending: true });
-          return;
-        }
-        var sc = Math.round((st.pass * item.maxScore) / st.eval);
-        var pct = (sc / item.maxScore) * 100;
-        if (item.kind === 'work' && pct < 60) workOk = false;
-        out.rows.push({ item: item, ev: st.eval, ps: st.pass, fl: st.eval - st.pass, sc: sc, pct: pct, pending: false });
-        out.score += sc; out.ev += st.eval; out.ps += st.pass; out.fl += st.eval - st.pass; out.done++;
-      });
-      return out;
-    }
-    var a = calc('1'), b = calc('2');
+    var t1 = tally(allLogs, traineeName, { semester: '1' }), t2 = tally(allLogs, traineeName, { semester: '2' });
+    var a = semRows('1', t1), b = semRows('2', t2);
+    var workOk = a.workOk && b.workOk;
     var totalScore = a.score + b.score;
     var itemsTotal = a.rows.length + b.rows.length;
     var itemsDone = a.done + b.done;
@@ -139,7 +194,7 @@ var FT_SCORE = (function () {
     var pct = (totalScore / FT_CUR.total) * 100;
     var isPass = complete && totalScore >= FT_CUR.passScore && workOk;
     return {
-      traineeLogs: traineeLogs,
+      traineeLogs: t1.logs.concat(t2.logs), tally1: t1, tally2: t2,
       s1Rows: a.rows, s1Score: a.score, s1Eval: a.ev, s1Pass: a.ps, s1Fail: a.fl, s1Max: FT_CUR.sems['1'].max,
       s2Rows: b.rows, s2Score: b.score, s2Eval: b.ev, s2Pass: b.ps, s2Fail: b.fl, s2Max: FT_CUR.sems['2'].max,
       totalScore: totalScore, totalMax: FT_CUR.total, percent: pct,
@@ -156,7 +211,158 @@ var FT_SCORE = (function () {
     if (res.isPass) return res.grade;
     return res.workAllPass ? 'ไม่ผ่าน (คะแนนรวมต่ำกว่า ' + FT_CUR.passScore + ')' : 'ไม่ผ่าน (มีประเภทงานต่ำกว่าร้อยละ 60)';
   }
-  return { compute: compute, statusText: statusText, rowsFor: rowsFor };
+  return { compute: compute, statusText: statusText, rowsFor: rowsFor, tally: tally, semRows: semRows, grade: grade, OK: OK, BAD: BAD, isOk: isOk };
+})();
+
+/* ===================== FT_FORMS =====================
+ * แบบฟอร์มตามหลักสูตร นสต. พ.ศ. 2567 (ผนวก ง): แบบประเมินแบบที่ 1, แบบที่ 2, รบ 3 */
+var FT_FORMS = (function () {
+  function e(v) { return ftEsc(v == null ? '' : v); }
+  function n(v) { return v ? String(v) : ''; }
+  /* ตารางจำนวนการปฏิบัติ (ถูกต้อง/ไม่ถูกต้อง) ตามแบบประเมินแบบที่ 1 และ 2 */
+  function countTable(sem, t, opts) {
+    opts = opts || {};
+    var S = FT_CUR.sems[sem], h = [];
+    var tot = { ok: 0, bad: 0 };
+    function row(label, c, cls) { h.push('<tr class="' + (cls || '') + '"><td' + (cls === 'item' ? ' class="ind"' : '') + '>' + label + '</td><td class="c">' + n(c && c.ok) + '</td><td class="c">' + n(c && c.bad) + '</td><td></td></tr>'); }
+    function sumRow(c) { h.push('<tr class="sum"><td class="right">รวมจำนวนการปฏิบัติ</td><td class="c">' + c.ok + '</td><td class="c">' + c.bad + '</td><td></td></tr>'); tot.ok += c.ok; tot.bad += c.bad; }
+    function grp(label) { h.push('<tr class="grp"><td colspan="4">' + label + '</td></tr>'); }
+    h.push('<table><thead><tr><th rowspan="2">รายการปฏิบัติ</th><th colspan="2" class="c">ผลการปฏิบัติ</th><th rowspan="2" class="c" style="width:16%">หมายเหตุ</th></tr>'
+      + '<tr><th class="c" style="width:12%">ถูกต้อง</th><th class="c" style="width:12%">ไม่ถูกต้อง</th></tr></thead><tbody>');
+    grp('ความพร้อมก่อนปฏิบัติงาน');
+    FT_CUR.prepItems.forEach(function (it, i) { row((i + 1) + '. ' + e(it), t.prep[i], 'item'); });
+    if (t.prepLegacy.ok + t.prepLegacy.bad) row('(บันทึกตามเกณฑ์เดิม)', t.prepLegacy, 'item');
+    sumRow(t.prepTotal);
+    grp('การปฏิบัติงาน');
+    S.cats.forEach(function (c) {
+      h.push('<tr class="grp"><td colspan="4">' + e(c.formName || c.name) + '</td></tr>');
+      c.items.forEach(function (it, i) {
+        if (c.breaks && c.breaks[i + 1]) h.push('<tr><td class="ind"><b>' + e(c.breaks[i + 1]) + '</b></td><td></td><td></td><td></td></tr>');
+        row((i + 1) + '. ' + e(it.name), t.items[it.code], 'item');
+      });
+      if (t.legacy[c.id]) row('(บันทึกตามเกณฑ์เดิม) ' + e(Object.keys(t.legacyNames[c.id] || {}).join(', ')), t.legacy[c.id], 'item');
+      sumRow(t.catTotal[c.id]);
+    });
+    grp('หลังปฏิบัติงาน');
+    FT_CUR.postItems.forEach(function (it, i) { row((i + 1) + '. ' + e(it), t.post[i], 'item'); });
+    if (t.postLegacy.ok + t.postLegacy.bad) row('(บันทึกตามเกณฑ์เดิม)', t.postLegacy, 'item');
+    sumRow(t.postTotal);
+    h.push('<tr class="sum"><td class="right">รวมจำนวนการปฏิบัติทั้งหมด</td><td class="c">' + tot.ok + '</td><td class="c">' + tot.bad + '</td><td class="c">ทั้งหมด <span' + (opts.totalId ? ' id="' + opts.totalId + '"' : '') + '>' + (tot.ok + tot.bad) + '</span> ครั้ง</td></tr>');
+    h.push('</tbody></table>');
+    return h.join('');
+  }
+  /* บันทึกผลคะแนนของภาคเรียน (แบบประเมินแบบที่ 2 หน้าบันทึกผลคะแนน) */
+  function scoreTable(sem, r) {
+    var h = ['<table><thead><tr><th>ภาคเรียนที่ ' + sem + ' — รายการปฏิบัติ</th><th class="c">จำนวนการปฏิบัติทั้งหมด</th><th class="c">จำนวนการปฏิบัติที่ทำได้ถูกต้อง</th><th class="c">คะแนนเต็ม</th><th class="c">คะแนน</th></tr></thead><tbody>'];
+    r.rows.forEach(function (x) {
+      var label = x.item.kind === 'work' ? '<span class="ind">' + e(x.item.title.replace(/ \(.*\)$/, '')) + '</span>' : '<b>' + e(x.item.title) + '</b>';
+      if (x.item.kind === 'work' && r.rows.indexOf(x) === 1) h.push('<tr><td><b>การปฏิบัติงาน</b></td><td></td><td></td><td></td><td></td></tr>');
+      h.push('<tr><td>' + label + '</td><td class="c">' + (x.pending ? '-' : x.ev) + '</td><td class="c">' + (x.pending ? '-' : x.ps) + '</td><td class="c">' + x.item.maxScore + '</td><td class="c"' + (!x.pending && x.item.kind === 'work' && x.pct < 60 ? ' style="color:#c00;font-weight:700"' : '') + '>' + (x.pending ? 'ยังไม่ประเมิน' : x.sc) + '</td></tr>');
+    });
+    h.push('<tr class="sum"><td class="right">รวม</td><td class="c">' + r.ev + '</td><td class="c">' + r.ps + '</td><td class="c">' + FT_CUR.sems[sem].max + '</td><td class="c">' + r.score + '</td></tr></tbody></table>');
+    return h.join('');
+  }
+  function formulaNote() {
+    return '<div style="font-size:11pt;margin-top:6pt"><b>สูตรการคำนวณผลคะแนน</b><br>'
+      + 'คะแนนความพร้อมก่อนปฏิบัติงาน / การมีมนุษยสัมพันธ์ที่ดี / หลังปฏิบัติงาน = (จำนวนการปฏิบัติที่ทำได้ถูกต้อง × 50) ÷ จำนวนการปฏิบัติทั้งหมด<br>'
+      + 'คะแนนการปฏิบัติตามประเภทงาน = (จำนวนการปฏิบัติที่ทำได้ถูกต้อง × 100) ÷ จำนวนการปฏิบัติทั้งหมด<br>'
+      + '<b>เกณฑ์การประเมิน</b> ร้อยละ 80 – 100 = ผ่าน (ดี) · ร้อยละ 60 – 79 = ผ่าน (พอใช้) · ร้อยละ 0 – 59 = ไม่ผ่าน</div>';
+  }
+  function signBox(title, name) {
+    return '<div><div class="lines"></div><div>(' + (name ? e(name) : '..........................................') + ')</div>'
+      + '<div>ตำแหน่ง ..........................................</div><div>' + title + '</div></div>';
+  }
+  /* ลายมือชื่อแบบที่ 2: ครูพี่เลี้ยงประจำสถานีตำรวจ + ครู – อาจารย์ ของหน่วยฝึกอบรม */
+  function signForm2(mentor) {
+    return '<div class="sign">' + signBox('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ<br>ประจำสถานีตำรวจ', mentor) + signBox('ครู – อาจารย์<br>ของหน่วยฝึกอบรม', '') + '</div>';
+  }
+  /* แบบประเมินแบบที่ 1: แบบบันทึกผลการปฏิบัติงาน (รายวัน) */
+  function form1(o) {
+    var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, from: o.date, to: o.date });
+    var notes = t.logs.map(function (l) { return '• ' + FT_CUR.topicLabel(l.topicCode) + (l.traineeNote ? ': ' + l.traineeNote : ''); }).join('\n');
+    var fb = t.logs.map(function (l) { return l.mentorFeedback; }).filter(Boolean).join('\n');
+    var pending = (o.logs || []).filter(function (l) { return l.traineeName === o.name && l.date === o.date && l.status !== 'evaluated'; }).length;
+    return '<div class="pg">แบบประเมินแบบที่ 1</div><h2>แบบบันทึกผลการปฏิบัติงาน (รายวัน)</h2>'
+      + '<div class="sub ft-sub">วันที่ ' + e(ftThaiDate(o.date, true)) + ' · ภาคเรียนที่ ' + e(o.sem) + '</div>'
+      + '<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>' + e(o.name) + '</b> &nbsp; สังกัด/สถานที่ฝึก <b>' + e(o.station || '-') + '</b></div>'
+      + '<div style="font-size:11pt">คำชี้แจง ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วบันทึกจำนวนครั้งที่ปฏิบัติถูกต้อง/ไม่ถูกต้อง'
+      + (pending ? ' <span class="no-print" style="color:#c00">(มี ' + pending + ' รายการของวันนี้ที่ยังไม่ได้ตรวจ — ไม่นับในแบบนี้)</span>' : '') + '</div>'
+      + countTable(o.sem, t)
+      + '<div class="sign">' + signBox('ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ', o.mentor) + '</div>'
+      + '<div style="page-break-before:always;margin-top:14pt"><div class="pg">แบบประเมินแบบที่ 1</div><b>บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ</b><div class="note">' + e(notes) + '</div>'
+      + '<div class="sign">' + signBox('ผู้ฝึกหัดปฏิบัติราชการ', o.name) + '</div>'
+      + '<b>ข้อเสนอแนะประจำวัน (เฉพาะครูพี่เลี้ยง)</b><div class="note">' + e(fb) + '</div>'
+      + '<div class="sign">' + signBox('ครูพี่เลี้ยง', o.mentor) + signBox('ผู้ฝึกหัด', o.name) + '</div></div>';
+  }
+  /* แบบประเมินแบบที่ 2: แบบสรุปผลการปฏิบัติงาน (รายภาคเรียน หรือเฉพาะเดือน) */
+  function form2(o) {
+    var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, month: o.month || '' });
+    var r = FT_SCORE.semRows(o.sem, t);
+    var first = t.days[0], last = t.days[t.days.length - 1];
+    return { tally: t, rows: r, html: '<div class="pg">แบบประเมินแบบที่ 2</div><h2>แบบสรุปผลการปฏิบัติงาน</h2>'
+      + '<div class="ft-sub">เพื่อใช้วัดผลสัมฤทธิ์การฝึกหัดปฏิบัติราชการ (ภาคเรียนที่ ' + e(o.sem) + ')' + (o.month ? ' — เฉพาะเดือน ' + e(ftThaiDate(o.month + '-01', true).replace(/^1 /, '')) : '') + '</div>'
+      + '<div>ระหว่างวันที่ ' + (first ? e(ftThaiDate(first, true)) : '……………') + ' ถึง วันที่ ' + (last ? e(ftThaiDate(last, true)) : '……………') + ' จำนวน ' + t.days.length + ' วัน</div>'
+      + '<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>' + e(o.name) + '</b> &nbsp; สังกัด/สถานที่ฝึก <b>' + e(o.station || '-') + '</b></div>'
+      + '<div style="font-size:11pt">คำชี้แจง สรุปผลการปฏิบัติงานจากแบบบันทึกผลการปฏิบัติงาน (รายวัน) โดยใส่ตัวเลขจำนวนการปฏิบัติตามผลการปฏิบัติจริง ตั้งแต่วันแรกจนถึงวันสุดท้ายของการฝึก</div>'
+      + countTable(o.sem, t, { totalId: o.totalId })
+      + '<div style="margin-top:12pt"><b>บันทึกผลคะแนน</b></div>' + scoreTable(o.sem, r)
+      + '<div style="margin-top:6pt">คะแนนเต็ม <b>' + FT_CUR.sems[o.sem].max + '</b> · คะแนนที่ทำได้ <b>' + r.score + '</b> · คิดเป็นร้อยละ <b>' + (r.score / FT_CUR.sems[o.sem].max * 100).toFixed(2) + '</b>'
+      + (r.done < r.rows.length ? ' <span style="color:#c00">(ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ)</span>' : '') + '</div>'
+      + formulaNote() };
+  }
+  /* บันทึกผลคะแนนรวม 2 ภาคเรียน (เต็ม 850) */
+  function scoreSummary(res) {
+    var h = scoreTable('1', { rows: res.s1Rows, ev: res.s1Eval, ps: res.s1Pass, score: res.s1Score })
+      + '<div style="height:8pt"></div>' + scoreTable('2', { rows: res.s2Rows, ev: res.s2Eval, ps: res.s2Pass, score: res.s2Score });
+    h += '<table style="margin-top:10pt"><thead><tr><th class="c">คะแนนเต็ม</th><th class="c">คะแนนที่ทำได้</th><th class="c">คิดเป็นร้อยละ</th><th class="c">ผลการปฏิบัติงาน</th></tr></thead><tbody>'
+      + '<tr><td class="c">' + FT_CUR.total + '</td><td class="c"><b>' + res.totalScore + '</b></td><td class="c">' + res.percent.toFixed(2) + '</td><td class="c"><b>' + e(FT_SCORE.statusText(res)) + '</b></td></tr></tbody></table>';
+    return h + formulaNote();
+  }
+  /* รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (รายภาคเรียน) */
+  function rb3(sem, people, unit) {
+    var rowsDef = FT_SCORE.rowsFor(sem);
+    var head = rowsDef.map(function (x) { return '<th class="c" style="font-size:10pt">' + e(x.kind === 'work' ? x.title.replace(/ \(.*\)$/, '') : x.title) + '<br>(' + x.maxScore + ')</th>'; }).join('');
+    var body = people.map(function (p, i) {
+      var r = sem === '1' ? p.res.s1Rows : p.res.s2Rows, sc = sem === '1' ? p.res.s1Score : p.res.s2Score;
+      return '<tr><td class="c">' + (i + 1) + '</td><td></td><td>' + e(p.name) + '</td>' + r.map(function (x) { return '<td class="c">' + (x.pending ? '-' : x.sc) + '</td>'; }).join('')
+        + '<td class="c"><b>' + sc + '</b></td><td style="font-size:10pt">' + (r.some(function (x) { return x.pending; }) ? 'ยังประเมินไม่ครบ' : '') + '</td></tr>';
+    }).join('');
+    return '<div class="pg">รบ 3</div><h2>บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ</h2><div class="ft-sub">(ภาคเรียนที่ ' + sem + ') ประจำปี พ.ศ. ' + (new Date().getFullYear() + 543) + '<br>ศูนย์ฝึกอบรม ' + e(unit || '...............................................') + '</div>'
+      + '<table><thead><tr><th class="c">ลำดับ</th><th class="c">เลขประจำตัว</th><th style="min-width:150px">ชื่อ - สกุล</th>' + head + '<th class="c">รวม<br>(' + FT_CUR.sems[sem].max + ')</th><th class="c">หมายเหตุ</th></tr></thead><tbody>'
+      + (body || '<tr><td colspan="' + (rowsDef.length + 5) + '" class="c">ไม่มีข้อมูล</td></tr>') + '</tbody></table>';
+  }
+  return { countTable: countTable, scoreTable: scoreTable, form1: form1, form2: form2, scoreSummary: scoreSummary, signForm2: signForm2, rb3: rb3 };
+})();
+
+/* วันที่แบบไทย เช่น 8 ต.ค. 2569 */
+function ftThaiDate(d, full) {
+  var m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(d || '');
+  var short = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  var long = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  return (+m[3]) + ' ' + (full ? long : short)[+m[2] - 1] + ' ' + (+m[1] + 543);
+}
+
+/* พิมพ์เฉพาะส่วนที่ระบุ (ซ่อนส่วนอื่นของหน้า) */
+function ftPrintOnly(el) {
+  document.body.classList.add('ft-print-isolate');
+  el.classList.add('ft-print-target');
+  var done = function () { document.body.classList.remove('ft-print-isolate'); el.classList.remove('ft-print-target'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+  setTimeout(done, 1000);
+}
+(function () {
+  try {
+    var st = document.createElement('style');
+    st.textContent = '.ft-form{display:none}.ft-doc .scr-only{}@media print{.ft-doc{font-size:12pt}.ft-doc .no-print{display:none!important}body.ft-print-isolate .container>*:not(.ft-print-target),body.ft-print-isolate>*:not(.container){display:none!important}body.ft-print-isolate .ft-print-target{display:block!important}}'
+      + '.ft-doc{font-family:Sarabun,sans-serif;color:#000;font-size:13pt}.ft-doc h2{font-size:15pt;text-align:center;margin:0 0 4pt}.ft-doc .ft-sub{text-align:center;margin-bottom:6pt}'
+      + '.ft-doc table{width:100%;border-collapse:collapse;margin-top:6pt}.ft-doc th,.ft-doc td{border:1px solid #000;padding:3pt 6pt;font-size:12pt}.ft-doc .c{text-align:center}'
+      + '.ft-doc .grp td{font-weight:700;background:#f3f3f3}.ft-doc .ind{padding-left:18pt}.ft-doc .sum td{font-weight:700}.ft-doc .right{text-align:right}'
+      + '.ft-doc .sign{display:flex;justify-content:space-around;margin-top:22pt;text-align:center;gap:20pt}.ft-doc .lines{border-bottom:1px dotted #000;min-height:18pt;margin:2pt 0}'
+      + '.ft-doc .pg{text-align:right;font-size:11pt}.ft-doc .note{white-space:pre-wrap;border:1px solid #000;padding:6pt;min-height:60pt}';
+    (document.head || document.documentElement).appendChild(st);
+  } catch (e) {}
 })();
 
 /* ===================== FT_SYNC ===================== */

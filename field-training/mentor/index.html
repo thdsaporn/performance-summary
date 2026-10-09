@@ -165,6 +165,10 @@
       border-color: var(--danger); background: var(--danger-bg); color: var(--danger);
     }
     .eval-radio-label input { display: none; }
+    .eval-row { display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap; }
+    .eval-row > span { flex:1 1 220px; font-size:13px; }
+    .eval-row .eval-radio-group { flex:0 0 auto; margin-top:0; min-width:230px; }
+    .eval-row .eval-radio-label { padding:5px 10px; }
 
     /* Print styling */
     .print-only { display: none; }
@@ -193,7 +197,7 @@
         <div class="badge-icon">👨‍✈️</div>
         <div>
           <h1>ระบบตรวจประเมินและออกรายงาน (สำหรับ ครูพี่เลี้ยง)</h1>
-          <p>ตรวจบันทึกรายวัน · แบบประเมินรายเดือน (แบบที่ 2) · แบบสรุปผล (แบบที่ 3) · กก.5 บก.กฝ.บช.ตชด.</p>
+          <p>หลักสูตร นสต. พ.ศ. 2567 · แบบประเมินแบบที่ 1 (รายวัน) · แบบที่ 2 (สรุปผลการปฏิบัติงาน) · บันทึกผลคะแนน</p>
         </div>
       </div>
       
@@ -205,13 +209,13 @@
     <!-- Mentor Mode Tabs: Daily Evaluation vs Monthly/Summary Forms -->
     <div class="mentor-tabs no-print">
       <button type="button" class="mentor-tab-btn active" id="btn_tab_daily" onclick="switchMentorTab('daily')">
-        📝 1. ตรวจประเมินบันทึกรายวัน (แบบที่ 1)
+        📝 1. ตรวจบันทึกรายวัน (แบบประเมินแบบที่ 1)
       </button>
       <button type="button" class="mentor-tab-btn" id="btn_tab_monthly" onclick="switchMentorTab('monthly')">
-        📅 2. แบบประเมินรายเดือน (แบบที่ 2)
+        📊 2. แบบสรุปผลการปฏิบัติงาน (แบบประเมินแบบที่ 2)
       </button>
       <button type="button" class="mentor-tab-btn" id="btn_tab_summary" onclick="switchMentorTab('summary')">
-        🎖️ 3. แบบสรุปผลการประเมินของครูพี่เลี้ยง (แบบที่ 3)
+        🎖️ 3. บันทึกผลคะแนนรวม (เต็ม 850)
       </button>
     </div>
 
@@ -251,6 +255,11 @@
               <option value="2">ภาคเรียนที่ 2</option>
             </select>
           </div>
+          <div style="margin-left:auto;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:2px;">พิมพ์แบบประเมินแบบที่ 1 (รายวัน) ของ นสต. ที่เลือก:</label>
+            <input type="date" id="f1_date">
+            <button type="button" class="btn btn-print btn-sm" onclick="printForm1FromFilter()">🖨️ พิมพ์แบบที่ 1</button>
+          </div>
         </div>
 
         <!-- Table -->
@@ -262,7 +271,7 @@
                 <th style="width:105px;text-align:center;">วันที่</th>
                 <th style="width:160px;">นสต. ผู้บันทึก</th>
                 <th style="width:75px;text-align:center;">ภาค</th>
-                <th style="width:230px;">หัวข้อปฏิบัติงาน</th>
+                <th style="width:230px;">รายการปฏิบัติ</th>
                 <th>บันทึกของ นสต.</th>
                 <th style="width:115px;text-align:center;">สถานะ</th>
                 <th style="width:115px;text-align:center;">ผลการตรวจ</th>
@@ -280,10 +289,10 @@
       <div class="card" style="border-top:4px solid var(--blue);">
         <div class="card-header">
           <div class="card-title">
-            <span>📅 แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ 2)</span>
+            <span>📊 แบบสรุปผลการปฏิบัติงาน เพื่อใช้วัดผลสัมฤทธิ์การฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ 2)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบประเมินรายเดือน (PDF)</button>
+            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบที่ 2 (PDF)</button>
           </div>
         </div>
 
@@ -295,59 +304,26 @@
             </select>
           </div>
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือกเดือนที่ประเมิน:</label>
-            <input type="month" id="m_monthly_month" value="2026-08" onchange="renderMonthlyReport()">
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">ภาคเรียน:</label>
+            <select id="m_rep2_sem" onchange="renderMonthlyReport()" style="font-weight:600;color:var(--navy);">
+              <option value="1">ภาคเรียนที่ 1</option>
+              <option value="2">ภาคเรียนที่ 2</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เฉพาะเดือน (เว้นว่าง = ทั้งภาคเรียน):</label>
+            <input type="month" id="m_monthly_month" value="" onchange="renderMonthlyReport()">
+            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('m_monthly_month').value='';renderMonthlyReport()">ทั้งภาคเรียน</button>
           </div>
         </div>
 
-        <!-- Official Form 2 Preview Header -->
-        <div style="text-align:center;margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการประจำเดือน (แบบประเมินแบบที่ 2)</h3>
-          <p style="font-size:13px;color:var(--text-muted);">หลักสูตรนักเรียนนายสิบตำรวจ (นสต.)  · กก.5 บก.กฝ.บช.ตชด.</p>
-        </div>
-
-        <div style="background:#f8fafc;padding:12px 16px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:14px;font-size:13.5px;">
-          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-            <div><b>ชื่อ นสต.:</b> <span id="m_rep2_name">-</span></div>
-            <div><b>ประจำเดือน:</b> <span id="m_rep2_month_text">-</span></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:4px;">
-            <div><b>สถานีตำรวจที่ฝึก:</b> <span id="m_rep2_station">-</span></div>
-            <div><b>ครูพี่เลี้ยง:</b> <span id="m_rep2_mentor">-</span></div>
-          </div>
-        </div>
-
-        <!-- Form 2 Monthly Aggregate Table -->
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:50px;text-align:center;">ลำดับ</th>
-                <th>รายการปฏิบัติ (ตามแบบสรุปผลการปฏิบัติงาน หลักสูตร นสต. 2567)</th>
-                <th style="width:120px;text-align:center;">จำนวนครั้งที่ประเมิน</th>
-                <th style="width:120px;text-align:center;color:var(--success);">ถูกต้อง</th>
-                <th style="width:120px;text-align:center;color:var(--danger);">ไม่ถูกต้อง</th>
-                <th style="width:130px;text-align:center;">ผลการประเมิน</th>
-              </tr>
-            </thead>
-            <tbody id="m_rep2_tbody"></tbody>
-            <tfoot>
-              <tr style="background:#fef9e7;font-weight:700;">
-                <td colspan="2" style="text-align:center;">รวมจำนวนการปฏิบัติทั้งหมดในเดือนนี้</td>
-                <td style="text-align:center;" id="m_rep2_tot_eval">0</td>
-                <td style="text-align:center;color:var(--success);" id="m_rep2_tot_pass">0</td>
-                <td style="text-align:center;color:var(--danger);" id="m_rep2_tot_fail">0</td>
-                <td style="text-align:center;color:var(--navy);" id="m_rep2_tot_result">ผ่านเกณฑ์</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        <div id="m_rep2_form" class="ft-doc"></div>
 
         <!-- Monthly Feedback Section (Editable & Savable) -->
         <div style="margin-top:16px;background:#f8fafc;padding:16px;border-radius:8px;border:1px solid var(--border-light);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
             <label for="m_rep2_feedback_input" style="font-weight:700;font-size:13.5px;color:var(--navy);">
-              ✍️ ข้อคิดเห็น / ข้อเสนอแนะภาพรวมประจำเดือนของครูพี่เลี้ยง:
+              ✍️ ข้อคิดเห็น / ข้อเสนอแนะของครูพี่เลี้ยง (ช่วงที่เลือก):
             </label>
             <div class="no-print" style="display:flex;gap:8px;align-items:center;">
               <span id="m_rep2_feedback_saved_indicator" style="font-size:12px;color:var(--success);font-weight:600;display:none;">✓ บันทึกข้อคิดเห็นแล้ว</span>
@@ -364,7 +340,7 @@
           </div>
         </div>
 
-        <!-- Signatures for Form 2 -->
+        <div id="m_rep2_sign" class="ft-doc"></div>
         </div>
       </div>
     </div>
@@ -374,16 +350,16 @@
       <div class="card" style="border-top:4px solid var(--gold-deep);">
         <div class="card-header">
           <div class="card-title">
-            <span>🎖️ แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการรวม (แบบประเมินแบบที่ 3)</span>
+            <span>🎖️ บันทึกผลคะแนนการฝึกหัดปฏิบัติราชการ 2 ภาคเรียน (แบบประเมินแบบที่ 2 หน้าบันทึกผลคะแนน)</span>
           </div>
           <div class="no-print" style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์แบบสรุปผลรวม (PDF)</button>
+            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์บันทึกผลคะแนน (PDF)</button>
           </div>
         </div>
 
         <div class="filter-bar no-print" style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:16px;">
           <div>
-            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือก นสต. เพื่อดูแบบสรุปผลรวม:</label>
+            <label style="font-size:12px;font-weight:600;color:var(--navy);display:block;margin-bottom:2px;">เลือก นสต.:</label>
             <select id="m_summary_trainee" onchange="renderSummaryReport()" style="font-weight:600;color:var(--navy);">
               <!-- Populated by JS -->
             </select>
@@ -391,7 +367,7 @@
         </div>
 
         <div style="text-align:center;margin-bottom:14px;">
-          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">แบบสรุปผลการประเมินการฝึกหัดปฏิบัติราชการ (แบบประเมินแบบที่ 3)</h3>
+          <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">บันทึกผลคะแนนการฝึกหัดปฏิบัติราชการ</h3>
           <p style="font-size:13px;color:var(--text-muted);">ตามหลักสูตรนักเรียนนายสิบตำรวจ พ.ศ. 2567 (ผนวก ง) · เต็ม 850 คะแนน · ผ่านร้อยละ 60 (510 คะแนน) และผ่านทุกประเภทงาน</p>
         </div>
 
@@ -417,28 +393,22 @@
           </div>
         </div>
 
-        <!-- Summary Certification Box -->
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:18px;">
-          <div style="font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:6px;">
-            ความเห็นและการรับรองของครูพี่เลี้ยง / ผู้ควบคุมการฝึก:
-          </div>
-          <div style="font-size:13.5px;color:#334155;line-height:1.6;">
-            ขอรับรองว่า <strong id="m_rep3_cert_name">นสต. ทศพร สุมาลี</strong> ได้เข้ารับการฝึกหัดปฏิบัติราชการ ณ สถานีตำรวจ และผ่านการประเมินครบถ้วนตามหลักเกณฑ์ของหลักสูตรนักเรียนนายสิบตำรวจ พ.ศ. 2567 มีความรู้ ความประพฤติ และทักษะพร้อมสำหรับการปฏิบัติหน้าที่ราชการตำรวจ
-          </div>
-        </div>
+        <div id="m_rep3_form" class="ft-doc"></div>
+        <div id="m_rep3_sign" class="ft-doc"></div>
 
         <!-- Signatures for Form 3 -->
         </div>
       </div>
     </div>
 
+    <div id="form1_print" class="ft-form ft-doc"></div>
   </div>
 
   <!-- Modal for Daily Evaluation -->
   <div id="evalModal" class="modal-overlay" style="display:none;">
     <div class="modal">
       <div class="modal-hdr">
-        <h3 id="modal_title">👨‍✈️ ตรวจประเมินผลการฝึกหัดปฏิบัติราชการประจำวัน (แบบที่ 1)</h3>
+        <h3 id="modal_title">👨‍✈️ บันทึกผลการปฏิบัติงาน (รายวัน) — แบบประเมินแบบที่ 1</h3>
         <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
       </div>
 
@@ -447,7 +417,7 @@
           <div><b>นสต.:</b> <strong id="m_eval_trainee_name" style="color:var(--navy);">-</strong></div>
           <div><b>วันที่:</b> <span id="m_eval_date">-</span> (ภาค <span id="m_eval_sem">-</span>)</div>
         </div>
-        <div style="margin-top:4px;"><b>หัวข้อ:</b> <span id="m_eval_topic">-</span></div>
+        <div style="margin-top:4px;"><b>รายการปฏิบัติ:</b> <span id="m_eval_topic">-</span></div>
         <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);">
           <b>บันทึกของ นสต.:</b>
           <div id="m_eval_trainee_note" style="color:#334155;margin-top:2px;font-style:italic;">-</div>
@@ -457,57 +427,27 @@
       <form id="evalForm" onsubmit="handleEvaluationSubmit(event)">
         <input type="hidden" id="m_eval_log_id">
 
-        <!-- 1. ก่อนปฏิบัติงาน -->
+        <!-- ตามแบบประเมินแบบที่ 1 (หลักสูตร นสต. 2567): บันทึกถูกต้อง/ไม่ถูกต้องรายข้อ -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">1. ความพร้อมก่อนการปฏิบัติงาน (การแต่งกาย, ตรงต่อเวลา, อุปกรณ์ฯ ร่างกาย/จิตใจ)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_prep_pass">
-              <input type="radio" name="eval_prep" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_prep_fail">
-              <input type="radio" name="eval_prep" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_prep_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">1. ความพร้อมก่อนปฏิบัติงาน</label>
+          <div id="m_eval_day_note" style="font-size:12px;color:var(--amber);margin:2px 0 4px;"></div>
+          <div id="eval_prep_box"></div>
+          <input type="text" id="eval_prep_reason" placeholder="หมายเหตุ (ถ้ามี หรือกรณีไม่ถูกต้อง)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
-
-        <!-- 2. การปฏิบัติงาน -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">2. การปฏิบัติงานประจำวัน (ตามหัวข้อที่ได้รับมอบหมาย)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_work_pass">
-              <input type="radio" name="eval_work" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_work_fail">
-              <input type="radio" name="eval_work" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_work_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">2. การปฏิบัติงาน</label>
+          <div id="eval_work_box"></div>
+          <input type="text" id="eval_work_reason" placeholder="หมายเหตุ (ถ้ามี หรือกรณีไม่ถูกต้อง)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
-
-        <!-- 3. หลังปฏิบัติงาน -->
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">3. หลังปฏิบัติงาน (การบำรุงรักษาอุปกรณ์/ยานพาหนะ, สรุปผล, แลกเปลี่ยนประสบการณ์)</label>
-          <div class="eval-radio-group">
-            <label class="eval-radio-label pass-option" id="lbl_post_pass">
-              <input type="radio" name="eval_post" value="ผ่าน" required onchange="updateRadioStyles()">
-              ✓ ผ่าน
-            </label>
-            <label class="eval-radio-label fail-option" id="lbl_post_fail">
-              <input type="radio" name="eval_post" value="ไม่ผ่าน" onchange="updateRadioStyles()">
-              ✕ ไม่ผ่าน
-            </label>
-          </div>
-          <input type="text" id="eval_post_reason" placeholder="ระบุเหตุผล (ถ้ามี หรือกรณีไม่ผ่าน)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">3. หลังปฏิบัติงาน</label>
+          <div id="eval_post_box"></div>
+          <input type="text" id="eval_post_reason" placeholder="หมายเหตุ (ถ้ามี หรือกรณีไม่ถูกต้อง)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
 
         <!-- ข้อเสนอแนะ -->
         <div style="margin-bottom:16px;">
-          <label style="font-weight:700;font-size:13px;color:var(--navy);">ส่วนที่ 3 : ข้อเสนอแนะประจำวันของครูพี่เลี้ยง</label>
+          <label style="font-weight:700;font-size:13px;color:var(--navy);">ข้อเสนอแนะประจำวัน (เฉพาะครูพี่เลี้ยง)</label>
           <textarea id="eval_mentor_feedback" placeholder="ให้คำแนะนำ ชี้แนะแนวทาง หรือข้อคิดเห็นแก่ นสต. ..." style="width:100%;min-height:75px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;"></textarea>
         </div>
 
@@ -540,11 +480,8 @@
     }
 
     function saveMonthlyFeedback() {
-      const selectedName = document.getElementById('m_monthly_trainee').value;
-      const selectedMonth = document.getElementById('m_monthly_month').value;
-      if (!selectedName || !selectedMonth) return;
-
-      const key = `${selectedName}_${selectedMonth}`;
+      const key = rep2FeedbackKey();
+      if (!key) return;
       const text = document.getElementById('m_rep2_feedback_input').value.trim();
       monthlyFeedbacks[key] = text;
       try {
@@ -593,7 +530,7 @@
     FT_SYNC.onData(d => {
       logs = d.logs; roster = d.roster; monthlyFeedbacks = d.feedback;
       // คงค่าตัวเลือกที่ผู้ใช้เลือกไว้
-      const keep = ['filter_trainee', 'm_monthly_trainee', 'm_summary_trainee'].map(id => [id, document.getElementById(id).value]);
+      const keep = ['filter_trainee', 'm_monthly_trainee', 'm_summary_trainee', 'm_rep2_sem'].map(id => [id, document.getElementById(id).value]);
       populateFilterDropdowns();
       keep.forEach(([id, v]) => { const el = document.getElementById(id); if (v && [...el.options].some(o => o.value === v)) el.value = v; });
       renderDailyTable();
@@ -665,20 +602,44 @@
       });
     }
 
+    // ---------- แบบประเมินแบบที่ 1: ถูกต้อง/ไม่ถูกต้อง รายข้อ ----------
+    function evalRowHtml(name, label) {
+      return `<div class="eval-row"><span>${ftEsc(label)}</span><div class="eval-radio-group">
+        <label class="eval-radio-label pass-option"><input type="radio" name="${name}" value="ผ่าน" onchange="updateRadioStyles()">✓ ถูกต้อง</label>
+        <label class="eval-radio-label fail-option"><input type="radio" name="${name}" value="ไม่ผ่าน" onchange="updateRadioStyles()">✕ ไม่ถูกต้อง</label>
+      </div></div>`;
+    }
+    // ความพร้อม/หลังปฏิบัติงานนับวันละ 1 ครั้ง: ใช้ผลที่ตรวจไว้แล้วของวันเดียวกันเป็นค่าเริ่มต้น
+    function dayShared(log, key) {
+      const same = logs.filter(l => l.id !== log.id && l.traineeName === log.traineeName && l.date === log.date &&
+        String(l.semester) === String(log.semester) && l.status === 'evaluated' && Array.isArray(l[key]) && l[key].length === 3);
+      same.sort((a, b) => (a.evalAt || 0) - (b.evalAt || 0));
+      return same.length ? same[same.length - 1][key] : null;
+    }
     function openEvalModal(logId) {
       const log = logs.find(l => l.id === logId);
       if (!log) return;
 
       document.getElementById('m_eval_log_id').value = log.id;
       document.getElementById('m_eval_trainee_name').textContent = log.traineeName;
-      document.getElementById('m_eval_date').textContent = log.date;
+      document.getElementById('m_eval_date').textContent = ftThaiDate(log.date);
       document.getElementById('m_eval_sem').textContent = log.semester;
-      document.getElementById('m_eval_topic').textContent = log.topicName;
+      document.getElementById('m_eval_topic').textContent = FT_CUR.item(log.topicCode) ? FT_CUR.topicLabel(log.topicCode) : (log.topicName || log.topicCode);
       document.getElementById('m_eval_trainee_note').textContent = log.traineeNote;
 
-      setRadioValue('eval_prep', log.evalPrep || 'ผ่าน');
-      setRadioValue('eval_work', log.evalWork || 'ผ่าน');
-      setRadioValue('eval_post', log.evalPost || 'ผ่าน');
+      document.getElementById('eval_prep_box').innerHTML = FT_CUR.prepItems.map((t, i) => evalRowHtml('eval_prep_' + i, (i + 1) + '. ' + t)).join('');
+      document.getElementById('eval_post_box').innerHTML = FT_CUR.postItems.map((t, i) => evalRowHtml('eval_post_' + i, (i + 1) + '. ' + t)).join('');
+      document.getElementById('eval_work_box').innerHTML = evalRowHtml('eval_work', FT_CUR.item(log.topicCode) ? FT_CUR.item(log.topicCode).name : (log.topicName || log.topicCode));
+
+      const sameDay = logs.filter(l => l.traineeName === log.traineeName && l.date === log.date && String(l.semester) === String(log.semester)).length;
+      document.getElementById('m_eval_day_note').textContent = sameDay > 1
+        ? `ความพร้อมก่อน/หลังปฏิบัติงานนับวันละ 1 ครั้ง — วันนี้มี ${sameDay} บันทึก ระบบใช้ผลที่ตรวจล่าสุดของวัน`
+        : '';
+      const prep = log.prepItems || dayShared(log, 'prepItems') || [0, 1, 2].map(() => log.evalPrep || 'ผ่าน');
+      const post = log.postItems || dayShared(log, 'postItems') || [0, 1, 2].map(() => log.evalPost || 'ผ่าน');
+      prep.forEach((v, i) => setRadioValue('eval_prep_' + i, FT_SCORE.isOk(v) ? 'ผ่าน' : 'ไม่ผ่าน'));
+      post.forEach((v, i) => setRadioValue('eval_post_' + i, FT_SCORE.isOk(v) ? 'ผ่าน' : 'ไม่ผ่าน'));
+      setRadioValue('eval_work', log.evalWork && !FT_SCORE.isOk(log.evalWork) ? 'ไม่ผ่าน' : 'ผ่าน');
 
       document.getElementById('eval_prep_reason').value = log.evalPrepReason || '';
       document.getElementById('eval_work_reason').value = log.evalWorkReason || '';
@@ -705,17 +666,8 @@
     }
 
     function updateRadioStyles() {
-      ['prep', 'work', 'post'].forEach(field => {
-        const val = getRadioValue('eval_' + field);
-        const passLbl = document.getElementById(`lbl_${field}_pass`);
-        const failLbl = document.getElementById(`lbl_${field}_fail`);
-        if (val === 'ผ่าน') {
-          passLbl.classList.add('selected');
-          failLbl.classList.remove('selected');
-        } else {
-          passLbl.classList.remove('selected');
-          failLbl.classList.add('selected');
-        }
+      document.querySelectorAll('#evalModal .eval-radio-label input').forEach(inp => {
+        inp.parentElement.classList.toggle('selected', inp.checked);
       });
     }
 
@@ -725,19 +677,42 @@
       const log = logs.find(l => l.id === logId);
       if (!log) return;
 
-      log.evalPrep = getRadioValue('eval_prep');
+      log.prepItems = [0, 1, 2].map(i => getRadioValue('eval_prep_' + i));
+      log.postItems = [0, 1, 2].map(i => getRadioValue('eval_post_' + i));
+      // ค่าสรุปเดิม (ใช้แสดงผลในหน้าอื่น): ผ่านเมื่อถูกต้องครบทุกข้อ
+      log.evalPrep = log.prepItems.every(v => v === 'ผ่าน') ? 'ผ่าน' : 'ไม่ผ่าน';
       log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim();
       log.evalWork = getRadioValue('eval_work');
       log.evalWorkReason = document.getElementById('eval_work_reason').value.trim();
-      log.evalPost = getRadioValue('eval_post');
+      log.evalPost = log.postItems.every(v => v === 'ผ่าน') ? 'ผ่าน' : 'ไม่ผ่าน';
       log.evalPostReason = document.getElementById('eval_post_reason').value.trim();
       log.mentorFeedback = document.getElementById('eval_mentor_feedback').value.trim();
+      log.evalAt = Date.now();
       log.status = 'evaluated';
 
       saveData();
       closeEvalModal();
       alert('บันทึกผลการตรวจประเมินเรียบร้อยแล้ว!');
       renderDailyTable();
+    }
+
+    // ---------- พิมพ์แบบประเมินแบบที่ 1 (รายวัน) ----------
+    function printForm1(name, date, sem) {
+      const r = roster.find(x => x.name === name) || {};
+      const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
+      const box = document.getElementById('form1_print');
+      box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
+        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor });
+      ftPrintOnly(box);
+    }
+    function printForm1FromFilter() {
+      const name = document.getElementById('filter_trainee').value;
+      const date = document.getElementById('f1_date').value;
+      if (!name) { alert('กรุณาเลือก นสต. ในช่อง "กรองตาม นสต." ก่อน'); return; }
+      if (!date) { alert('กรุณาเลือกวันที่'); return; }
+      const has = logs.filter(l => l.traineeName === name && l.date === date);
+      if (!has.length) { alert('ไม่พบบันทึกของ ' + name + ' ในวันที่เลือก'); return; }
+      printForm1(name, date, has[0].semester);
     }
 
     function deleteLog(logId) {
@@ -787,8 +762,8 @@
         let evalSummary = '-';
         if (isEval) {
           evalSummary = (log.evalWork === 'ผ่าน')
-            ? '<span class="badge badge-pass">ผ่าน</span>'
-            : '<span class="badge badge-fail">ไม่ผ่าน</span>';
+            ? '<span class="badge badge-pass">ถูกต้อง</span>'
+            : '<span class="badge badge-fail">ไม่ถูกต้อง</span>';
         }
 
         const tr = document.createElement('tr');
@@ -797,7 +772,7 @@
           <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
           <td><b>${ftEsc(log.traineeName || '-')}</b></td>
           <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
-          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td><b>${ftEsc(FT_CUR.item(log.topicCode) ? FT_CUR.topicLabel(log.topicCode) : log.topicName)}</b></td>
           <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td style="text-align:center;">${evalSummary}</td>
@@ -805,6 +780,7 @@
             <button type="button" class="btn btn-purple btn-sm" onclick="openEvalModal(${ftJs(log.id)})">
               ${isEval ? '✏️ แก้ไขผล' : '🔍 ตรวจประเมิน'}
             </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="printForm1(${ftJs(log.traineeName)}, ${ftJs(log.date)}, ${ftJs(log.semester)})" title="พิมพ์แบบประเมินแบบที่ 1 ของวันนี้">🖨️</button>
             <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog(${ftJs(log.id)})" title="ลบ">🗑️</button>
           </td>
         `;
@@ -812,102 +788,40 @@
       });
     }
 
-    // ================= Monthly Report (แบบที่ 2) =================
+    // ================= แบบประเมินแบบที่ 2: แบบสรุปผลการปฏิบัติงาน =================
+    function rep2FeedbackKey() {
+      const name = document.getElementById('m_monthly_trainee').value;
+      const month = document.getElementById('m_monthly_month').value;
+      const sem = document.getElementById('m_rep2_sem').value;
+      return name ? `${name}_${month || 's' + sem}` : '';
+    }
     function renderMonthlyReport() {
       loadFeedbacks();
       const selectedName = document.getElementById('m_monthly_trainee').value;
-      const selectedMonth = document.getElementById('m_monthly_month').value; // 'YYYY-MM'
-      if (!selectedName || !selectedMonth) return;
+      const month = document.getElementById('m_monthly_month').value; // 'YYYY-MM' หรือว่าง = ทั้งภาคเรียน
+      const sem = document.getElementById('m_rep2_sem').value || '1';
+      const box = document.getElementById('m_rep2_form');
+      if (!selectedName) { box.innerHTML = '<p style="color:var(--text-muted)">ยังไม่มีรายชื่อ นสต.</p>'; return; }
+      const r = roster.find(x => x.name === selectedName) || {};
+      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, totalId: 'm_rep2_tot_eval' });
+      box.innerHTML = out.html;
+      document.getElementById('m_rep2_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
 
-      const matchRoster = roster.find(r => r.name === selectedName);
-      document.getElementById('m_rep2_name').textContent = selectedName;
-      document.getElementById('m_rep2_station').textContent = matchRoster ? matchRoster.station : '-';
-      document.getElementById('m_rep2_mentor').textContent = matchRoster ? matchRoster.mentor : '-';
-      
-      
-
-      // Format month text (e.g. สิงหาคม 2567)
-      const [year, month] = selectedMonth.split('-');
-      const thaiMonths = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-      const thaiYear = parseInt(year) + 543;
-      document.getElementById('m_rep2_month_text').textContent = `${thaiMonths[parseInt(month)]} พ.ศ. ${thaiYear}`;
-
-      // Filter logs in this month
-      const monthLogs = logs.filter(l => l.traineeName === selectedName && l.status === 'evaluated' && String(l.date || '').startsWith(selectedMonth));
-
-      // สรุปตามแบบสรุปผลการปฏิบัติงาน (หลักสูตร นสต. 2567): ความพร้อม → ประเภทงาน/รายการ → หลังปฏิบัติ
-      const cnt = {};
-      const bump = (k, v) => { if (v !== 'ผ่าน' && v !== 'ไม่ผ่าน') return; const c = cnt[k] || (cnt[k] = { pass: 0, fail: 0 }); if (v === 'ผ่าน') c.pass++; else c.fail++; };
-      const legacy = {};
-      monthLogs.forEach(l => {
-        bump('prep', l.evalPrep); bump('post', l.evalPost);
-        if (FT_CUR.item(l.topicCode)) bump(l.topicCode, l.evalWork);
-        else { const cat = FT_CUR.catOf(l.topicCode); if (cat) { bump(cat + '|legacy', l.evalWork); (legacy[cat] = legacy[cat] || new Set()).add(l.topicName || l.topicCode); } }
-      });
-      const tbody = document.getElementById('m_rep2_tbody');
-      tbody.innerHTML = '';
-      let totalEval = 0, totalPass = 0, totalFail = 0, allOk = true;
-      const resultCell = (p, f) => { const ev = p + f; if (!ev) return '<span style="color:var(--text-muted);">-</span>'; const ok = p / ev >= 0.6; return `<span class="badge ${ok ? 'badge-evaluated' : 'badge-pending'}">${ok ? 'ผ่าน' : 'ไม่ผ่าน'} (${Math.round(p / ev * 100)}%)</span>`; };
-      const addRow = (no, label, c, opts = {}) => {
-        const p = c ? c.pass : 0, f = c ? c.fail : 0;
-        const tr = document.createElement('tr');
-        if (opts.head) tr.style.background = '#f8fafc';
-        tr.innerHTML = `
-          <td style="text-align:center;font-weight:600;">${no}</td>
-          <td style="${opts.sub ? 'padding-left:28px;' : ''}">${opts.head ? '<b>' + ftEsc(label) + '</b>' : ftEsc(label)}</td>
-          <td style="text-align:center;font-weight:600;">${p + f || (opts.head ? '' : '-')}</td>
-          <td style="text-align:center;font-weight:600;color:var(--success);">${p || (opts.head ? '' : '-')}</td>
-          <td style="text-align:center;font-weight:600;color:${f > 0 ? 'var(--danger)' : 'var(--text-muted)'};">${f || (opts.head ? '' : '-')}</td>
-          <td style="text-align:center;">${opts.result || ''}</td>`;
-        tbody.appendChild(tr);
-      };
-      const sems = [...new Set(monthLogs.map(l => String(l.semester) === '2' ? '2' : '1'))].sort();
-      if (!monthLogs.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px;">ไม่พบรายการบันทึกในเดือนนี้</td></tr>';
-      } else {
-        const tally = c => { if (!c) return; totalEval += c.pass + c.fail; totalPass += c.pass; totalFail += c.fail; };
-        const sum = keys => keys.reduce((a, k) => { const c = cnt[k]; if (c) { a.pass += c.pass; a.fail += c.fail; } return a; }, { pass: 0, fail: 0 });
-        const check = c => { if (c.pass + c.fail && c.pass / (c.pass + c.fail) < 0.6) allOk = false; return resultCell(c.pass, c.fail); };
-        addRow('1', 'ความพร้อมก่อนปฏิบัติงาน', cnt.prep, { head: true, result: check(cnt.prep || { pass: 0, fail: 0 }) }); tally(cnt.prep);
-        sems.forEach(sem => FT_CUR.sems[sem].cats.forEach(cat => {
-          const keys = cat.items.map(i => i.code).concat(cat.id + '|legacy');
-          const tot = sum(keys);
-          if (!tot.pass && !tot.fail) return;
-          addRow(cat.no, cat.name + (sems.length > 1 ? ' (ภาค ' + sem + ')' : ''), tot, { head: true, result: check(tot) });
-          cat.items.forEach((it, i) => { if (cnt[it.code]) { addRow('', (i + 1) + '. ' + it.name, cnt[it.code], { sub: true }); tally(cnt[it.code]); } });
-          if (cnt[cat.id + '|legacy']) { addRow('', '(บันทึกตามหัวข้อเกณฑ์เดิม) ' + [...legacy[cat.id]].join(', '), cnt[cat.id + '|legacy'], { sub: true }); tally(cnt[cat.id + '|legacy']); }
-        }));
-        addRow('3', 'หลังปฏิบัติงาน', cnt.post, { head: true, result: check(cnt.post || { pass: 0, fail: 0 }) }); tally(cnt.post);
-      }
-
-      document.getElementById('m_rep2_tot_eval').textContent = totalEval;
-      document.getElementById('m_rep2_tot_pass').textContent = totalPass;
-      document.getElementById('m_rep2_tot_fail').textContent = totalFail;
-      document.getElementById('m_rep2_tot_result').textContent = totalEval > 0 && allOk ? 'ผ่านเกณฑ์' : (totalEval > 0 ? 'มีรายการต่ำกว่าเกณฑ์' : '-');
-
-      // Load saved custom feedback or default
-      const fbKey = `${selectedName}_${selectedMonth}`;
-      const savedFeedback = monthlyFeedbacks[fbKey] !== undefined ? monthlyFeedbacks[fbKey] : '- มีความตั้งใจปฏิบัติงานตามที่ได้รับมอบหมาย มีวินัย และพัฒนาการด้านงานสารบรรณและการตรวจพื้นที่ได้อย่างถูกต้อง -';
+      const fbKey = rep2FeedbackKey();
+      const savedFeedback = monthlyFeedbacks[fbKey] !== undefined ? monthlyFeedbacks[fbKey] : '';
       const inputEl = document.getElementById('m_rep2_feedback_input');
       const printEl = document.getElementById('m_rep2_feedback_print');
       if (inputEl) inputEl.value = savedFeedback;
       if (printEl) printEl.textContent = savedFeedback || '- ไม่มีความเห็นเพิ่มเติม -';
     }
 
-    // ================= Summary Report (แบบที่ 3) =================
+    // ================= บันทึกผลคะแนนรวม 2 ภาคเรียน =================
     function renderSummaryReport() {
       const selectedName = document.getElementById('m_summary_trainee').value;
       if (!selectedName) return;
-
-      const matchRoster = roster.find(r => r.name === selectedName);
-      document.getElementById('m_rep3_cert_name').textContent = selectedName;
-      
-      
-
+      const r = roster.find(x => x.name === selectedName) || {};
       // คำนวณด้วยสูตรกลางเดียวกับหน้าฝ่ายฝึก (ft-common.js)
       const res = FT_SCORE.compute(logs, selectedName);
-      const s1Score = res.s1Score, s2Score = res.s2Score, totalScore = res.totalScore;
-      const weightedScore = res.weightedScore.toFixed(2);
       let note = document.getElementById('m_rep3_progress');
       if (!note) {
         note = document.createElement('div');
@@ -921,10 +835,13 @@
         : '⚠ ' + FT_SCORE.statusText(res) + ' — คะแนนรวมเป็นคะแนนเฉพาะหัวข้อที่ประเมินแล้ว';
       note.style.color = res.complete && res.isPass ? 'var(--success)' : 'var(--danger)';
 
-      document.getElementById('m_rep3_s1_val').textContent = s1Score;
-      document.getElementById('m_rep3_s2_val').textContent = s2Score;
-      document.getElementById('m_rep3_total_val').textContent = totalScore.toLocaleString('th-TH');
-      document.getElementById('m_rep3_weight_val').textContent = weightedScore;
+      document.getElementById('m_rep3_s1_val').textContent = res.s1Score;
+      document.getElementById('m_rep3_s2_val').textContent = res.s2Score;
+      document.getElementById('m_rep3_total_val').textContent = res.totalScore.toLocaleString('th-TH');
+      document.getElementById('m_rep3_weight_val').textContent = res.weightedScore.toFixed(2);
+      document.getElementById('m_rep3_form').innerHTML =
+        `<div>ชื่อ - สกุล นักเรียนนายสิบตำรวจ <b>${ftEsc(selectedName)}</b> &nbsp; สังกัด/สถานที่ฝึก <b>${ftEsc(r.station || '-')}</b></div>` + FT_FORMS.scoreSummary(res);
+      document.getElementById('m_rep3_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
     }
 
     window.addEventListener('DOMContentLoaded', () => {

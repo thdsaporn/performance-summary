@@ -152,6 +152,14 @@
           <datalist id="trainee_roster_list"></datalist>
         </div>
         <div class="form-group">
+          <label>สังกัด (ของ นสต.)</label>
+          <input type="text" id="trainee_unit" placeholder="เช่น กก.5 บก.กฝ.บช.ตชด.">
+        </div>
+        <div class="form-group">
+          <label>เลขประจำตัว นสต.</label>
+          <input type="text" id="trainee_tid" placeholder="เลขประจำตัว">
+        </div>
+        <div class="form-group">
           <label>สถานีตำรวจ/หน่วยงานที่ฝึกปฏิบัติ</label>
           <input type="text" id="trainee_station" value="สภ.แม่แตง ภ.จว.เชียงใหม่">
         </div>
@@ -317,6 +325,8 @@
         document.getElementById('trainee_station').value = match.station;
         document.getElementById('trainee_mentor').value = match.mentor;
         document.getElementById('trainee_mentor_pos').value = match.mentorPos || '';
+        document.getElementById('trainee_unit').value = match.unit || '';
+        document.getElementById('trainee_tid').value = match.tid || '';
       }
       document.getElementById('lbl_current_trainee').textContent = name;
       loadDayForm();
@@ -389,6 +399,8 @@
       const station = document.getElementById('trainee_station').value.trim();
       const mentor = document.getElementById('trainee_mentor').value.trim();
       const mentorPos = document.getElementById('trainee_mentor_pos').value.trim();
+      const unit = document.getElementById('trainee_unit').value.trim();
+      const tid = document.getElementById('trainee_tid').value.trim();
       const date = document.getElementById('log_date').value;
       const semester = document.getElementById('log_semester').value;
       const content = document.getElementById('log_content').value.trim();
@@ -400,6 +412,8 @@
       let rr = roster.find(r => r.name === tName);
       if (!rr) { rr = { name: tName }; roster.push(rr); }
       if (station) rr.station = station;
+      if (unit) rr.unit = unit;
+      if (tid) rr.tid = tid;
       if (mentor) rr.mentor = mentor;
       if (mentorPos) {
         rr.mentorPos = mentorPos;

@@ -233,7 +233,6 @@
       </div>
       <div class="header-actions">
         <button type="button" class="btn btn-outline btn-sm" onclick="openRosterModal()">👥 จัดการรายชื่อ นสต.</button>
-        <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์รายงาน (PDF)</button>
       </div>
     </div>
   </header>
@@ -246,7 +245,7 @@
         👤 1. ดูผลคะแนนรายบุคคล (Individual View)
       </button>
       <button type="button" class="mode-tab" id="btn_mode_batch" onclick="switchAdminMode('batch')">
-        👥 2. ดูบัญชีรวมคะแนนทุกคนทั้งรุ่น (Batch Ranking Summary)
+        👥 2. บัญชีรวมคะแนนทั้งรุ่น (รบ 3)
       </button>
     </div>
 
@@ -269,7 +268,7 @@
       </div>
 
       <!-- Individual Score Summary Dashboard -->
-      <div class="summary-grid">
+      <div class="summary-grid no-print">
         <div class="stat-box s1">
           <div class="stat-label">ภาคเรียนที่ 1 (4 ประเภทงาน)</div>
           <div class="stat-value">
@@ -452,53 +451,24 @@
         </div>
       </div>
 
-      <!-- Batch Ranking Table Card -->
+      <!-- รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (ตามผนวก ก หลักสูตร นสต.) -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
-            <span>📋 บัญชีสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. ทั้งรุ่น (จัดลำดับที่)</span>
+            <span>📋 บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (รบ 3)</span>
           </div>
-          <div class="no-print" style="display:flex;gap:8px;">
+          <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="rb3_sem" onchange="renderBatchView()" style="padding:6px 10px;border:1.5px solid var(--blue);border-radius:8px;font-family:inherit;font-weight:600;color:var(--navy);">
+              <option value="1">ภาคเรียนที่ 1</option>
+              <option value="2">ภาคเรียนที่ 2</option>
+            </select>
+            <button type="button" class="btn btn-print btn-sm" onclick="printRb3(document.getElementById('rb3_sem').value)">🖨️ พิมพ์ รบ 3</button>
             <button type="button" class="btn btn-outline btn-sm" onclick="exportBatchCSV()">📥 ส่งออก Excel/CSV</button>
-            <button type="button" class="btn btn-print btn-sm" onclick="window.print()">🖨️ พิมพ์บัญชีสรุปผล</button>
-            <button type="button" class="btn btn-print btn-sm" onclick="printRb3('1')">🖨️ รบ 3 ภาคเรียนที่ 1</button>
-            <button type="button" class="btn btn-print btn-sm" onclick="printRb3('2')">🖨️ รบ 3 ภาคเรียนที่ 2</button>
           </div>
         </div>
-
-        <div class="table-wrap">
-          <table class="score-table">
-            <thead>
-              <tr>
-                <th style="width:70px;">อันดับที่</th>
-                <th class="col-desc" style="min-width:160px;">ยศ - ชื่อ - สกุล นสต.</th>
-                <th class="col-desc" style="min-width:140px;">สภ. ที่ฝึกปฏิบัติ</th>
-                <th class="col-desc" style="min-width:140px;">ครูพี่เลี้ยง</th>
-                <th style="width:85px;">บันทึก (วัน)</th>
-                <th style="width:95px;">ภาค 1<br>(450)</th>
-                <th style="width:95px;">ภาค 2<br>(400)</th>
-                <th style="width:110px;">คะแนนรวม<br>(850)</th>
-                <th style="width:115px;">ค่าน้ำหนัก 10%<br>(310 คะแนน)</th>
-                <th style="width:95px;">ผลการฝึก</th>
-                <th style="width:85px;" class="no-print">ดูคะแนน</th>
-              </tr>
-            </thead>
-            <tbody id="batch_tbody"></tbody>
-          </table>
-        </div>
+        <div style="overflow-x:auto;"><div id="rb3_screen" class="ft-doc"></div></div>
       </div>
 
-    </div>
-
-    <!-- Official Print Signature Block -->
-    <div class="card print-only">
-      <div style="text-align:center;margin-bottom:14pt;">
-        <h2 style="font-size:16pt;font-weight:700;margin-bottom:4pt;">แบบสรุปผลคะแนนการฝึกหัดปฏิบัติราชการ นสต. </h2>
-        <p style="font-size:11.5pt;">กองกำกับการ 5 กองบังคับการฝึกพิเศษ กองบัญชาการตำรวจตระเวนชายแดน (ค่ายนเรศวรมหาราช)</p>
-        <p style="font-size:10.5pt;color:#444;">ตามหลักสูตร นสต. (ผนวก ง)</p>
-      </div>
-
-      </div>
     </div>
 
     <div id="rb3_print" class="ft-form ft-doc"></div>
@@ -519,6 +489,7 @@
           <input type="text" id="m_add_station" placeholder="สภ. ที่ฝึกปฏิบัติ" required style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
         </div>
         <div style="display:flex;gap:8px;">
+          <input type="text" id="m_add_unit" placeholder="สังกัด นสต." style="width:150px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <input type="text" id="m_add_tid" placeholder="เลขประจำตัว นสต." style="width:130px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <input type="text" id="m_add_mentor" placeholder="ครูพี่เลี้ยง / ผู้ควบคุมการฝึก" required style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <input type="text" id="m_add_mentor_pos" placeholder="ตำแหน่งครูพี่เลี้ยง" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
@@ -533,6 +504,7 @@
               <th style="width:40px;">ลำดับ</th>
               <th>ยศ-ชื่อ-สกุล</th>
               <th style="width:120px;">เลขประจำตัว</th>
+              <th style="width:130px;">สังกัด</th>
               <th>สภ. ที่ฝึก</th>
               <th>ครูพี่เลี้ยง / ตำแหน่ง</th>
               <th style="width:60px;">ลบ</th>
@@ -800,48 +772,11 @@
         };
       });
 
-      // Sort by totalScore descending (Ranking)
-      batchData.sort((a, b) => b.totalScore - a.totalScore);
-
-      // Render Table
-      const tbody = document.getElementById('batch_tbody');
-      tbody.innerHTML = '';
-
       let passCount = 0, sumAllScores = 0, sumAllWeighted = 0;
-
-      batchData.forEach((row, index) => {
-        const rank = index + 1;
-        if (row.isPass) passCount++;
-        sumAllScores += row.totalScore;
-        sumAllWeighted += row.weightedScore;
-
-        let rankBadgeClass = '';
-        if (rank === 1) rankBadgeClass = 'top1';
-        else if (rank === 2) rankBadgeClass = 'top2';
-        else if (rank === 3) rankBadgeClass = 'top3';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="text-align:center;">
-            <span class="rank-pill ${rankBadgeClass}">${rank}</span>
-          </td>
-          <td><b>${ftEsc(row.name)}</b></td>
-          <td>${ftEsc(row.station)}</td>
-          <td>${ftEsc(row.mentor)}</td>
-          <td style="text-align:center;font-weight:600;">${row.logsCount}</td>
-          <td style="text-align:center;font-weight:600;color:var(--blue);">${row.s1Score}</td>
-          <td style="text-align:center;font-weight:600;color:var(--purple);">${row.s2Score}</td>
-          <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--navy);">${row.totalScore.toLocaleString('th-TH')}</td>
-          <td style="text-align:center;font-weight:700;font-size:14.5px;color:var(--success);">${row.weightedScore.toFixed(2)}</td>
-          <td style="text-align:center;">
-            <span class="badge ${row.isPass ? 'badge-evaluated' : 'badge-pending'}">${!row.complete ? ftEsc(row.statusText) : (row.isPass ? '✓ ' + ftEsc(row.grade) : '✕ ไม่ผ่าน')}</span>
-          </td>
-          <td style="text-align:center;" class="no-print">
-            <button type="button" class="btn btn-outline btn-sm" onclick="selectAndShowTrainee(${ftJs(row.name)})">🔍 ดูผล</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+      batchData.forEach(row => { if (row.isPass) passCount++; sumAllScores += row.totalScore; sumAllWeighted += row.weightedScore; });
+      // รบ 3 (เรียงตามรายชื่อ ตามแบบ)
+      const sem = (document.getElementById('rb3_sem') || {}).value || '1';
+      document.getElementById('rb3_screen').innerHTML = FT_FORMS.rb3(sem, rb3People(), 'กก.5 บก.กฝ.บช.ตชด.');
 
       // Overall batch stats
       const totalTrainees = batchData.length || 1;
@@ -868,9 +803,12 @@
     }
 
     // รบ 3: บัญชีรวมคะแนนการฝึกหัดปฏิบัติราชการ (หลักสูตร นสต.) — เรียงตามรายชื่อ
-    function printRb3(sem) {
+    function rb3People() {
       const names = [...new Set([...roster.map(r => r.name), ...logs.map(l => l.traineeName)].filter(Boolean))];
-      const people = names.map(name => ({ name, tid: (roster.find(r => r.name === name) || {}).tid || '', res: computeTraineeScores(name) }));
+      return names.map(name => ({ name, tid: (roster.find(r => r.name === name) || {}).tid || '', res: computeTraineeScores(name) }));
+    }
+    function printRb3(sem) {
+      const people = rb3People();
       const box = document.getElementById('rb3_print');
       box.innerHTML = FT_FORMS.rb3(sem, people, 'กก.5 บก.กฝ.บช.ตชด.');
       ftPrintOnly(box, true);
@@ -926,6 +864,7 @@
       const station = document.getElementById('m_add_station').value.trim();
       const mentor = document.getElementById('m_add_mentor').value.trim();
       const tid = document.getElementById('m_add_tid').value.trim();
+      const unit = document.getElementById('m_add_unit').value.trim();
       const mentorPos = document.getElementById('m_add_mentor_pos').value.trim();
 
       if (roster.some(r => r.name === name)) {
@@ -934,6 +873,8 @@
       }
       const rec = { name, station, mentor };
       if (tid) rec.tid = tid;
+      if (unit) rec.unit = unit;
+      document.getElementById('m_add_unit').value = '';
       if (mentorPos) { rec.mentorPos = mentorPos; roster.forEach(x => { if (x.mentor === mentor) x.mentorPos = mentorPos; }); }
       else { const same = roster.find(x => x.mentor === mentor && x.mentorPos); if (same) rec.mentorPos = same.mentorPos; }
       roster.push(rec);
@@ -951,6 +892,11 @@
       saveData();
     }
     // ตำแหน่งครูพี่เลี้ยง: ใช้กับ นสต. ทุกคนที่มีครูพี่เลี้ยงคนเดียวกัน
+    function setRosterUnit(index, v) {
+      if (!roster[index]) return;
+      roster[index].unit = String(v || '').trim();
+      saveData();
+    }
     function setRosterMentorPos(index, v) {
       const r = roster[index]; if (!r) return;
       const pos = String(v || '').trim();
@@ -973,6 +919,7 @@
           <td style="text-align:center;">${i+1}</td>
           <td><b>${ftEsc(r.name)}</b></td>
           <td><input type="text" value="${ftEsc(r.tid || '')}" placeholder="ใส่เลขประจำตัว" onchange="setRosterTid(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12.5px;"></td>
+          <td><input type="text" value="${ftEsc(r.unit || '')}" placeholder="สังกัด" onchange="setRosterUnit(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12.5px;"></td>
           <td>${ftEsc(r.station)}</td>
           <td><div style="font-size:12px;">${ftEsc(r.mentor || '-')}</div><input type="text" value="${ftEsc(r.mentorPos || '')}" placeholder="ตำแหน่งครูพี่เลี้ยง" onchange="setRosterMentorPos(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12px;"></td>
           <td style="text-align:center;">

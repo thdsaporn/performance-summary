@@ -283,7 +283,12 @@ var FT_FORMS = (function () {
     return 'วันที่' + dot(p.d, 24) + 'เดือน' + dot(p.m, 70) + 'ปี' + dot(p.y, 40);
   }
   function nameLine(o) {
-    return '<div class="ln fx">ชื่อ - สกุล นักเรียนนายสิบตำรวจ' + fdot(o.name, 3) + 'สังกัด' + fdot(o.station, 3) + 'เลขประจำตัว' + fdot(o.tid, 2) + '</div>';
+    /* หัวข้อเขียน "นักเรียนนายสิบตำรวจ" แล้ว จึงตัดคำนำหน้า นสต. ออกจากชื่อ; สังกัด = สังกัดของ นสต. (ไม่ใช่สถานีที่ฝึก) */
+    return '<div class="ln fw">' + grp('ชื่อ - สกุล นักเรียนนายสิบตำรวจ', splitRank(o.name).name, 60) + grp('สังกัด', o.unit, 55) + grp('เลขประจำตัว', o.tid, 40) + '</div>';
+  }
+  /* "หัวข้อ ......ค่า......" เป็นกลุ่มเดียว ไม่แยกบรรทัด; ถ้าบรรทัดไม่พอทั้งกลุ่มจะขึ้นบรรทัดใหม่ (ไม่ตัดข้อความ) */
+  function grp(label, v, mw) {
+    return '<span class="fx g1">' + label + fdot(v, 1, mw) + '</span>';
   }
   /* เส้นจุดที่ยืดเต็มบรรทัด (ใช้ใน .fx) */
   function fdot(v, g, mw) { return '<span class="fd" style="flex-grow:' + (g || 1) + (mw ? ';min-width:' + mw + 'pt' : '') + '">' + (v ? e(v) : '&nbsp;') + '</span>'; }
@@ -379,7 +384,7 @@ var FT_FORMS = (function () {
     var pending = (o.logs || []).filter(function (l) { return l.traineeName === o.name && l.date === o.date && l.status !== 'evaluated'; }).length;
     var head = '<div class="ttl">แบบบันทึกผลการปฏิบัติงาน (รายวัน)</div><div class="ttl2">' + dateLine(o.date) + '</div>'
       + '<div class="gap"></div>' + nameLine(o)
-      + '<div class="ln"><b>คำชี้แจง</b> ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วทำเครื่องหมาย ✓ ตามผลการปฏิบัติจริง'
+      + '<div class="ln inst"><b>คำชี้แจง</b> ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วทำเครื่องหมาย ✓ ตามผลการปฏิบัติจริง'
       + (pending ? ' <span class="no-print" style="color:#c00">(มี ' + pending + ' รายการของวันนี้ที่ยังไม่ได้ตรวจ — ไม่นับในแบบนี้)</span>' : '') + '</div>';
     var foot = '<div class="foot fw"><b>ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ</b><span class="fx g1">ยศ ชื่อ - สกุล' + fdot(o.mentor, 1, 110) + '</span><span class="fx g1">ตำแหน่ง' + fdot(o.mentorPos, 1, 150) + '</span></div>';
     var pages = packTables(countBlocks(o.sem, t, 'day').blocks, 29).map(function (tb) { return head + tb + foot; });
@@ -439,7 +444,7 @@ var FT_FORMS = (function () {
       + nameLine(o)
       + '<div class="ln"><b>คำชี้แจง</b> ให้สรุปผลการปฏิบัติงานของนักเรียนนายสิบตำรวจ จากแบบบันทึกผลการปฏิบัติงาน (รายวัน) โดยใส่ตัวเลขจำนวนการปฏิบัติงานตามผลการปฏิบัติจริง ตั้งแต่วันแรกจนถึงวันสุดท้ายของการฝึกหัดปฏิบัติราชการ</div>';
     var pages = packTables(cb.blocks, 29).map(function (tb) { return head + tb; });
-    pages.push('<div class="hd">บันทึกผลคะแนน</div><div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 120) + ' เลขประจำตัว' + dot(o.tid, 70) + '</div>'
+    pages.push('<div class="hd">บันทึกผลคะแนน</div><div class="ln fw">' + grp('ชื่อ - สกุล นักเรียนนายสิบตำรวจ', splitRank(o.name).name, 120) + grp('เลขประจำตัว', o.tid, 70) + '</div>'
       + '<div class="frame">' + scoreTable(o.sem, r) + '</div>'
       + (r.done < r.rows.length ? '<div class="no-print" style="color:#c00">ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ</div>' : '')
       + signBoxes(o.mentor, o.mentorPos, o.teacher, o.teacherPos) + formulaNote());
@@ -509,16 +514,16 @@ function ftPrintOnly(el, landscape) {
     st.textContent = [
       '.ft-form{display:none}.ft-doc,.ft-doc *{box-sizing:border-box}',
       /* แผ่นเอกสารบนจอ */
-      '.ft-doc .ft-sheet{background:#fff;color:#000;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18pt 22pt;margin:0 auto 14pt;max-width:820px;font-family:Sarabun,sans-serif;font-size:12.5pt;line-height:1.4}',
+      '.ft-doc .ft-sheet{background:#fff;color:#000;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18pt 22pt;margin:0 auto 14pt;max-width:820px;font-family:Sarabun,sans-serif;font-size:13pt;line-height:1.4}',
       '.ft-doc .ft-sheet.land{max-width:1120px}',
       '.ft-doc .pg{text-align:right;font-size:11pt}',
       '.ft-doc .ttl{text-align:center;font-weight:700;font-size:13.5pt}.ft-doc .ttl2{text-align:center;margin-bottom:2pt}',
       '.ft-doc .hd{font-weight:700;margin:4pt 0}.ft-doc .ln{margin:4pt 0}.ft-doc .ln2{margin:6pt 0}',
       '.ft-doc .dt{display:inline-block;border-bottom:1px dotted #000;text-align:center;padding:0 4pt;line-height:1.2}',
-      '.ft-doc .fx{display:flex;align-items:flex-end;white-space:nowrap;gap:3pt}.ft-doc .fd{flex:1 1 auto;min-width:24pt;padding:0 4pt 0 8pt;border-bottom:1px dotted #000;text-align:left;overflow:hidden;text-overflow:clip;line-height:1.2}.ft-doc .gap{height:10pt}.ft-doc .fw{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2pt 6pt}.ft-doc .fw>.g1{flex:1 1 auto}.ft-doc .fd{white-space:normal}.ft-doc .sg .fx{display:flex}',
+      '.ft-doc .fx{display:flex;align-items:flex-end;white-space:nowrap;gap:3pt}.ft-doc .fd{flex:1 1 auto;min-width:24pt;padding:0 2pt 0 5pt;border-bottom:1px dotted #000;text-align:left;overflow:visible;text-overflow:clip;line-height:1.2}.ft-doc .gap{height:10pt}.ft-doc .inst{font-size:12pt}.ft-doc .ln.fw{font-size:12pt}.ft-doc .fw{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2pt 4pt}.ft-doc .fw>.g1{flex:1 1 auto}.ft-doc .fd{white-space:nowrap}.ft-doc .sg .fx{display:flex}',
       '.ft-doc .it .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .it .cat{font-weight:700}.ft-doc tr.hx td{vertical-align:bottom}',
       '.ft-doc table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6pt}',
-      '.ft-doc th,.ft-doc td{border:1px solid #000;padding:0.5pt 5pt;font-size:12.5pt;line-height:1.22;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',
+      '.ft-doc th,.ft-doc td{border:1px solid #000;padding:0.5pt 5pt;font-size:13pt;line-height:1.22;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',
       '.ft-doc th{font-weight:700;text-align:center}.ft-doc .c{text-align:center}.ft-doc .r{text-align:right}',
       '.ft-doc .pk{background:#fbd5f3!important}@media screen{.ft-doc .low{color:#c00}}',
       '.ft-doc .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .cat{font-weight:700}.ft-doc .it,.ft-doc .brk{padding-left:6pt}',

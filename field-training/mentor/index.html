@@ -789,7 +789,7 @@
       const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
       const box = document.getElementById('form1_print');
       box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
-        station: r.station || anyLog.station, mentor: mentorOf(name).mentor, mentorPos: mentorOf(name).mentorPos, tid: r.tid || '' });
+        station: r.station || anyLog.station, unit: r.unit || '', mentor: mentorOf(name).mentor, mentorPos: mentorOf(name).mentorPos, tid: r.tid || '' });
       ftPrintOnly(box);
     }
     // พิมพ์เฉพาะแบบฟอร์ม (คัดลอกไปที่กล่องพิมพ์ แล้วซ่อนส่วนอื่นของหน้า)
@@ -954,7 +954,7 @@
       if (!selectedName) { box.innerHTML = '<p style="color:var(--text-muted)">ยังไม่มีรายชื่อ นสต.</p>'; return; }
       const r = roster.find(x => x.name === selectedName) || {};
       const mi = mentorOf(selectedName), ut = unitTeacher(); fillUnitTeacher();
-      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos, tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
+      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, unit: r.unit || '', mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos, tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
       box.innerHTML = out.html;
       document.getElementById('m_rep2_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
 
@@ -992,7 +992,7 @@
       document.getElementById('m_rep3_weight_val').textContent = res.weightedScore.toFixed(2);
       document.getElementById('m_rep3_form').innerHTML =
         (() => { const mi = mentorOf(selectedName), ut = unitTeacher(); fillUnitTeacher();
-          return FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos }); })();
+          return FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, unit: r.unit || '', tid: r.tid || '', mentor: mi.mentor, mentorPos: mi.mentorPos, teacher: ut.name, teacherPos: ut.pos }); })();
       document.getElementById('m_rep3_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
     }
 

@@ -274,6 +274,17 @@
           </div>
         </div>
 
+        <!-- ข้อมูลครูพี่เลี้ยงสำหรับช่องลงชื่อในแบบพิมพ์ -->
+        <div id="mentor_info_box" class="no-print" style="display:none;background:#f8fafc;border:1px solid var(--border-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;">
+          <b style="color:var(--navy);">ครูพี่เลี้ยงของ <span id="mi_trainee"></span> (ใช้ในช่องลงชื่อของแบบพิมพ์)</b>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center;">
+            <input type="text" id="mi_mentor" placeholder="ยศ ชื่อ - สกุล ครูพี่เลี้ยง" style="flex:1 1 200px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <input type="text" id="mi_pos" placeholder="ตำแหน่ง เช่น รอง สว.(ป.) สภ.แม่แตง ภ.จว.เชียงใหม่" style="flex:2 1 260px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;">
+            <button type="button" class="btn btn-purple btn-sm" onclick="saveMentorInfo()">💾 บันทึก</button>
+            <span id="mi_saved" style="color:var(--success);font-weight:600;display:none;">✓ บันทึกแล้ว</span>
+          </div>
+        </div>
+
         <!-- Table -->
         <div class="table-wrap">
           <table>
@@ -758,7 +769,7 @@
       const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
       const box = document.getElementById('form1_print');
       box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
-        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, tid: r.tid || '' });
+        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, mentorPos: r.mentorPos || '', tid: r.tid || '' });
       ftPrintOnly(box);
     }
     // พิมพ์เฉพาะแบบฟอร์ม (คัดลอกไปที่กล่องพิมพ์ แล้วซ่อนส่วนอื่นของหน้า)
@@ -792,7 +803,35 @@
       }
     }
 
+    // ชื่อ/ตำแหน่งครูพี่เลี้ยง (เก็บในรายชื่อ นสต.) — ตำแหน่งใช้ร่วมกับ นสต. คนอื่นที่มีครูพี่เลี้ยงคนเดียวกัน
+    function renderMentorInfo() {
+      const name = document.getElementById('filter_trainee').value;
+      const box = document.getElementById('mentor_info_box');
+      box.style.display = name ? '' : 'none';
+      if (!name) return;
+      const r = roster.find(x => x.name === name) || {};
+      document.getElementById('mi_trainee').textContent = name;
+      const act = document.activeElement && document.activeElement.id;
+      if (act !== 'mi_mentor') document.getElementById('mi_mentor').value = r.mentor || '';
+      if (act !== 'mi_pos') document.getElementById('mi_pos').value = r.mentorPos || '';
+    }
+    function saveMentorInfo() {
+      const name = document.getElementById('filter_trainee').value;
+      if (!name) return;
+      const mentor = document.getElementById('mi_mentor').value.trim();
+      const pos = document.getElementById('mi_pos').value.trim();
+      let r = roster.find(x => x.name === name);
+      if (!r) { r = { name }; roster.push(r); }
+      const oldMentor = r.mentor;
+      r.mentor = mentor; r.mentorPos = pos;
+      roster.forEach(x => { if (x !== r && mentor && (x.mentor === mentor || (oldMentor && x.mentor === oldMentor))) { x.mentor = mentor; x.mentorPos = pos; } });
+      try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) {}
+      FT_SYNC.push({ roster: roster }, { noDelete: ['roster'] });
+      const ok = document.getElementById('mi_saved'); ok.style.display = ''; setTimeout(() => ok.style.display = 'none', 2000);
+    }
+
     function renderDailyTable() {
+      renderMentorInfo();
       const filterTrainee = document.getElementById('filter_trainee').value;
       const filterStatus = document.getElementById('filter_status').value;
       const filterSem = document.getElementById('filter_semester').value;
@@ -868,7 +907,7 @@
       const box = document.getElementById('m_rep2_form');
       if (!selectedName) { box.innerHTML = '<p style="color:var(--text-muted)">ยังไม่มีรายชื่อ นสต.</p>'; return; }
       const r = roster.find(x => x.name === selectedName) || {};
-      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: r.mentor, tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
+      const out = FT_FORMS.form2({ logs, name: selectedName, sem, month, station: r.station, mentor: r.mentor, mentorPos: r.mentorPos || '', tid: r.tid || '', totalId: 'm_rep2_tot_eval' });
       box.innerHTML = out.html;
       document.getElementById('m_rep2_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
 
@@ -905,7 +944,7 @@
       document.getElementById('m_rep3_total_val').textContent = res.totalScore.toLocaleString('th-TH');
       document.getElementById('m_rep3_weight_val').textContent = res.weightedScore.toFixed(2);
       document.getElementById('m_rep3_form').innerHTML =
-        FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: r.mentor });
+        FT_FORMS.scoreSummary(res, { name: selectedName, station: r.station, tid: r.tid || '', mentor: r.mentor, mentorPos: r.mentorPos || '' });
       document.getElementById('m_rep3_sign').innerHTML = FT_FORMS.signForm2(r.mentor);
     }
 

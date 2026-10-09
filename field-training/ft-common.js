@@ -283,8 +283,11 @@ var FT_FORMS = (function () {
     return 'วันที่' + dot(p.d, 24) + 'เดือน' + dot(p.m, 70) + 'ปี' + dot(p.y, 40);
   }
   function nameLine(o) {
-    return '<div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 110) + ' สังกัด' + dot(o.station, 90) + ' <span style="white-space:nowrap">เลขประจำตัว' + dot(o.tid, 60) + '</span></div>';
+    return '<div class="ln fx">ชื่อ - สกุล นักเรียนนายสิบตำรวจ' + fdot(o.name, 3) + 'สังกัด' + fdot(o.station, 3) + 'เลขประจำตัว' + fdot(o.tid, 2) + '</div>';
   }
+  /* เส้นจุดที่ยืดเต็มบรรทัด (ใช้ใน .fx) */
+  function fdot(v, g, mw) { return '<span class="fd" style="flex-grow:' + (g || 1) + (mw ? ';min-width:' + mw + 'pt' : '') + '">' + (v ? e(v) : '&nbsp;') + '</span>'; }
+
   function sheets(label, pages, cls) {
     return pages.map(function (body, i) {
       return '<section class="ft-sheet' + (cls ? ' ' + cls : '') + '"><div class="pg">' + label + (pages.length > 1 ? ' หน้า ' + (i + 1) + '/' + pages.length : '') + '</div>' + body + '</section>';
@@ -294,37 +297,46 @@ var FT_FORMS = (function () {
   /* ---------- ตารางรายการปฏิบัติ (แบบที่ 1 และ 2) แบ่งเป็นบล็อก แล้วจัดลงแผ่น ---------- */
   function countBlocks(sem, t, mode) {
     var S = FT_CUR.sems[sem], blocks = [], tot = { ok: 0, bad: 0 };
+    var pre = '', preW = 0;   /* หัวข้อ/ชื่องานที่อยู่ในช่องเดียวกับข้อถัดไป (ตามฟอร์มกระดาษ) */
+    function head(cls, label) { pre += '<div class="' + cls + '">' + label + '</div>'; preW += 0.75; }
     function cell(v, used) {
       if (mode === 'day') return !used ? '-' : (v ? (v === 1 ? '✓' : String(v)) : '');
       return v ? String(v) : '';
     }
     function item(label, c, noDash) {
       var used = !!(c && (c.ok || c.bad)) || noDash;
-      return '<tr><td class="it">' + label + '</td><td class="c">' + cell(c && c.ok, used) + '</td><td class="c">' + cell(c && c.bad, used) + '</td><td></td></tr>';
+      var h = '<tr' + (pre ? ' class="hx"' : '') + '><td class="it">' + pre + label + '</td><td class="c">' + cell(c && c.ok, used) + '</td><td class="c">' + cell(c && c.bad, used) + '</td><td></td></tr>';
+      pre = '';
+      return h;
     }
     function sum(c) {
       tot.ok += c.ok; tot.bad += c.bad;
-      return '<tr class="sum"><td class="r">รวมจำนวนการปฏิบัติ</td><td class="c pk">' + (c.ok || (c.bad ? '' : '')) + '</td><td class="c">' + (c.bad || '') + '</td><td></td></tr>';
+      return '<tr class="sum"><td class="r">รวมจำนวนการปฏิบัติ</td><td class="c pk">' + (c.ok || '') + '</td><td class="c">' + (c.bad || '') + '</td><td></td></tr>';
     }
-    function sec(label) { return '<tr><td class="sec">' + label + '</td><td></td><td></td><td></td></tr>'; }
-    function cat(label) { return '<tr><td class="cat">' + e(label) + '</td><td></td><td></td><td></td></tr>'; }
     function lst(items, arr, legacy) {
       return items.map(function (x, i) { return item((i + 1) + '. ' + e(x), arr[i], mode === 'day'); }).join('')
         + (legacy && legacy.ok + legacy.bad ? item('(บันทึกตามเกณฑ์เดิม)', legacy) : '');
     }
-    blocks.push({ w: 6, h: sec('ความพร้อมก่อนปฏิบัติงาน') + lst(FT_CUR.prepItems, t.prep, t.prepLegacy) + sum(t.prepTotal) });
+    function take() { var w = preW; preW = 0; return w; }
+    head('sec', 'ความพร้อมก่อนปฏิบัติงาน');
+    var w0 = take() + 4 + (t.prepLegacy.ok + t.prepLegacy.bad ? 1 : 0);
+    blocks.push({ w: w0, h: lst(FT_CUR.prepItems, t.prep, t.prepLegacy) + sum(t.prepTotal) });
     S.cats.forEach(function (c, ci) {
-      var h = (ci === 0 ? sec('การปฏิบัติงาน') : '') + cat(c.formName || c.name), w = (ci === 0 ? 1 : 0) + 2 + c.items.length;
+      if (ci === 0) head('sec', 'การปฏิบัติงาน');
+      head('cat', e(c.formName || c.name));
+      var h = '', w = 0;
       c.items.forEach(function (x, i) {
-        if (c.breaks && c.breaks[i + 1]) { h += '<tr><td class="brk">' + e(c.breaks[i + 1]) + '</td><td></td><td></td><td></td></tr>'; w++; }
-        if (x.name.length > 40) w += 0.6;
+        if (c.breaks && c.breaks[i + 1]) head('brk', e(c.breaks[i + 1]));
+        w += take() + 1 + (x.name.length > 40 ? 0.6 : 0);
         h += item((i + 1) + '. ' + e(x.name), t.items[x.code]);
       });
       if (t.legacy[c.id]) { h += item('(บันทึกตามเกณฑ์เดิม) ' + e(Object.keys(t.legacyNames[c.id] || {}).join(', ')), t.legacy[c.id]); w++; }
-      blocks.push({ w: w, h: h + sum(t.catTotal[c.id]) });
+      blocks.push({ w: w + 1, h: h + sum(t.catTotal[c.id]) });
     });
-    var post = sec('หลังปฏิบัติงาน') + lst(FT_CUR.postItems, t.post, t.postLegacy) + sum(t.postTotal);
-    blocks.push({ w: 7, h: post + '<tr class="sum"><td class="r"><b>รวมจำนวนการปฏิบัติทั้งหมด</b></td><td class="c pk"><b>' + tot.ok + '</b></td><td class="c"><b>' + (tot.bad || '') + '</b></td><td></td></tr>', tot: tot });
+    head('sec', 'หลังปฏิบัติงาน');
+    var wp = take() + 5;
+    var post = lst(FT_CUR.postItems, t.post, t.postLegacy) + sum(t.postTotal);
+    blocks.push({ w: wp, h: post + '<tr class="sum"><td class="r"><b>รวมจำนวนการปฏิบัติทั้งหมด</b></td><td class="c pk"><b>' + tot.ok + '</b></td><td class="c"><b>' + (tot.bad || '') + '</b></td><td></td></tr>', tot: tot });
     return { blocks: blocks, tot: tot };
   }
   function packTables(blocks, cap) {
@@ -349,8 +361,8 @@ var FT_FORMS = (function () {
   function ruled(text, lines) {
     return '<div class="ruled" style="min-height:' + (lines * 22) + 'pt">' + e(text) + '</div>';
   }
-  function signLine(role, name, extra) {
-    return '<div class="sg"><div>(ลงชื่อ) ' + DOTS.slice(0, 34) + role + '</div><div>(' + (name ? '&nbsp;' + e(name) + '&nbsp;' : DOTS.slice(0, 34)) + ')</div><div>ตำแหน่ง' + DOTS.slice(0, 34) + '</div>' + (extra || '') + '</div>';
+  function signLine(role, name, pos) {
+    return '<div class="sg"><div>(ลงชื่อ) ' + DOTS.slice(0, 34) + role + '</div><div>(' + (name ? '&nbsp;' + e(name) + '&nbsp;' : DOTS.slice(0, 34)) + ')</div><div>ตำแหน่ง' + (pos ? dot(pos, 150) : DOTS.slice(0, 34)) + '</div></div>';
   }
   function form1(o) {
     var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, from: o.date, to: o.date });
@@ -358,15 +370,15 @@ var FT_FORMS = (function () {
     var fb = t.logs.map(function (l) { return l.mentorFeedback; }).filter(Boolean).join('\n');
     var pending = (o.logs || []).filter(function (l) { return l.traineeName === o.name && l.date === o.date && l.status !== 'evaluated'; }).length;
     var head = '<div class="ttl">แบบบันทึกผลการปฏิบัติงาน (รายวัน)</div><div class="ttl2">' + dateLine(o.date) + '</div>'
-      + nameLine(o)
+      + '<div class="gap"></div>' + nameLine(o)
       + '<div class="ln"><b>คำชี้แจง</b> ให้พิจารณารายการปฏิบัติของนักเรียนนายสิบตำรวจ แล้วทำเครื่องหมาย ✓ ตามผลการปฏิบัติจริง'
       + (pending ? ' <span class="no-print" style="color:#c00">(มี ' + pending + ' รายการของวันนี้ที่ยังไม่ได้ตรวจ — ไม่นับในแบบนี้)</span>' : '') + '</div>';
-    var foot = '<div class="foot"><b>ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ</b> ยศ ชื่อ - สกุล ' + dot(o.mentor, 120) + ' <span style="white-space:nowrap">ตำแหน่ง' + dot('', 90) + '</span></div>';
-    var pages = packTables(countBlocks(o.sem, t, 'day').blocks, 30).map(function (tb) { return head + tb + foot; });
+    var foot = '<div class="foot fw"><b>ครูพี่เลี้ยงหรือผู้ควบคุมการฝึกหัดปฏิบัติราชการ</b><span class="fx g1">ยศ ชื่อ - สกุล' + fdot(o.mentor, 1, 110) + '</span><span class="fx g1">ตำแหน่ง' + fdot(o.mentorPos, 1, 150) + '</span></div>';
+    var pages = packTables(countBlocks(o.sem, t, 'day').blocks, 29).map(function (tb) { return head + tb + foot; });
     pages.push('<div class="hd">บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ</div>' + ruled(notes, 10)
       + '<div class="sgrow end">' + signLine('ผู้ฝึกหัดปฏิบัติราชการ', o.name) + '</div>'
       + '<div class="hd" style="margin-top:14pt">ข้อเสนอแนะประจำวัน (เฉพาะครูพี่เลี้ยง)</div>' + ruled(fb, 9)
-      + '<div class="sgrow">' + signLine('ครูพี่เลี้ยง', o.mentor) + signLine('ผู้ฝึกหัดฯ/ทราบ', o.name) + '</div>');
+      + '<div class="sgrow">' + signLine('ครูพี่เลี้ยง', o.mentor, o.mentorPos) + signLine('ผู้ฝึกหัดฯ/ทราบ', o.name) + '</div>');
     return thHtml(sheets('แบบประเมินแบบที่ 1', pages));
   }
 
@@ -382,12 +394,12 @@ var FT_FORMS = (function () {
     });
     return h + '<tr class="sum"><td class="c"><b>รวม</b></td><td class="c"><b>' + r.ev + '</b></td><td class="c"><b>' + r.ps + '</b></td><td class="c"><b>' + r.score + '</b></td></tr></tbody></table>';
   }
-  function signBoxes(mentor) {
-    function box(t1, t2, name) {
+  function signBoxes(mentor, mentorPos) {
+    function box(t1, t2, name, pos) {
       return '<div class="bx"><div class="c"><b>' + t1 + '</b></div><div class="c"><b>' + t2 + '</b></div>'
-        + '<div class="ln2">ยศ ชื่อ – สกุล ' + dot(name, 130) + '</div><div class="ln2">ตำแหน่ง ' + dot('', 150) + '</div></div>';
+        + '<div class="ln2 fx">ยศ ชื่อ – สกุล' + fdot(name, 1) + '</div><div class="ln2 fx">ตำแหน่ง' + fdot(pos, 1) + '</div></div>';
     }
-    return '<div class="bxrow">' + box('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ', 'ประจำสถานีตำรวจ', mentor) + box('ครู – อาจารย์/ฝ่ายปกครองฯ', 'ของหน่วยฝึกอบรม', '') + '</div>';
+    return '<div class="bxrow">' + box('ครูพี่เลี้ยงผู้ควบคุมการฝึกหัดปฏิบัติราชการ', 'ประจำสถานีตำรวจ', mentor, mentorPos) + box('ครู – อาจารย์/ฝ่ายปกครองฯ', 'ของหน่วยฝึกอบรม', '', '') + '</div>';
   }
   function evalBoxes(max, score, pct, res) {
     var g = res ? FT_SCORE.statusText(res) : '';
@@ -422,7 +434,7 @@ var FT_FORMS = (function () {
     pages.push('<div class="hd">บันทึกผลคะแนน</div><div class="ln">ชื่อ - สกุล นักเรียนนายสิบตำรวจ ' + dot(o.name, 120) + ' เลขประจำตัว' + dot(o.tid, 70) + '</div>'
       + '<div class="frame">' + scoreTable(o.sem, r) + '</div>'
       + (r.done < r.rows.length ? '<div class="no-print" style="color:#c00">ยังประเมินไม่ครบ ' + r.done + '/' + r.rows.length + ' หัวข้อ</div>' : '')
-      + signBoxes(o.mentor) + formulaNote());
+      + signBoxes(o.mentor, o.mentorPos) + formulaNote());
     var html = sheets('แบบประเมินแบบที่ 2', pages);
     var all = cb.tot.ok + cb.tot.bad;
     return { tally: t, rows: r, html: thHtml(html) + (o.totalId ? '<span id="' + o.totalId + '" hidden>' + all + '</span>' : '') };
@@ -434,7 +446,7 @@ var FT_FORMS = (function () {
       + (o.name ? nameLine(o) : '')
       + '<div class="frame">' + scoreTable('1', { rows: res.s1Rows, ev: res.s1Eval, ps: res.s1Pass, score: res.s1Score })
       + scoreTable('2', { rows: res.s2Rows, ev: res.s2Eval, ps: res.s2Pass, score: res.s2Score }) + '</div>'
-      + signBoxes(o.mentor) + evalBoxes(FT_CUR.total, res.totalScore, res.percent, res) + formulaNote();
+      + signBoxes(o.mentor, o.mentorPos) + evalBoxes(FT_CUR.total, res.totalScore, res.percent, res) + formulaNote();
     return thHtml(sheets('แบบประเมินแบบที่ 2', [body]));
   }
   /* (เข้ากันกับหน้าเดิม) ลายมือชื่ออยู่ในแบบพิมพ์แล้ว */
@@ -489,14 +501,16 @@ function ftPrintOnly(el, landscape) {
     st.textContent = [
       '.ft-form{display:none}.ft-doc,.ft-doc *{box-sizing:border-box}',
       /* แผ่นเอกสารบนจอ */
-      '.ft-doc .ft-sheet{background:#fff;color:#000;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18pt 22pt;margin:0 auto 14pt;max-width:820px;font-family:Sarabun,sans-serif;font-size:12pt;line-height:1.45}',
+      '.ft-doc .ft-sheet{background:#fff;color:#000;border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18pt 22pt;margin:0 auto 14pt;max-width:820px;font-family:Sarabun,sans-serif;font-size:12.5pt;line-height:1.4}',
       '.ft-doc .ft-sheet.land{max-width:1120px}',
       '.ft-doc .pg{text-align:right;font-size:11pt}',
       '.ft-doc .ttl{text-align:center;font-weight:700;font-size:13.5pt}.ft-doc .ttl2{text-align:center;margin-bottom:2pt}',
       '.ft-doc .hd{font-weight:700;margin:4pt 0}.ft-doc .ln{margin:4pt 0}.ft-doc .ln2{margin:6pt 0}',
       '.ft-doc .dt{display:inline-block;border-bottom:1px dotted #000;text-align:center;padding:0 4pt;line-height:1.2}',
+      '.ft-doc .fx{display:flex;align-items:flex-end;white-space:nowrap;gap:3pt}.ft-doc .fd{flex:1 1 auto;min-width:24pt;padding:0 4pt;border-bottom:1px dotted #000;text-align:center;overflow:hidden;text-overflow:clip;line-height:1.2}.ft-doc .gap{height:10pt}.ft-doc .fw{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2pt 6pt}.ft-doc .fw>.g1{flex:1 1 auto}.ft-doc .fd{white-space:normal}.ft-doc .sg .fx{display:flex}',
+      '.ft-doc .it .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .it .cat{font-weight:700}.ft-doc tr.hx td{vertical-align:bottom}',
       '.ft-doc table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6pt}',
-      '.ft-doc th,.ft-doc td{border:1px solid #000;padding:1pt 5pt;font-size:12pt;line-height:1.25;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',
+      '.ft-doc th,.ft-doc td{border:1px solid #000;padding:0.5pt 5pt;font-size:12.5pt;line-height:1.22;vertical-align:middle;overflow-wrap:anywhere;color:#000;background:#fff!important}',
       '.ft-doc th{font-weight:700;text-align:center}.ft-doc .c{text-align:center}.ft-doc .r{text-align:right}',
       '.ft-doc .pk{background:#fbd5f3!important}@media screen{.ft-doc .low{color:#c00}}',
       '.ft-doc .sec{text-align:center;font-weight:700;text-decoration:underline}.ft-doc .cat{font-weight:700}.ft-doc .it,.ft-doc .brk{padding-left:6pt}',

@@ -507,7 +507,7 @@
 
   <!-- Modal for Roster Management -->
   <div id="rosterModal" class="modal-overlay" style="display:none;">
-    <div class="modal">
+    <div class="modal" style="max-width:920px;">
       <div class="modal-hdr">
         <h3>👥 จัดการรายชื่อ นสต. ในรุ่น</h3>
         <button type="button" class="modal-close" onclick="closeRosterModal()">✕</button>
@@ -534,6 +534,7 @@
               <th>ยศ-ชื่อ-สกุล</th>
               <th style="width:120px;">เลขประจำตัว</th>
               <th>สภ. ที่ฝึก</th>
+              <th>ครูพี่เลี้ยง / ตำแหน่ง</th>
               <th style="width:60px;">ลบ</th>
             </tr>
           </thead>
@@ -943,6 +944,14 @@
       roster[index].tid = String(v || '').trim();
       saveData();
     }
+    // ตำแหน่งครูพี่เลี้ยง: ใช้กับ นสต. ทุกคนที่มีครูพี่เลี้ยงคนเดียวกัน
+    function setRosterMentorPos(index, v) {
+      const r = roster[index]; if (!r) return;
+      const pos = String(v || '').trim();
+      roster.forEach(x => { if (x === r || (r.mentor && x.mentor === r.mentor)) x.mentorPos = pos; });
+      saveData();
+      renderRosterModalList();
+    }
     function deleteRosterTrainee(index) {
       if (!confirm(`ต้องการลบรายชื่อ ${roster[index].name} ออกจากรุ่นหรือไม่?`)) return;
       roster.splice(index, 1);
@@ -959,6 +968,7 @@
           <td><b>${ftEsc(r.name)}</b></td>
           <td><input type="text" value="${ftEsc(r.tid || '')}" placeholder="ใส่เลขประจำตัว" onchange="setRosterTid(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12.5px;"></td>
           <td>${ftEsc(r.station)}</td>
+          <td><div style="font-size:12px;">${ftEsc(r.mentor || '-')}</div><input type="text" value="${ftEsc(r.mentorPos || '')}" placeholder="ตำแหน่งครูพี่เลี้ยง" onchange="setRosterMentorPos(${i}, this.value)" style="width:100%;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:12px;"></td>
           <td style="text-align:center;">
             <button type="button" class="btn btn-outline btn-sm" onclick="deleteRosterTrainee(${i})" style="color:var(--danger);">✕</button>
           </td>

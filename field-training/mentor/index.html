@@ -169,6 +169,18 @@
     .eval-row > span { flex:1 1 220px; font-size:13px; }
     .eval-row .eval-radio-group { flex:0 0 auto; margin-top:0; min-width:230px; }
     .eval-row .eval-radio-label { padding:5px 10px; }
+    /* ตารางแบบที่ 1 ในหน้าต่างตรวจ (บันทึกรายวัน) */
+    .modal.wide { max-width: 860px; }
+    .ev-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+    .ev-table th, .ev-table td { border:1px solid var(--border-light); padding:5px 8px; }
+    .ev-table th { background:#f8fafc; color:var(--navy); font-size:12.5px; }
+    .ev-table .grp td { background:#f1f5f9; font-weight:700; color:var(--navy); }
+    .ev-table .sub td { font-weight:600; color:#475569; padding-left:20px; }
+    .ev-table tr.did td { background:#eff6ff; }
+    .ev-table tr.did td:first-child { font-weight:600; }
+    .ev-table input[type=number] { width:58px; padding:3px 4px; border:1px solid var(--border); border-radius:6px; text-align:center; font-family:inherit; }
+    .ev-table input.ok { border-color:#a7f3d0; } .ev-table input.bad { border-color:#fecaca; }
+    .ev-table .tn { text-align:center; color:var(--blue); font-weight:700; }
 
     /* Print styling */
     .print-only { display: none; }
@@ -406,7 +418,7 @@
 
   <!-- Modal for Daily Evaluation -->
   <div id="evalModal" class="modal-overlay" style="display:none;">
-    <div class="modal">
+    <div class="modal" id="evalModalBox">
       <div class="modal-hdr">
         <h3 id="modal_title">👨‍✈️ บันทึกผลการปฏิบัติงาน (รายวัน) — แบบประเมินแบบที่ 1</h3>
         <button type="button" class="modal-close" onclick="closeEvalModal()">✕</button>
@@ -436,6 +448,7 @@
         </div>
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-light);">
           <label style="font-weight:700;font-size:13px;color:var(--navy);">2. การปฏิบัติงาน</label>
+          <div id="eval_work_hint" style="font-size:12px;color:var(--text-muted);margin:2px 0 0;"></div>
           <div id="eval_work_box"></div>
           <input type="text" id="eval_work_reason" placeholder="หมายเหตุ (ถ้ามี หรือกรณีไม่ถูกต้อง)" style="margin-top:6px;width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
@@ -616,6 +629,34 @@
       same.sort((a, b) => (a.evalAt || 0) - (b.evalAt || 0));
       return same.length ? same[same.length - 1][key] : null;
     }
+    // ตารางรายการปฏิบัติทั้งภาคเรียน (แบบที่ 1) ให้ครูใส่จำนวนถูกต้อง/ไม่ถูกต้อง
+    function dayEvalTable(log) {
+      const sem = String(log.semester) === '2' ? '2' : '1';
+      const has = log.evalItems && Object.keys(log.evalItems).length;
+      let h = '<div style="overflow-x:auto;"><table class="ev-table"><thead><tr><th>รายการปฏิบัติ</th><th style="width:70px;">นสต. แจ้ง</th><th style="width:80px;">ถูกต้อง</th><th style="width:80px;">ไม่ถูกต้อง</th></tr></thead><tbody>';
+      FT_CUR.sems[sem].cats.forEach(c => {
+        h += `<tr class="grp"><td colspan="4">${ftEsc(c.no + ' ' + (c.formName || c.name))}</td></tr>`;
+        c.items.forEach((it, i) => {
+          if (c.breaks && c.breaks[i + 1]) h += `<tr class="sub"><td colspan="4">${ftEsc(c.breaks[i + 1])}</td></tr>`;
+          const n = +((log.items || {})[it.code] || 0);
+          const r = has ? (log.evalItems[it.code] || {}) : { ok: n, bad: 0 };
+          h += `<tr class="${n ? 'did' : ''}" data-code="${it.code}"><td>${i + 1}. ${ftEsc(it.name)}</td>
+            <td class="tn">${n || ''}</td>
+            <td style="text-align:center;"><input type="number" class="ok" min="0" max="99" value="${+r.ok || ''}"></td>
+            <td style="text-align:center;"><input type="number" class="bad" min="0" max="99" value="${+r.bad || ''}"></td></tr>`;
+        });
+      });
+      return h + '</tbody></table></div>';
+    }
+    function readDayEval() {
+      const out = {};
+      document.querySelectorAll('#eval_work_box .ev-table tr[data-code]').forEach(tr => {
+        const v = cls => Math.max(0, Math.min(99, parseInt(tr.querySelector('input.' + cls).value, 10) || 0));
+        const ok = v('ok'), bad = v('bad');
+        if (ok || bad) out[tr.dataset.code] = { ok, bad };
+      });
+      return out;
+    }
     function openEvalModal(logId) {
       const log = logs.find(l => l.id === logId);
       if (!log) return;
@@ -624,12 +665,20 @@
       document.getElementById('m_eval_trainee_name').textContent = log.traineeName;
       document.getElementById('m_eval_date').textContent = ftThaiDate(log.date);
       document.getElementById('m_eval_sem').textContent = log.semester;
-      document.getElementById('m_eval_topic').textContent = FT_CUR.item(log.topicCode) ? FT_CUR.topicLabel(log.topicCode) : (log.topicName || log.topicCode);
+      const isDay = FT_DAY.isDay(log);
+      document.getElementById('m_eval_topic').textContent = FT_DAY.summary(log) + (isDay ? ` (รวม ${FT_DAY.performed(log)} ครั้ง)` : '');
+      document.getElementById('evalModalBox').classList.toggle('wide', isDay);
       document.getElementById('m_eval_trainee_note').textContent = log.traineeNote;
 
       document.getElementById('eval_prep_box').innerHTML = FT_CUR.prepItems.map((t, i) => evalRowHtml('eval_prep_' + i, (i + 1) + '. ' + t)).join('');
       document.getElementById('eval_post_box').innerHTML = FT_CUR.postItems.map((t, i) => evalRowHtml('eval_post_' + i, (i + 1) + '. ' + t)).join('');
-      document.getElementById('eval_work_box').innerHTML = evalRowHtml('eval_work', FT_CUR.item(log.topicCode) ? FT_CUR.item(log.topicCode).name : (log.topicName || log.topicCode));
+      if (isDay) {
+        document.getElementById('eval_work_box').innerHTML = dayEvalTable(log);
+        document.getElementById('eval_work_hint').textContent = 'ช่องที่ นสต. ติ๊กไว้มีพื้นสีฟ้า ระบบใส่ "ถูกต้อง" ตามจำนวนที่ นสต. แจ้งไว้ให้ก่อน — ปรับจำนวนถูกต้อง/ไม่ถูกต้องตามที่ตรวจจริง (เพิ่มรายการอื่นได้)';
+      } else {
+        document.getElementById('eval_work_box').innerHTML = evalRowHtml('eval_work', FT_CUR.item(log.topicCode) ? FT_CUR.item(log.topicCode).name : (log.topicName || log.topicCode));
+        document.getElementById('eval_work_hint').textContent = 'บันทึกรูปแบบเดิม (1 บันทึก = 1 รายการ)';
+      }
 
       const sameDay = logs.filter(l => l.traineeName === log.traineeName && l.date === log.date && String(l.semester) === String(log.semester)).length;
       document.getElementById('m_eval_day_note').textContent = sameDay > 1
@@ -682,7 +731,14 @@
       // ค่าสรุปเดิม (ใช้แสดงผลในหน้าอื่น): ผ่านเมื่อถูกต้องครบทุกข้อ
       log.evalPrep = log.prepItems.every(v => v === 'ผ่าน') ? 'ผ่าน' : 'ไม่ผ่าน';
       log.evalPrepReason = document.getElementById('eval_prep_reason').value.trim();
-      log.evalWork = getRadioValue('eval_work');
+      if (FT_DAY.isDay(log)) {
+        log.evalItems = readDayEval();
+        if (!Object.keys(log.evalItems).length && !confirm('ยังไม่ได้ใส่จำนวนถูกต้อง/ไม่ถูกต้องของรายการปฏิบัติเลย ต้องการบันทึกต่อหรือไม่?')) return;
+        const wt = FT_DAY.workTotals(log);
+        log.evalWork = wt.bad ? 'ไม่ผ่าน' : 'ผ่าน';   // ค่าสรุป (ใช้แสดงผลในหน้าอื่น)
+      } else {
+        log.evalWork = getRadioValue('eval_work');
+      }
       log.evalWorkReason = document.getElementById('eval_work_reason').value.trim();
       log.evalPost = log.postItems.every(v => v === 'ผ่าน') ? 'ผ่าน' : 'ไม่ผ่าน';
       log.evalPostReason = document.getElementById('eval_post_reason').value.trim();
@@ -735,7 +791,7 @@
       const filterStatus = document.getElementById('filter_status').value;
       const filterSem = document.getElementById('filter_semester').value;
 
-      let filtered = logs.slice();
+      let filtered = logs.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
       if (filterTrainee) filtered = filtered.filter(l => l.traineeName === filterTrainee);
       if (filterStatus) filtered = filtered.filter(l => l.status === filterStatus);
       if (filterSem) filtered = filtered.filter(l => l.semester === filterSem);
@@ -760,7 +816,10 @@
           : '<span class="badge badge-pending">⏳ รอตรวจ</span>';
 
         let evalSummary = '-';
-        if (isEval) {
+        if (isEval && FT_DAY.isDay(log)) {
+          const wt = FT_DAY.workTotals(log);
+          evalSummary = `<span class="badge badge-pass">ถูกต้อง ${wt.ok}</span>` + (wt.bad ? ` <span class="badge badge-fail">ไม่ถูกต้อง ${wt.bad}</span>` : '');
+        } else if (isEval) {
           evalSummary = (log.evalWork === 'ผ่าน')
             ? '<span class="badge badge-pass">ถูกต้อง</span>'
             : '<span class="badge badge-fail">ไม่ถูกต้อง</span>';
@@ -772,7 +831,7 @@
           <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
           <td><b>${ftEsc(log.traineeName || '-')}</b></td>
           <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
-          <td><b>${ftEsc(FT_CUR.item(log.topicCode) ? FT_CUR.topicLabel(log.topicCode) : log.topicName)}</b></td>
+          <td><b>${ftEsc(FT_DAY.summary(log, 3))}</b>${FT_DAY.isDay(log) ? `<div style="font-size:11.5px;color:var(--text-muted);">แบบบันทึกรายวัน · ${FT_DAY.itemCodes(log).length} รายการ ${FT_DAY.performed(log)} ครั้ง</div>` : ''}</td>
           <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td style="text-align:center;">${evalSummary}</td>

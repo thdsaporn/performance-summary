@@ -88,6 +88,42 @@ var FT_CUR = (function () {
            topicLabel: topicLabel, prepText: PREP, postText: POST, prepItems: PREP_ITEMS, postItems: POST_ITEMS };
 })();
 
+/* ===================== FT_DAY =====================
+ * บันทึกแบบ "1 วัน = 1 แบบฟอร์ม" (แบบประเมินแบบที่ 1)
+ *   items     : { รหัสรายการ: จำนวนครั้งที่ นสต. ปฏิบัติ }        ← นสต. กรอก
+ *   evalItems : { รหัสรายการ: { ok: n, bad: n } }                 ← ครูพี่เลี้ยงบันทึก
+ *   prepItems / postItems : ['ผ่าน'|'ไม่ผ่าน' × 3]                ← ครูพี่เลี้ยงบันทึก
+ * บันทึกรุ่นเก่า (1 บันทึก = 1 รายการ, topicCode/evalWork) ยังอ่านและคิดคะแนนได้ */
+var FT_DAY = (function () {
+  function isDay(l) { return !!(l && l.form === 'day'); }
+  function itemCodes(l) {
+    if (isDay(l)) return Object.keys(l.items || {}).filter(function (c) { return (+l.items[c] || 0) > 0; });
+    return l && l.topicCode ? [l.topicCode] : [];
+  }
+  /* ข้อความสรุปรายการปฏิบัติของบันทึก เช่น "รับหนังสือ ×2, ใช้งานเครื่องวิทยุสื่อสาร" */
+  function summary(l, maxN) {
+    if (!isDay(l)) return FT_CUR.item(l.topicCode) ? FT_CUR.topicLabel(l.topicCode) : (l.topicName || l.topicCode || '');
+    var parts = itemCodes(l).map(function (c) {
+      var it = FT_CUR.item(c), n = +l.items[c] || 0;
+      return (it ? it.name : c) + (n > 1 ? ' ×' + n : '');
+    });
+    if (maxN && parts.length > maxN) return parts.slice(0, maxN).join(', ') + ' และอีก ' + (parts.length - maxN) + ' รายการ';
+    return parts.join(', ');
+  }
+  function performed(l) {
+    if (!isDay(l)) return l && l.topicCode ? 1 : 0;
+    return itemCodes(l).reduce(function (a, c) { return a + (+l.items[c] || 0); }, 0);
+  }
+  /* ผลรวมถูกต้อง/ไม่ถูกต้องของการปฏิบัติงาน (ไม่รวมความพร้อม/หลังปฏิบัติ) */
+  function workTotals(l) {
+    var t = { ok: 0, bad: 0 };
+    if (isDay(l)) Object.keys(l.evalItems || {}).forEach(function (c) { t.ok += +(l.evalItems[c] || {}).ok || 0; t.bad += +(l.evalItems[c] || {}).bad || 0; });
+    else if (l.evalWork === 'ผ่าน') t.ok = 1; else if (l.evalWork === 'ไม่ผ่าน') t.bad = 1;
+    return t;
+  }
+  return { isDay: isDay, itemCodes: itemCodes, summary: summary, performed: performed, workTotals: workTotals };
+})();
+
 var FT_SCORE = (function () {
   var OK = 'ถูกต้อง', BAD = 'ไม่ถูกต้อง';
   function isOk(v) { return v === 'ผ่าน' || v === OK; }
@@ -119,6 +155,15 @@ var FT_SCORE = (function () {
     logs.forEach(function (l) {
       var key = (String(l.semester) === '2' ? '2' : '1') + '|' + l.date;
       (byDay[key] = byDay[key] || []).push(l);
+      if (FT_DAY.isDay(l)) {
+        Object.keys(l.evalItems || {}).forEach(function (c) {
+          var r = l.evalItems[c] || {}, okN = +r.ok || 0, badN = +r.bad || 0;
+          if (!okN && !badN) return;
+          var bucket = FT_CUR.item(c) ? (t.items[c] = t.items[c] || zero()) : null;
+          if (bucket) { bucket.ok += okN; bucket.bad += badN; }
+        });
+        return;
+      }
       var code = l.topicCode, cat = FT_CUR.catOf(code);
       if (FT_CUR.item(code)) { add(t.items[code] = t.items[code] || zero(), l.evalWork); }
       else if (cat) {
@@ -279,7 +324,7 @@ var FT_FORMS = (function () {
   /* แบบประเมินแบบที่ 1: แบบบันทึกผลการปฏิบัติงาน (รายวัน) */
   function form1(o) {
     var t = FT_SCORE.tally(o.logs, o.name, { semester: o.sem, from: o.date, to: o.date });
-    var notes = t.logs.map(function (l) { return '• ' + FT_CUR.topicLabel(l.topicCode) + (l.traineeNote ? ': ' + l.traineeNote : ''); }).join('\n');
+    var notes = t.logs.map(function (l) { return FT_DAY.isDay(l) ? (l.traineeNote || '') : '• ' + FT_DAY.summary(l) + (l.traineeNote ? ': ' + l.traineeNote : ''); }).filter(Boolean).join('\n');
     var fb = t.logs.map(function (l) { return l.mentorFeedback; }).filter(Boolean).join('\n');
     var pending = (o.logs || []).filter(function (l) { return l.traineeName === o.name && l.date === o.date && l.status !== 'evaluated'; }).length;
     return '<div class="pg">แบบประเมินแบบที่ 1</div><h2>แบบบันทึกผลการปฏิบัติงาน (รายวัน)</h2>'

@@ -108,6 +108,16 @@
     .badge { display: inline-flex; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
     .badge-pending { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; }
     .badge-evaluated { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+    /* แบบบันทึกรายวัน */
+    .day-table td, .day-table th { padding: 6px 10px; }
+    .day-table .grp td { background: #f1f5f9; font-weight: 700; color: var(--navy); }
+    .day-table .sub td { font-weight: 600; color: #475569; padding-left: 22px; }
+    .day-table .it td:first-child { padding-left: 22px; }
+    .day-table label.chk { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .day-table input[type=checkbox] { width: 18px; height: 18px; flex: 0 0 auto; }
+    .day-table input[type=number] { width: 64px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; }
+    .day-table tr.on td { background: #eff6ff; }
+    .day-note { font-size: 12.5px; color: var(--text-muted); }
     /* มือถือ: กันช่องกรอกล้นจอ */
     .form-grid > * { min-width: 0; }
     select, input, textarea { max-width: 100%; }
@@ -152,43 +162,50 @@
       </div>
     </div>
 
-    <!-- Daily Log Form -->
+    <!-- Daily Log Form: แบบประเมินแบบที่ 1 (1 วัน = 1 แบบฟอร์ม) -->
     <div class="card" style="border-top:4px solid var(--blue);">
       <div class="card-title">
-        <span>📝 บันทึกการปฏิบัติงานประจำวัน (แบบประเมินแบบที่ 1 ส่วนที่ 2)</span>
+        <span>📝 แบบบันทึกผลการปฏิบัติงาน (รายวัน) — แบบประเมินแบบที่ 1</span>
       </div>
       <form id="traineeForm" onsubmit="handleTraineeSubmit(event)">
         <input type="hidden" id="edit_log_id">
         <div class="form-grid">
           <div class="form-group">
             <label>วันที่ปฏิบัติงาน</label>
-            <input type="date" id="log_date" required>
+            <input type="date" id="log_date" required onchange="loadDayForm()">
           </div>
           <div class="form-group">
             <label>ภาคเรียน</label>
-            <select id="log_semester" onchange="updateTopics()" required>
+            <select id="log_semester" onchange="loadDayForm()" required>
               <option value="1">ภาคเรียนที่ 1 (สารบรรณ, เขียนรายงาน, เทคโนโลยีสารสนเทศ, มนุษยสัมพันธ์)</option>
               <option value="2">ภาคเรียนที่ 2 (สายตรวจ, จราจร, สืบสวน)</option>
             </select>
           </div>
-          <div class="form-group" style="grid-column: span 2;">
-            <label>รายการปฏิบัติงานในวันนี้ (ตามแบบบันทึกผลการปฏิบัติงาน หลักสูตร นสต. 2567)</label>
-            <select id="log_topic" required></select>
-          </div>
+        </div>
+        <div id="day_status" class="day-note" style="margin:4px 0 10px;"></div>
+
+        <label style="font-weight:600;font-size:13.5px;color:var(--navy);display:block;margin-bottom:6px;">
+          1) ติ๊กรายการที่ได้ปฏิบัติในวันนี้ และใส่จำนวนครั้ง
+        </label>
+        <div class="table-wrap" style="margin-bottom:14px;">
+          <table class="day-table">
+            <thead><tr><th>รายการปฏิบัติ</th><th style="width:110px;text-align:center;">จำนวนครั้ง</th></tr></thead>
+            <tbody id="day_items"></tbody>
+          </table>
+        </div>
+        <div class="day-note" style="margin:-8px 0 14px;">
+          ความพร้อมก่อนปฏิบัติงานและหลังปฏิบัติงาน ครูพี่เลี้ยงเป็นผู้ประเมิน · ผลถูกต้อง/ไม่ถูกต้องของทุกรายการ ครูพี่เลี้ยงเป็นผู้บันทึก
         </div>
 
         <div class="form-group" style="margin-bottom:16px;">
-          <label>รายละเอียดการปฏิบัติงานประจำวัน (บันทึกเหตุการณ์และสิ่งที่ปฏิบัติอย่างละเอียด)</label>
-          <textarea id="log_content" placeholder="บันทึกรายละเอียดการปฏิบัติงานประจำวัน..." required style="min-height:100px;"></textarea>
+          <label>2) บันทึกการปฏิบัติงานประจำวันสำหรับผู้ฝึกหัดปฏิบัติราชการ</label>
+          <textarea id="log_content" placeholder="บันทึกเหตุการณ์และสิ่งที่ได้ปฏิบัติในวันนี้..." required style="min-height:110px;"></textarea>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <span style="font-size:12.5px;color:var(--text-muted);">
-            📌 เมื่อกดบันทึก ข้อมูลจะส่งไปยัง <b>ระบบครูพี่เลี้ยง</b> ทันที
-          </span>
+          <span id="day_count" style="font-size:12.5px;color:var(--text-muted);">ยังไม่ได้เลือกรายการ</span>
           <div style="display:flex;gap:8px;">
-            <button type="button" class="btn btn-outline" id="btn_cancel_edit" style="display:none;" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
-            <button type="submit" class="btn btn-primary" id="btn_submit_log">💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ</button>
+            <button type="submit" class="btn btn-primary" id="btn_submit_log">💾 ส่งแบบบันทึกวันนี้ให้ครูพี่เลี้ยง</button>
           </div>
         </div>
       </form>
@@ -206,10 +223,10 @@
               <th style="width:45px;text-align:center;">ลำดับ</th>
               <th style="width:105px;text-align:center;">วันที่</th>
               <th style="width:80px;text-align:center;">ภาค</th>
-              <th style="width:240px;">หัวข้อปฏิบัติงาน</th>
+              <th style="width:260px;">รายการที่ปฏิบัติ</th>
               <th>บันทึกของ นสต.</th>
               <th style="width:115px;text-align:center;">สถานะ</th>
-              <th style="width:180px;">ผลการตรวจ/ข้อเสนอแนะครู</th>
+              <th style="width:200px;">ผลการตรวจ/ข้อเสนอแนะครู</th>
               <th style="width:75px;text-align:center;">จัดการ</th>
             </tr>
           </thead>
@@ -283,6 +300,9 @@
     FT_SYNC.onData(d => {
       logs = d.logs; roster = d.roster;
       refreshRosterList();
+      // อัปเดตสถานะแบบฟอร์มวันนี้ (เช่น ครูเพิ่งตรวจ) โดยไม่ทับสิ่งที่กำลังกรอก
+      const editing = document.activeElement && document.getElementById('traineeForm').contains(document.activeElement);
+      if (!editing) loadDayForm();
       renderTable();   // ไม่เรียก onTraineeChange เพื่อไม่ทับสถานี/ครูที่ผู้ใช้กำลังพิมพ์
     });
 
@@ -294,114 +314,109 @@
         document.getElementById('trainee_mentor').value = match.mentor;
       }
       document.getElementById('lbl_current_trainee').textContent = name;
+      loadDayForm();
       renderTable();
     }
 
-    function updateTopics() {
-      const sem = document.getElementById('log_semester').value;
-      const select = document.getElementById('log_topic');
-      select.innerHTML = '';
+    // ---------- แบบบันทึกรายวัน (1 วัน = 1 แบบฟอร์ม) ----------
+    function dayLogFor(name, date, sem) {
+      return logs.find(l => FT_DAY.isDay(l) && l.traineeName === name && l.date === date && String(l.semester) === String(sem));
+    }
+    function renderDayItems(sem, values, locked) {
+      const tb = document.getElementById('day_items');
+      let h = '';
       FT_CUR.sems[sem].cats.forEach(c => {
-        const g = document.createElement('optgroup');
-        g.label = c.no + ' ' + c.name;
-        c.items.forEach((t, i) => {
-          const opt = document.createElement('option');
-          opt.value = t.code;
-          opt.textContent = (i + 1) + '. ' + t.name;
-          g.appendChild(opt);
+        h += `<tr class="grp"><td colspan="2">${ftEsc(c.no + ' ' + (c.formName || c.name))}</td></tr>`;
+        c.items.forEach((it, i) => {
+          if (c.breaks && c.breaks[i + 1]) h += `<tr class="sub"><td colspan="2">${ftEsc(c.breaks[i + 1])}</td></tr>`;
+          const n = +(values[it.code] || 0);
+          h += `<tr class="it${n ? ' on' : ''}" data-code="${it.code}">
+            <td><label class="chk"><input type="checkbox" ${n ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleItem(this)"> ${i + 1}. ${ftEsc(it.name)}</label></td>
+            <td style="text-align:center;"><input type="number" min="1" max="99" value="${n || ''}" ${n && !locked ? '' : 'disabled'} oninput="updateDayCount()"></td></tr>`;
         });
-        select.appendChild(g);
       });
+      tb.innerHTML = h;
+      updateDayCount();
+    }
+    function toggleItem(cb) {
+      const tr = cb.closest('tr'), num = tr.querySelector('input[type=number]');
+      num.disabled = !cb.checked;
+      if (cb.checked && !(+num.value > 0)) num.value = 1;
+      if (!cb.checked) num.value = '';
+      tr.classList.toggle('on', cb.checked);
+      updateDayCount();
+    }
+    function readDayItems() {
+      const out = {};
+      document.querySelectorAll('#day_items tr.it').forEach(tr => {
+        const cb = tr.querySelector('input[type=checkbox]'), n = Math.max(0, Math.min(99, parseInt(tr.querySelector('input[type=number]').value, 10) || 0));
+        if (cb.checked && n > 0) out[tr.dataset.code] = n;
+      });
+      return out;
+    }
+    function updateDayCount() {
+      const it = readDayItems(), k = Object.keys(it).length, n = Object.values(it).reduce((a, b) => a + b, 0);
+      document.getElementById('day_count').textContent = k ? `เลือกแล้ว ${k} รายการ รวม ${n} ครั้ง` : 'ยังไม่ได้เลือกรายการ';
+    }
+    // โหลดแบบบันทึกของวันที่/ภาคเรียนที่เลือก (ถ้าเคยส่งแล้วจะแก้ไขต่อได้จนกว่าครูจะตรวจ)
+    function loadDayForm() {
+      const name = document.getElementById('trainee_name').value.trim();
+      const date = document.getElementById('log_date').value;
+      const sem = document.getElementById('log_semester').value;
+      const log = date ? dayLogFor(name, date, sem) : null;
+      const locked = !!(log && log.status === 'evaluated');
+      document.getElementById('edit_log_id').value = log ? log.id : '';
+      renderDayItems(sem, log ? (log.items || {}) : {}, locked);
+      document.getElementById('log_content').value = log ? (log.traineeNote || '') : '';
+      document.getElementById('log_content').disabled = locked;
+      const btn = document.getElementById('btn_submit_log');
+      btn.disabled = locked;
+      btn.textContent = log ? '💾 บันทึกการแก้ไขแบบบันทึกวันนี้' : '💾 ส่งแบบบันทึกวันนี้ให้ครูพี่เลี้ยง';
+      const st = document.getElementById('day_status');
+      st.innerHTML = !log ? '' : locked
+        ? '<span style="color:var(--success);font-weight:600;">✓ ครูพี่เลี้ยงตรวจแบบบันทึกวันนี้แล้ว — แก้ไขไม่ได้ (ติดต่อครูพี่เลี้ยงหากต้องแก้)</span>'
+        : '<span style="color:var(--amber);font-weight:600;">⏳ ส่งแบบบันทึกวันนี้แล้ว รอครูตรวจ — แก้ไขแล้วกดบันทึกได้</span>';
     }
 
     function handleTraineeSubmit(e) {
       e.preventDefault();
-      const editId = document.getElementById('edit_log_id').value;
       const tName = document.getElementById('trainee_name').value.trim();
       const station = document.getElementById('trainee_station').value.trim();
       const mentor = document.getElementById('trainee_mentor').value.trim();
       const date = document.getElementById('log_date').value;
       const semester = document.getElementById('log_semester').value;
-      const topicCode = document.getElementById('log_topic').value;
       const content = document.getElementById('log_content').value.trim();
+      const items = readDayItems();
+      if (!tName) { alert('กรุณากรอกชื่อ นสต.'); return; }
+      if (!Object.keys(items).length) { alert('กรุณาติ๊กรายการที่ได้ปฏิบัติในวันนี้อย่างน้อย 1 รายการ'); return; }
 
-      const topicName = FT_CUR.topicLabel(topicCode);
+      if (!roster.some(r => r.name === tName)) roster.push({ name: tName, station: station, mentor: mentor });
 
-      // Add to roster if new
-      if (!roster.some(r => r.name === tName)) {
-        roster.push({ name: tName, station: station, mentor: mentor });
-      }
-
-      if (editId) {
-        const log = logs.find(l => l.id === editId);
-        if (log) {
-          log.traineeName = tName;
-          log.station = station;
-          log.mentor = mentor;
-          log.date = date;
-          log.semester = semester;
-          log.topicCode = topicCode;
-          log.topicName = topicName;
-          log.traineeNote = content;
-        }
-        cancelEdit();
+      let log = dayLogFor(tName, date, semester);
+      if (log && log.status === 'evaluated') { alert('แบบบันทึกวันนี้ครูพี่เลี้ยงตรวจแล้ว แก้ไขไม่ได้'); return; }
+      if (log) {
+        Object.assign(log, { station, mentor, items, traineeNote: content });
       } else {
-        const newLog = {
-          id: ftNewId(),
-          traineeName: tName,
-          station: station,
-          mentor: mentor,
-          date: date,
-          semester: semester,
-          topicCode: topicCode,
-          topicName: topicName,
-          traineeNote: content,
-          status: 'pending',
-          evalPrep: null, evalPrepReason: '',
-          evalWork: null, evalWorkReason: '',
-          evalPost: null, evalPostReason: '',
-          mentorFeedback: ''
-        };
-        logs.unshift(newLog);
+        log = { id: ftNewId(), form: 'day', traineeName: tName, station, mentor, date, semester,
+                items, traineeNote: content, status: 'pending',
+                evalItems: {}, prepItems: null, postItems: null, mentorFeedback: '' };
+        logs.unshift(log);
       }
-
+      log.topicName = FT_DAY.summary(log);   // ข้อความสรุป ใช้แสดงในชีต "บันทึกการฝึก" (คอลัมน์หัวข้อ)
       saveData();
-      document.getElementById('log_content').value = '';
-      alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+      alert('ส่งแบบบันทึกประจำวันเรียบร้อยแล้ว!');
+      loadDayForm();
       renderTable();
     }
 
     function editLog(logId) {
       const log = logs.find(l => l.id === logId);
       if (!log) return;
-      if (log.status === 'evaluated') {
-        alert('รายการนี้ครูพี่เลี้ยงประเมินผลเรียบร้อยแล้ว หากต้องการแก้ไขกรุณาติดต่อครูพี่เลี้ยง');
-        return;
-      }
-      document.getElementById('edit_log_id').value = log.id;
+      if (!FT_DAY.isDay(log)) { alert('บันทึกนี้เป็นรูปแบบเดิม (ทีละรายการ) — แก้ไขไม่ได้ในแบบฟอร์มใหม่ หากต้องแก้ให้ลบแล้วบันทึกใหม่'); return; }
       document.getElementById('log_date').value = log.date;
-      document.getElementById('log_semester').value = log.semester;
-      updateTopics();
-      const sel = document.getElementById('log_topic');
-      if (!FT_CUR.item(log.topicCode)) {
-        // บันทึกตามหัวข้อเกณฑ์เดิม — แสดงไว้ให้เลือกใหม่ตามหลักสูตร 2567
-        const opt = document.createElement('option');
-        opt.value = log.topicCode; opt.textContent = '(เกณฑ์เดิม) ' + (log.topicName || log.topicCode);
-        sel.insertBefore(opt, sel.firstChild);
-      }
-      sel.value = log.topicCode;
-      document.getElementById('log_content').value = log.traineeNote;
-
-      document.getElementById('btn_submit_log').textContent = '💾 บันทึกการแก้ไข';
-      document.getElementById('btn_cancel_edit').style.display = 'inline-flex';
+      document.getElementById('log_semester').value = String(log.semester);
+      loadDayForm();
       window.scrollTo({ top: 200, behavior: 'smooth' });
-    }
-
-    function cancelEdit() {
-      document.getElementById('edit_log_id').value = '';
-      document.getElementById('log_content').value = '';
-      document.getElementById('btn_submit_log').textContent = '💾 บันทึกและส่งให้ครูพี่เลี้ยงตรวจ';
-      document.getElementById('btn_cancel_edit').style.display = 'none';
     }
 
     function deleteLog(logId) {
@@ -414,12 +429,14 @@
       }
       logs = logs.filter(l => l.id !== logId);
       saveData();
+      loadDayForm();
       renderTable();
     }
 
     function renderTable() {
       const currentName = document.getElementById('trainee_name').value.trim();
-      const filtered = logs.filter(l => l.traineeName === currentName);
+      const filtered = logs.filter(l => l.traineeName === currentName)
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)));
       document.getElementById('count_logs').textContent = filtered.length;
 
       const tbody = document.getElementById('trainee_tbody');
@@ -438,7 +455,8 @@
 
         let resultSummary = '<span style="color:var(--text-muted);">-</span>';
         if (isEval) {
-          resultSummary = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ถูกต้อง</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ถูกต้อง</span>'}</div>`;
+          const t = FT_DAY.workTotals(log);
+          resultSummary = `<div><b>ผล:</b> <span style="color:var(--success);font-weight:700;">ถูกต้อง ${t.ok}</span> · <span style="color:${t.bad ? 'var(--danger)' : 'var(--text-muted)'};font-weight:700;">ไม่ถูกต้อง ${t.bad}</span></div>`;
           if (log.mentorFeedback) {
             resultSummary += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>แนะ:</b> ${ftEsc(log.mentorFeedback)}</div>`;
           }
@@ -447,14 +465,14 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="text-align:center;font-weight:600;">${index + 1}</td>
-          <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
+          <td style="text-align:center;font-weight:600;">${ftEsc(ftThaiDate(log.date))}</td>
           <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
-          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td>${ftEsc(FT_DAY.summary(log, 4))}${FT_DAY.isDay(log) ? `<div class="day-note">รวม ${FT_DAY.performed(log)} ครั้ง</div>` : ''}</td>
           <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td>${resultSummary}</td>
           <td style="text-align:center;white-space:nowrap;">
-            ${!isEval ? `<button type="button" class="btn btn-outline btn-sm" onclick="editLog(${ftJs(log.id)})" title="แก้ไข">✏️</button>` : ''}
+            ${!isEval && FT_DAY.isDay(log) ? `<button type="button" class="btn btn-outline btn-sm" onclick="editLog(${ftJs(log.id)})" title="แก้ไข">✏️</button>` : ''}
             <button type="button" class="btn btn-outline btn-sm" onclick="deleteLog(${ftJs(log.id)})" title="ลบ">🗑️</button>
           </td>
         `;
@@ -467,7 +485,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
-      updateTopics();
       onTraineeChange();
     });
   </script>

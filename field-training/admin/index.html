@@ -736,7 +736,7 @@
       // Render Individual Logs Timeline
       const logsTbody = document.getElementById('ind_logs_tbody');
       logsTbody.innerHTML = '';
-      const allUserLogs = logs.filter(l => l.traineeName === selectedName);
+      const allUserLogs = logs.filter(l => l.traineeName === selectedName).sort((a, b) => String(b.date).localeCompare(String(a.date)));
       document.getElementById('ind_log_count').textContent = allUserLogs.length;
 
       allUserLogs.forEach((log, index) => {
@@ -747,7 +747,8 @@
 
         let evalDetails = '-';
         if (isEval) {
-          evalDetails = `<div><b>ผล:</b> ${log.evalWork === 'ผ่าน' ? '<span style="color:var(--success);font-weight:700;">ผ่าน</span>' : '<span style="color:var(--danger);font-weight:700;">ไม่ผ่าน</span>'}</div>`;
+          const wt = FT_DAY.workTotals(log);
+          evalDetails = `<div><b>ผล:</b> <span style="color:var(--success);font-weight:700;">ถูกต้อง ${wt.ok}</span> · <span style="color:${wt.bad ? 'var(--danger)' : 'var(--text-muted)'};font-weight:700;">ไม่ถูกต้อง ${wt.bad}</span></div>`;
           if (log.mentorFeedback) {
             evalDetails += `<div style="font-size:11.5px;color:#475569;margin-top:2px;"><b>ครูแนะ:</b> ${ftEsc(log.mentorFeedback)}</div>`;
           }
@@ -758,7 +759,7 @@
           <td style="text-align:center;font-weight:600;">${index + 1}</td>
           <td style="text-align:center;font-weight:600;">${ftEsc(log.date)}</td>
           <td style="text-align:center;">ภาค ${ftEsc(log.semester)}</td>
-          <td><b>${ftEsc(log.topicName)}</b></td>
+          <td><b>${ftEsc(FT_DAY.summary(log, 3))}</b>${FT_DAY.isDay(log) ? `<div style="font-size:11.5px;color:var(--text-muted);">แบบบันทึกรายวัน · ${FT_DAY.performed(log)} ครั้ง</div>` : ''}</td>
           <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${ftEsc(log.traineeNote)}">${ftEsc(log.traineeNote)}</td>
           <td style="text-align:center;">${statusBadge}</td>
           <td>${evalDetails}</td>

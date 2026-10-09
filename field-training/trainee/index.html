@@ -148,28 +148,28 @@
       <div class="form-grid">
         <div class="form-group">
           <label>เลือกหรือพิมพ์ ยศ-ชื่อ-สกุล นสต.</label>
-          <input type="text" id="trainee_name" list="trainee_roster_list" value="นสต. ทศพร สุมาลี" onchange="onTraineeChange()">
+          <input type="text" id="trainee_name" list="trainee_roster_list" placeholder="เช่น นสต. สมชาย ใจดี" onchange="onTraineeChange()">
           <datalist id="trainee_roster_list"></datalist>
         </div>
         <div class="form-group">
           <label>สังกัด (ของ นสต.)</label>
-          <input type="text" id="trainee_unit" placeholder="เช่น กก.5 บก.กฝ.บช.ตชด.">
+          <input type="text" id="trainee_unit" placeholder="เช่น กก.5 บก.กฝ.บช.ตชด." onchange="saveProfile()">
         </div>
         <div class="form-group">
           <label>เลขประจำตัว นสต.</label>
-          <input type="text" id="trainee_tid" placeholder="เลขประจำตัว">
+          <input type="text" id="trainee_tid" placeholder="เลขประจำตัว" onchange="saveProfile()">
         </div>
         <div class="form-group">
           <label>สถานีตำรวจ/หน่วยงานที่ฝึกปฏิบัติ</label>
-          <input type="text" id="trainee_station" value="สภ.แม่แตง ภ.จว.เชียงใหม่">
+          <input type="text" id="trainee_station" placeholder="เช่น สภ.แม่แตง ภ.จว.เชียงใหม่" onchange="saveProfile()">
         </div>
         <div class="form-group">
           <label>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</label>
-          <input type="text" id="trainee_mentor" value="ร.ต.อ. อนุชา กล้าหาญ">
+          <input type="text" id="trainee_mentor" placeholder="ยศ ชื่อ - สกุล" onchange="saveProfile()">
         </div>
         <div class="form-group">
           <label>ตำแหน่งครูพี่เลี้ยง</label>
-          <input type="text" id="trainee_mentor_pos" placeholder="เช่น รอง สว.(ป.) สภ.แม่แตง ภ.จว.เชียงใหม่">
+          <input type="text" id="trainee_mentor_pos" placeholder="เช่น รอง สว.(ป.) สภ.แม่แตง ภ.จว.เชียงใหม่" onchange="saveProfile()">
         </div>
       </div>
     </div>
@@ -322,8 +322,8 @@
       const name = document.getElementById('trainee_name').value.trim();
       const match = roster.find(r => r.name === name);
       if (match) {
-        document.getElementById('trainee_station').value = match.station;
-        document.getElementById('trainee_mentor').value = match.mentor;
+        document.getElementById('trainee_station').value = match.station || '';
+        document.getElementById('trainee_mentor').value = match.mentor || '';
         document.getElementById('trainee_mentor_pos').value = match.mentorPos || '';
         document.getElementById('trainee_unit').value = match.unit || '';
         document.getElementById('trainee_tid').value = match.tid || '';
@@ -393,6 +393,25 @@
         : '<span style="color:var(--amber);font-weight:600;">⏳ ส่งแบบบันทึกวันนี้แล้ว รอครูตรวจ — แก้ไขแล้วกดบันทึกได้</span>';
     }
 
+    // ข้อมูลประจำตัว นสต. (สังกัด เลขประจำตัว สถานี ครูพี่เลี้ยง ตำแหน่ง) → รายชื่อกลาง ใช้ร่วมทุกหน้า
+    function updateProfile() {
+      const v = id => document.getElementById(id).value.trim();
+      const tName = v('trainee_name');
+      if (!tName) return false;
+      let rr = roster.find(r => r.name === tName);
+      if (!rr) { rr = { name: tName }; roster.push(rr); }
+      const f = { station: v('trainee_station'), unit: v('trainee_unit'), tid: v('trainee_tid'), mentor: v('trainee_mentor'), mentorPos: v('trainee_mentor_pos') };
+      Object.keys(f).forEach(k => { if (f[k]) rr[k] = f[k]; });
+      if (f.mentorPos && f.mentor) roster.forEach(x => { if (x !== rr && x.mentor === f.mentor) x.mentorPos = f.mentorPos; });
+      return true;
+    }
+    function saveProfile() {
+      if (!updateProfile()) return;
+      try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) {}
+      FT_SYNC.push({ roster: roster }, { noDelete: ['roster'] });
+      refreshRosterList();
+    }
+
     function handleTraineeSubmit(e) {
       e.preventDefault();
       const tName = document.getElementById('trainee_name').value.trim();
@@ -408,17 +427,7 @@
       if (!tName) { alert('กรุณากรอกชื่อ นสต.'); return; }
       if (!Object.keys(items).length) { alert('กรุณาติ๊กรายการที่ได้ปฏิบัติในวันนี้อย่างน้อย 1 รายการ'); return; }
 
-      // รายชื่อกลาง: เพิ่มคนใหม่ / อัปเดตสถานี ครูพี่เลี้ยง และตำแหน่งครูพี่เลี้ยง (ใช้ร่วมทุกหน้า)
-      let rr = roster.find(r => r.name === tName);
-      if (!rr) { rr = { name: tName }; roster.push(rr); }
-      if (station) rr.station = station;
-      if (unit) rr.unit = unit;
-      if (tid) rr.tid = tid;
-      if (mentor) rr.mentor = mentor;
-      if (mentorPos) {
-        rr.mentorPos = mentorPos;
-        roster.forEach(x => { if (x !== rr && mentor && x.mentor === mentor) x.mentorPos = mentorPos; });
-      }
+      updateProfile();
 
       let log = dayLogFor(tName, date, semester);
       if (log && log.status === 'evaluated') { alert('แบบบันทึกวันนี้ครูพี่เลี้ยงตรวจแล้ว แก้ไขไม่ได้'); return; }

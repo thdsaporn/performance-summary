@@ -619,7 +619,8 @@ var FT_SYNC = (function () {
     Object.keys(data).forEach(function (kind) {
       var cur = toMap(kind, data[kind]), snap = state.snap[kind] || (state.snap[kind] = {});
       Object.keys(cur).forEach(function (k) {
-        if (isSample(kind, k)) return;
+        /* กันเฉพาะบันทึกตัวอย่าง (l1, l2 …) — รายชื่อที่ผู้ใช้กรอกเองส่งได้เสมอ แม้ชื่อตรงกับรายชื่อตัวอย่าง */
+        if (kind === 'logs' && isSample(kind, k)) return;
         if (JSON.stringify(cur[k]).length > MAX_RECORD) {
           if (!warnedSize) { warnedSize = true; alert('รายการนี้ยาวเกินไป ระบบกลางรับไม่ได้ กรุณาย่อข้อความให้สั้นลง'); }
           return;

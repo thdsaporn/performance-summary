@@ -522,6 +522,7 @@
         <div style="display:flex;gap:8px;">
           <input type="text" id="m_add_tid" placeholder="เลขประจำตัว นสต." style="width:130px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <input type="text" id="m_add_mentor" placeholder="ครูพี่เลี้ยง / ผู้ควบคุมการฝึก" required style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <input type="text" id="m_add_mentor_pos" placeholder="ตำแหน่งครูพี่เลี้ยง" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
           <button type="submit" class="btn btn-primary btn-sm">+ เพิ่มในรุ่น</button>
         </div>
       </form>
@@ -663,7 +664,7 @@
 
       const rosterMatch = roster.find(r => r.name === selectedName);
       document.getElementById('lbl_ind_station').textContent = rosterMatch ? rosterMatch.station : '-';
-      document.getElementById('lbl_ind_mentor').textContent = rosterMatch ? rosterMatch.mentor : '-';
+      document.getElementById('lbl_ind_mentor').textContent = rosterMatch ? (rosterMatch.mentor || '-') + (rosterMatch.mentorPos ? ' (' + rosterMatch.mentorPos + ')' : '') : '-';
 
       const res = computeTraineeScores(selectedName);
 
@@ -926,12 +927,18 @@
       const station = document.getElementById('m_add_station').value.trim();
       const mentor = document.getElementById('m_add_mentor').value.trim();
       const tid = document.getElementById('m_add_tid').value.trim();
+      const mentorPos = document.getElementById('m_add_mentor_pos').value.trim();
 
       if (roster.some(r => r.name === name)) {
         alert('มีชื่อ นสต. ท่านนี้ในรุ่นอยู่แล้ว');
         return;
       }
-      roster.push(tid ? { name, station, mentor, tid } : { name, station, mentor });
+      const rec = { name, station, mentor };
+      if (tid) rec.tid = tid;
+      if (mentorPos) { rec.mentorPos = mentorPos; roster.forEach(x => { if (x.mentor === mentor) x.mentorPos = mentorPos; }); }
+      else { const same = roster.find(x => x.mentor === mentor && x.mentorPos); if (same) rec.mentorPos = same.mentorPos; }
+      roster.push(rec);
+      document.getElementById('m_add_mentor_pos').value = '';
       saveData();
       document.getElementById('m_add_tid').value = '';
       document.getElementById('m_add_name').value = '';

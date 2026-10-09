@@ -769,7 +769,7 @@
       const anyLog = logs.find(l => l.traineeName === name && l.date === date) || {};
       const box = document.getElementById('form1_print');
       box.innerHTML = FT_FORMS.form1({ logs, name, date, sem: String(sem || anyLog.semester || '1'),
-        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, mentorPos: r.mentorPos || '', tid: r.tid || '' });
+        station: r.station || anyLog.station, mentor: r.mentor || anyLog.mentor, mentorPos: r.mentorPos || anyLog.mentorPos || '', tid: r.tid || '' });
       ftPrintOnly(box);
     }
     // พิมพ์เฉพาะแบบฟอร์ม (คัดลอกไปที่กล่องพิมพ์ แล้วซ่อนส่วนอื่นของหน้า)

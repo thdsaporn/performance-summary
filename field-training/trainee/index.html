@@ -159,6 +159,10 @@
           <label>ครูพี่เลี้ยง / ผู้ควบคุมการฝึก</label>
           <input type="text" id="trainee_mentor" value="ร.ต.อ. อนุชา กล้าหาญ">
         </div>
+        <div class="form-group">
+          <label>ตำแหน่งครูพี่เลี้ยง</label>
+          <input type="text" id="trainee_mentor_pos" placeholder="เช่น รอง สว.(ป.) สภ.แม่แตง ภ.จว.เชียงใหม่">
+        </div>
       </div>
     </div>
 
@@ -312,6 +316,7 @@
       if (match) {
         document.getElementById('trainee_station').value = match.station;
         document.getElementById('trainee_mentor').value = match.mentor;
+        document.getElementById('trainee_mentor_pos').value = match.mentorPos || '';
       }
       document.getElementById('lbl_current_trainee').textContent = name;
       loadDayForm();
@@ -383,6 +388,7 @@
       const tName = document.getElementById('trainee_name').value.trim();
       const station = document.getElementById('trainee_station').value.trim();
       const mentor = document.getElementById('trainee_mentor').value.trim();
+      const mentorPos = document.getElementById('trainee_mentor_pos').value.trim();
       const date = document.getElementById('log_date').value;
       const semester = document.getElementById('log_semester').value;
       const content = document.getElementById('log_content').value.trim();
@@ -390,14 +396,22 @@
       if (!tName) { alert('กรุณากรอกชื่อ นสต.'); return; }
       if (!Object.keys(items).length) { alert('กรุณาติ๊กรายการที่ได้ปฏิบัติในวันนี้อย่างน้อย 1 รายการ'); return; }
 
-      if (!roster.some(r => r.name === tName)) roster.push({ name: tName, station: station, mentor: mentor });
+      // รายชื่อกลาง: เพิ่มคนใหม่ / อัปเดตสถานี ครูพี่เลี้ยง และตำแหน่งครูพี่เลี้ยง (ใช้ร่วมทุกหน้า)
+      let rr = roster.find(r => r.name === tName);
+      if (!rr) { rr = { name: tName }; roster.push(rr); }
+      if (station) rr.station = station;
+      if (mentor) rr.mentor = mentor;
+      if (mentorPos) {
+        rr.mentorPos = mentorPos;
+        roster.forEach(x => { if (x !== rr && mentor && x.mentor === mentor) x.mentorPos = mentorPos; });
+      }
 
       let log = dayLogFor(tName, date, semester);
       if (log && log.status === 'evaluated') { alert('แบบบันทึกวันนี้ครูพี่เลี้ยงตรวจแล้ว แก้ไขไม่ได้'); return; }
       if (log) {
-        Object.assign(log, { station, mentor, items, traineeNote: content });
+        Object.assign(log, { station, mentor, mentorPos, items, traineeNote: content });
       } else {
-        log = { id: ftNewId(), form: 'day', traineeName: tName, station, mentor, date, semester,
+        log = { id: ftNewId(), form: 'day', traineeName: tName, station, mentor, mentorPos, date, semester,
                 items, traineeNote: content, status: 'pending',
                 evalItems: {}, prepItems: null, postItems: null, mentorFeedback: '' };
         logs.unshift(log);

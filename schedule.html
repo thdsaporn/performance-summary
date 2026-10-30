@@ -1100,6 +1100,7 @@ function updateSaveIndicator(){
 const DIR_NAMES_URL = 'https://freebuff-teacher-system.onrender.com/api/teacher-names';
 const DIR_NAMES_KEY = 'sch_dir_names_v1';
 let DIR_NAMES = (() => { try{ return JSON.parse(localStorage.getItem(DIR_NAMES_KEY) || '[]') || []; }catch(e){ return []; } })();
+let DIR_GROUPS = (() => { try{ return JSON.parse(localStorage.getItem(DIR_NAMES_KEY + '_groups') || '{}') || {}; }catch(e){ return {}; } })();
 function loadDirectoryNames(){
   const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const t = ctl ? setTimeout(() => ctl.abort(), 60000) : null;   // Render ฟรีอาจหลับ ใช้เวลาตื่น ~30-50 วินาที
@@ -1107,7 +1108,8 @@ function loadDirectoryNames(){
     if(t) clearTimeout(t);
     if(!Array.isArray(list)) return;
     DIR_NAMES = list.filter(x => x && x.name && x.group !== 'เกษียณ').map(x => x.name);
-    try{ localStorage.setItem(DIR_NAMES_KEY, JSON.stringify(DIR_NAMES)); }catch(e){}
+    DIR_GROUPS = {}; list.forEach(x => { if(x && x.name) DIR_GROUPS[teacherKey(x.name)] = x.group; });
+    try{ localStorage.setItem(DIR_NAMES_KEY, JSON.stringify(DIR_NAMES)); localStorage.setItem(DIR_NAMES_KEY + '_groups', JSON.stringify(DIR_GROUPS)); }catch(e){}
     const dl = document.getElementById('teacherList');
     if(dl) dl.innerHTML = teacherOptions().map(n => `<option value="${escapeHtml(n)}">`).join('');
   }).catch(() => { if(t) clearTimeout(t); });
@@ -1150,9 +1152,10 @@ const TABS = [
   {id:'subject', label:'ค้นหาตามวิชา'},
   {id:'calendar', label:'ปฏิทินรายเดือน'},
   {id:'manage', label:'จัดการหลักสูตร'},
+  {id:'fee', label:'เอกสารค่าสอน'},
 ];
 
-const EDIT_TABS = ['entry', 'manage'];
+const EDIT_TABS = ['entry', 'manage', 'fee'];
 function visibleTabs(){ return SCH.readOnly() ? TABS.filter(t => EDIT_TABS.indexOf(t.id) === -1) : TABS; }
 function switchTab(id){
   if(SCH.readOnly() && EDIT_TABS.indexOf(id) !== -1) id = 'print';
@@ -1248,6 +1251,7 @@ function renderApp(){
   else if(currentTab==='subject') renderSubjectPanel(target);
   else if(currentTab==='calendar') renderCalendarPanel(target);
   else if(currentTab==='manage') renderManagePanel(target);
+  else if(currentTab==='fee') renderFeePanel(target);
 }
 
 // ============================================================
@@ -2206,6 +2210,163 @@ let manageEditCode = null; // รหัสวิชาที่กำลัง�
 
 function curProfile(){ return CURRICULA.find(c=>c.id===activeCurId) || CURRICULA[0] || DEFAULT_CURRICULA[0]; }
 async function saveCur(){ recomputeCurriculum(); await saveSettings(); }
+
+// ============================================================
+// เอกสารค่าสอน (ขั้น A: บันทึกขออนุมัติยืมเงินค่าสมนาคุณ) — 30 ต.ค. 2569
+// อัตราตั้งรายหลักสูตร เก็บในเครื่องนี้ (sch_fee_cfg_<หลักสูตร>) — ชั่วโมงดึงจากตารางในช่วงวันที่ที่เลือก
+// เป็นเครื่องมือช่วยจัดทำเอกสาร ผู้ใช้ตรวจ/แก้ไฟล์ Word ก่อนเสนอทุกครั้ง
+// ============================================================
+const FEE_TYPES = ['ทฤษฎี', 'ปฏิบัติ', 'อภิปราย'];
+function feeDefaults(cur){
+  const dates = ENTRIES.map(e => e.date).filter(Boolean).sort();
+  return {
+    from: dates[0] || '', to: dates[dates.length - 1] || '',
+    rules: [{ label: 'ภาคการฝึก', types: FEE_TYPES.slice(), who: 'all', rate: 300, mult: 1, unit: 'ห้อง' }],
+    org: 'กก.๕ บก.กฝ.บช.ตชด. อ.แม่แตง จว.เชียงใหม่  ๕๐๑๕๐', phone: '0 5304 6615', docNo: '๐๐๓๐.๖๕๒/',
+    docDate: '', course: cur.name,
+    intro: 'ด้วย กก.๕ บก.กฝ.บช.ตชด. ดำเนินการฝึกอบรมหลักสูตร ' + cur.name + ' นั้น',
+    recipient1: 'ผกก.๕ บก.กฝ.บช.ตชด. (ผ่าน รอง ผกก., สว.กก.๕ บก.กฝ.บช.ตชด.(กง.กบ.,ผงป.))',
+    recipient2: 'ผกก.๕ บก.กฝ.บช.ตชด. (ผ่าน สว.กก.๕ บก.กฝ.บช.ตชด.(กง.กบ.))',
+    bRank: '', bName: '', bPos: '',
+    checkRank: '', checkName: '', checkPos: 'ผบ.หมู่ กก.๕ บก.กฝ.บช.ตชด.',
+    chiefRank: '', chiefName: '', chiefPos: 'สว.กก.๕ บก.กฝ.บช.ตชด.(กง.กบ.)',
+    cmdRank: '', cmdName: '', cmdPos: 'ผกก.๕ บก.กฝ.บช.ตชด.',
+    thaiNum: true,
+  };
+}
+function feeCfg(){
+  const cur = activeCurriculum(), base = feeDefaults(cur);
+  let saved = {};
+  try{ saved = JSON.parse(localStorage.getItem('sch_fee_cfg_' + cur.id) || '{}') || {}; }catch(e){}
+  if(!base.docDate){ const n = new Date(); base.docDate = '       ' + THAI_MONTHS[n.getMonth()] + '  ' + (n.getFullYear() + 543); }
+  return Object.assign(base, saved);
+}
+function feeSaveCfg(c){ try{ localStorage.setItem('sch_fee_cfg_' + activeCurriculum().id, JSON.stringify(c)); }catch(e){} }
+// ภายนอก = มีชื่อในกลุ่ม "วิทยากรภายนอก" ของทำเนียบ; นอกนั้นถือเป็นภายใน
+function feeWho(teacher){
+  return teacherNames(teacher).some(n => DIR_GROUPS[teacherKey(n)] === 'วิทยากรภายนอก') ? 'ภายนอก' : 'ภายใน';
+}
+// คาบหนึ่งนับในอัตราแถวแรกที่ตรงเงื่อนไข (ประเภทคาบ + ภายใน/ภายนอก)
+function feeCompute(c){
+  const inRange = ENTRIES.filter(e => (!c.from || e.date >= c.from) && (!c.to || e.date <= c.to));
+  const used = new Set();
+  const groups = c.rules.map(r => {
+    const subj = {};
+    inRange.forEach(e => {
+      if(used.has(e.id) || r.types.indexOf(e.type) === -1) return;
+      if(r.who !== 'all' && feeWho(e.teacher) !== r.who) return;
+      used.add(e.id);
+      const k = e.subjectName || '-';
+      subj[k] = Math.round(((subj[k] || 0) + (Number(e.hours) || 0)) * 100) / 100;
+    });
+    const subjects = Object.keys(subj).map(name => ({ name, hours: subj[name] }));
+    const hours = Math.round(subjects.reduce((a, x) => a + x.hours, 0) * 100) / 100;
+    const rate = Number(r.rate) || 0, mult = Number(r.mult) || 1;
+    return { label: r.label, hours, rate, mult, multUnit: r.unit, amount: Math.round(hours * rate * mult * 100) / 100, subjects };
+  }).filter(g => g.hours > 0);
+  return { groups, total: groups.reduce((a, g) => a + g.amount, 0), missed: inRange.filter(e => !used.has(e.id)), count: inRange.length };
+}
+function feeShort(iso){ if(!iso) return ''; const [y, m, d] = iso.split('-').map(Number); return d + ' ' + THAI_MONTHS_ABBR[m - 1] + String(y + 543).slice(-2); }
+// "26 ก.พ. - 8 มี.ค.67" / "15 - 21 มิ.ย.66"
+function feePeriod(c){
+  if(!c.from || !c.to) return '';
+  if(c.from === c.to) return feeShort(c.from);
+  const sameY = c.from.slice(0, 4) === c.to.slice(0, 4), sameM = sameY && c.from.slice(5, 7) === c.to.slice(5, 7);
+  const left = sameM ? String(+c.from.slice(8)) : sameY ? feeShort(c.from).slice(0, -2) : feeShort(c.from);
+  return left + ' - ' + feeShort(c.to);
+}
+function feeMoney(n){ return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+function renderFeePanel(el){
+  const c = feeCfg(), r = feeCompute(c), cur = activeCurriculum();
+  const inp = k => `<input data-fee="${k}" value="${escapeHtml(c[k] || '')}" style="width:100%">`;
+  const ruleRow = (x, i) => `<tr>
+    <td><input data-rule="${i}" data-rk="label" value="${escapeHtml(x.label)}" style="width:110px"></td>
+    <td>${FEE_TYPES.map(t => `<label style="margin-right:8px;white-space:nowrap"><input type="checkbox" data-rule="${i}" data-rt="${t}" ${x.types.indexOf(t) !== -1 ? 'checked' : ''}> ${t}</label>`).join('')}</td>
+    <td><select data-rule="${i}" data-rk="who">${[['all', 'ทุกคน'], ['ภายใน', 'วิทยากรภายใน'], ['ภายนอก', 'วิทยากรภายนอก']].map(([v, l]) => `<option value="${v}" ${x.who === v ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
+    <td><input type="number" data-rule="${i}" data-rk="rate" value="${x.rate}" style="width:80px"></td>
+    <td><input type="number" data-rule="${i}" data-rk="mult" value="${x.mult}" style="width:60px"> <input data-rule="${i}" data-rk="unit" value="${escapeHtml(x.unit || '')}" style="width:70px" placeholder="ห้อง/กลุ่ม/คน"></td>
+    <td><button class="btn btn-ghost" onclick="feeDelRule(${i})">ลบ</button></td></tr>`;
+  el.innerHTML = `
+  <div class="card">
+    <h2>เอกสารค่าสอน — ${escapeHtml(cur.name)}</h2>
+    <p class="muted">สร้างบันทึกขออนุมัติยืมเงินค่าสมนาคุณวิทยากร (Word) จากชั่วโมงในตาราง · ตรวจและแก้ไฟล์ก่อนเสนอทุกครั้ง · ค่าที่ตั้งจำไว้ในเครื่องนี้แยกตามหลักสูตร</p>
+    <div class="form-grid">
+      <div class="field"><label>ตั้งแต่วันที่</label><input type="date" data-fee="from" value="${c.from}"></div>
+      <div class="field"><label>ถึงวันที่</label><input type="date" data-fee="to" value="${c.to}"></div>
+    </div>
+    <h3 style="margin-top:14px">อัตราค่าสมนาคุณ</h3>
+    <p class="muted">คาบหนึ่งนับในแถวแรกที่ตรงเงื่อนไข · วิทยากรภายนอก = ชื่อในกลุ่ม "วิทยากรภายนอก" ของทำเนียบวิทยากร</p>
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ชื่อภาค</th><th>ประเภทคาบ</th><th>วิทยากร</th><th>บาท/ชม.</th><th>× จำนวน</th><th></th></tr></thead>
+      <tbody>${c.rules.map(ruleRow).join('')}</tbody></table></div>
+    <button class="btn btn-ghost" style="margin-top:6px" onclick="feeAddRule()">+ เพิ่มอัตรา</button>
+    <h3 style="margin-top:14px">ยอดที่คำนวณได้ (${r.count} คาบในช่วงวันที่)</h3>
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>ภาค / วิชา</th><th style="width:90px">ชั่วโมง</th><th style="width:140px">เงิน (บาท)</th></tr></thead><tbody>
+      ${r.groups.map(g => `<tr style="background:#f2f6fa"><td><b>${escapeHtml(g.label)}</b> ${g.hours} ชม. × ${feeMoney(g.rate)} บาท${g.mult > 1 || g.multUnit ? ' × ' + g.mult + ' ' + escapeHtml(g.multUnit || '') : ''}</td><td><b>${g.hours}</b></td><td><b>${feeMoney(g.amount)}</b></td></tr>
+        ${g.subjects.map((x, i) => `<tr><td style="padding-left:24px">${i + 1}. ${escapeHtml(x.name)}</td><td>${x.hours}</td><td></td></tr>`).join('')}`).join('')}
+      <tr><td><b>รวมเป็นเงินทั้งสิ้น</b></td><td></td><td><b>${feeMoney(r.total)}</b></td></tr></tbody></table></div>
+    ${r.missed.length ? `<p style="color:#a33">⚠️ มี ${r.missed.length} คาบที่ไม่เข้าอัตราใด (ประเภท: ${escapeHtml([...new Set(r.missed.map(e => e.type))].join(', '))}) — ไม่นับเงิน</p>` : ''}
+    <h3 style="margin-top:14px">หัวบันทึกและผู้ลงนาม</h3>
+    <div class="form-grid">
+      <div class="field wide"><label>ส่วนราชการ</label>${inp('org')}</div>
+      <div class="field"><label>โทร</label>${inp('phone')}</div>
+      <div class="field"><label>ที่</label>${inp('docNo')}</div>
+      <div class="field"><label>วันที่ (เว้นวัน)</label>${inp('docDate')}</div>
+      <div class="field wide"><label>ชื่อหลักสูตรในบันทึก</label>${inp('course')}</div>
+      <div class="field wide"><label>เรียน (หน้า 1)</label>${inp('recipient1')}</div>
+      <div class="field wide"><label>เรียน (หน้า 2)</label>${inp('recipient2')}</div>
+      <div class="field wide"><label>ย่อหน้าที่มา (แก้ได้ เช่น อ้างหนังสืออนุมัติงบประมาณ)</label><textarea data-fee="intro" rows="3" style="width:100%">${escapeHtml(c.intro)}</textarea></div>
+      <div class="field"><label>ผู้ยืม/ผู้เสนอ: ยศ</label>${inp('bRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('bName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('bPos')}</div>
+      <div class="field"><label>การเงินตรวจสอบ: ยศ</label>${inp('checkRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('checkName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('checkPos')}</div>
+      <div class="field"><label>สว.กง.กบ.: ยศ</label>${inp('chiefRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('chiefName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('chiefPos')}</div>
+      <div class="field"><label>ผู้อนุมัติ: ยศ</label>${inp('cmdRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('cmdName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('cmdPos')}</div>
+      <div class="field"><label><input type="checkbox" data-fee="thaiNum" ${c.thaiNum ? 'checked' : ''}> ใช้เลขไทย</label></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="feeExport()" ${r.total > 0 ? '' : 'disabled'}>ดาวน์โหลดบันทึกขออนุมัติยืมเงิน (Word)</button>
+      <span id="feeMsg" class="muted"></span>
+    </div>
+  </div>`;
+  el.querySelectorAll('[data-fee]').forEach(x => x.addEventListener('change', () => {
+    const k = x.dataset.fee, cc = feeCfg(); cc[k] = x.type === 'checkbox' ? x.checked : x.value; feeSaveCfg(cc);
+    if(k === 'from' || k === 'to') renderApp();
+  }));
+  el.querySelectorAll('[data-rule]').forEach(x => x.addEventListener('change', () => {
+    const cc = feeCfg(), rr = cc.rules[+x.dataset.rule];
+    if(x.dataset.rt){ rr.types = rr.types.filter(t => t !== x.dataset.rt); if(x.checked) rr.types.push(x.dataset.rt); }
+    else rr[x.dataset.rk] = x.type === 'number' ? Number(x.value) : x.value;
+    feeSaveCfg(cc); renderApp();
+  }));
+}
+function feeAddRule(){ const c = feeCfg(); c.rules.push({ label: 'ภาคทฤษฎี', types: ['ทฤษฎี'], who: 'all', rate: 200, mult: 1, unit: '' }); feeSaveCfg(c); renderApp(); }
+function feeDelRule(i){ const c = feeCfg(); c.rules.splice(i, 1); feeSaveCfg(c); renderApp(); }
+// ไลบรารีสร้าง Word โหลดเมื่อกดดาวน์โหลดเท่านั้น (ไม่ทำให้หน้าตารางช้า)
+const FEE_LIBS = [
+  ['docx', 'https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js', 'sha384-VG7nNHhMlezbK+XRucsDQymGisKRncnWqwFcAe+MAHxdR+d/6Brmvux2OlSb8je3'],
+  ['SARABAN_GARUDA', 'lib/garuda-data.js'], ['SarabanDocx', 'lib/saraban-docx.js'], ['FeeDocs', 'lib/fee-docs.js'],
+];
+function feeLoadLibs(){
+  return FEE_LIBS.reduce((p, [g, src, sri]) => p.then(() => window[g] ? null : new Promise((ok, bad) => {
+    const sc = document.createElement('script'); sc.src = src;
+    if(sri){ sc.integrity = sri; sc.crossOrigin = 'anonymous'; }
+    sc.onload = ok; sc.onerror = () => bad(new Error('โหลด ' + src + ' ไม่ได้'));
+    document.head.appendChild(sc);
+  })), Promise.resolve());
+}
+async function feeExport(){
+  const msg = document.getElementById('feeMsg'), c = feeCfg(), r = feeCompute(c);
+  msg.textContent = 'กำลังสร้างไฟล์...';
+  try{
+    await feeLoadLibs();
+    await FeeDocs.exportMemo({
+      org: c.org, phone: c.phone, docNo: c.docNo, docDate: c.docDate, course: c.course, intro: c.intro,
+      recipient1: c.recipient1, recipient2: c.recipient2, period: feePeriod(c), groups: r.groups, total: r.total, thaiNum: !!c.thaiNum,
+      borrower: { rank: c.bRank, name: c.bName, position: c.bPos },
+      finance: { checkRank: c.checkRank, checkName: c.checkName, checkPos: c.checkPos, chiefRank: c.chiefRank, chiefName: c.chiefName,
+                 chiefPos: c.chiefPos, cmdRank: c.cmdRank, cmdName: c.cmdName, cmdPos: c.cmdPos },
+    });
+    msg.textContent = '✓ ดาวน์โหลดแล้ว — เปิดตรวจใน Word ก่อนเสนอ';
+  }catch(e){ console.error(e); msg.textContent = 'สร้างไฟล์ไม่สำเร็จ: ' + e.message; }
+}
 
 function renderManagePanel(el){
   const cur = curProfile();

@@ -1096,6 +1096,28 @@ function updateSaveIndicator(){
 }
 
 
+// รายชื่อวิทยากรจากระบบทำเนียบวิทยากร (ยศ+ชื่อเท่านั้น) — ใช้เป็นตัวเลือกในช่อง "วิทยากร" (30 ต.ค. 2569)
+const DIR_NAMES_URL = 'https://freebuff-teacher-system.onrender.com/api/teacher-names';
+const DIR_NAMES_KEY = 'sch_dir_names_v1';
+let DIR_NAMES = (() => { try{ return JSON.parse(localStorage.getItem(DIR_NAMES_KEY) || '[]') || []; }catch(e){ return []; } })();
+function loadDirectoryNames(){
+  const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = ctl ? setTimeout(() => ctl.abort(), 60000) : null;   // Render ฟรีอาจหลับ ใช้เวลาตื่น ~30-50 วินาที
+  fetch(DIR_NAMES_URL, ctl ? { signal: ctl.signal } : {}).then(r => r.json()).then(list => {
+    if(t) clearTimeout(t);
+    if(!Array.isArray(list)) return;
+    DIR_NAMES = list.filter(x => x && x.name && x.group !== 'เกษียณ').map(x => x.name);
+    try{ localStorage.setItem(DIR_NAMES_KEY, JSON.stringify(DIR_NAMES)); }catch(e){}
+    const dl = document.getElementById('teacherList');
+    if(dl) dl.innerHTML = teacherOptions().map(n => `<option value="${escapeHtml(n)}">`).join('');
+  }).catch(() => { if(t) clearTimeout(t); });
+}
+// ตัวเลือกในช่องวิทยากร: ชื่อที่เคยใช้ในหลักสูตรนี้ + รายชื่อจากทำเนียบ (ไม่ซ้ำคนเดียวกัน)
+function teacherOptions(){
+  const out = uniqueTeachers(), seen = new Set(out.flatMap(t => teacherNames(t).map(teacherKey)));
+  DIR_NAMES.forEach(n => { const k = teacherKey(n); if(k && !seen.has(k)){ seen.add(k); out.push(n); } });
+  return out;
+}
 function uniqueTeachers(){
   return [...new Set(ENTRIES.map(e=>e.teacher).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
 }
@@ -1285,7 +1307,7 @@ function renderEntryPanel(el){
           <div class="field wide">
             <label>วิทยากร/อาจารย์</label>
             <input list="teacherList" id="f_teacher" placeholder="ชื่อผู้สอน" value="${escapeHtml(draft.teacher || '')}">
-            <datalist id="teacherList">${teachers.map(t=>`<option value="${escapeHtml(t)}">`).join('')}</datalist>
+            <datalist id="teacherList">${teacherOptions().map(t=>`<option value="${escapeHtml(t)}">`).join('')}</datalist>
           </div>
           <div class="field wide">
             <label>หมายเหตุ</label>
@@ -2490,6 +2512,7 @@ async function init(){
   await loadAll();
   if(SCH.readOnly()) currentTab = 'print';
   renderApp();
+  loadDirectoryNames();
   if(SCH.enabled()){
     await schRefresh(true);
     // อัปเดตอัตโนมัติเมื่อกลับมาที่หน้านี้ และทุก 2 นาที

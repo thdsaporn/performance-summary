@@ -2249,13 +2249,14 @@ function feeWho(teacher){
 // คาบหนึ่งนับในอัตราแถวแรกที่ตรงเงื่อนไข (ประเภทคาบ + ภายใน/ภายนอก)
 function feeCompute(c){
   const inRange = ENTRIES.filter(e => (!c.from || e.date >= c.from) && (!c.to || e.date <= c.to));
-  const used = new Set();
+  const used = new Set(), paid = [];
   const groups = c.rules.map(r => {
     const subj = {};
     inRange.forEach(e => {
       if(used.has(e.id) || r.types.indexOf(e.type) === -1) return;
       if(r.who !== 'all' && feeWho(e.teacher) !== r.who) return;
       used.add(e.id);
+      paid.push(Object.assign({}, e, { rate: Number(r.rate) || 0 }));   // ใบสำคัญ: อัตราต่อชั่วโมงต่อคน (ไม่คูณจำนวนห้อง)
       const k = e.subjectName || '-';
       subj[k] = Math.round(((subj[k] || 0) + (Number(e.hours) || 0)) * 100) / 100;
     });
@@ -2264,7 +2265,7 @@ function feeCompute(c){
     const rate = Number(r.rate) || 0, mult = Number(r.mult) || 1;
     return { label: r.label, hours, rate, mult, multUnit: r.unit, amount: Math.round(hours * rate * mult * 100) / 100, subjects };
   }).filter(g => g.hours > 0);
-  return { groups, total: groups.reduce((a, g) => a + g.amount, 0), missed: inRange.filter(e => !used.has(e.id)), count: inRange.length };
+  return { groups, paid, total: groups.reduce((a, g) => a + g.amount, 0), missed: inRange.filter(e => !used.has(e.id)), count: inRange.length };
 }
 function feeShort(iso){ if(!iso) return ''; const [y, m, d] = iso.split('-').map(Number); return d + ' ' + THAI_MONTHS_ABBR[m - 1] + String(y + 543).slice(-2); }
 // "26 ก.พ. - 8 มี.ค.67" / "15 - 21 มิ.ย.66"
@@ -2315,6 +2316,7 @@ function renderFeePanel(el){
       <div class="field wide"><label>เรียน (หน้า 1)</label>${inp('recipient1')}</div>
       <div class="field wide"><label>เรียน (หน้า 2)</label>${inp('recipient2')}</div>
       <div class="field wide"><label>ย่อหน้าที่มา (แก้ได้ เช่น อ้างหนังสืออนุมัติงบประมาณ)</label><textarea data-fee="intro" rows="3" style="width:100%">${escapeHtml(c.intro)}</textarea></div>
+      <div class="field wide"><span class="muted">ผู้ยืม/ผู้เสนอ ใช้เป็น "ผู้จ่ายเงิน" ในใบสำคัญรับเงินด้วย</span></div>
       <div class="field"><label>ผู้ยืม/ผู้เสนอ: ยศ</label>${inp('bRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('bName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('bPos')}</div>
       <div class="field"><label>การเงินตรวจสอบ: ยศ</label>${inp('checkRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('checkName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('checkPos')}</div>
       <div class="field"><label>สว.กง.กบ.: ยศ</label>${inp('chiefRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('chiefName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('chiefPos')}</div>
@@ -2323,6 +2325,7 @@ function renderFeePanel(el){
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="feeExport()" ${r.total > 0 ? '' : 'disabled'}>ดาวน์โหลดบันทึกขออนุมัติยืมเงิน (Word)</button>
+      <button class="btn btn-primary" onclick="feeExportReceipts()" ${r.paid.length ? '' : 'disabled'}>ดาวน์โหลดใบสำคัญรับเงิน (Excel)</button>
       <span id="feeMsg" class="muted"></span>
     </div>
   </div>`;
@@ -2344,13 +2347,27 @@ const FEE_LIBS = [
   ['docx', 'https://cdn.jsdelivr.net/npm/docx@9.8.1/dist/index.iife.js', 'sha384-VG7nNHhMlezbK+XRucsDQymGisKRncnWqwFcAe+MAHxdR+d/6Brmvux2OlSb8je3'],
   ['SARABAN_GARUDA', 'lib/garuda-data.js'], ['SarabanDocx', 'lib/saraban-docx.js'], ['FeeDocs', 'lib/fee-docs.js'],
 ];
-function feeLoadLibs(){
-  return FEE_LIBS.reduce((p, [g, src, sri]) => p.then(() => window[g] ? null : new Promise((ok, bad) => {
+const FEE_RCPT_LIBS = [
+  ['JSZip', 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js', 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'],
+  ['FeeDocs', 'lib/fee-docs.js'],
+];
+function feeLoadLibs(libs){
+  return (libs || FEE_LIBS).reduce((p, [g, src, sri]) => p.then(() => window[g] ? null : new Promise((ok, bad) => {
     const sc = document.createElement('script'); sc.src = src;
     if(sri){ sc.integrity = sri; sc.crossOrigin = 'anonymous'; }
     sc.onload = ok; sc.onerror = () => bad(new Error('โหลด ' + src + ' ไม่ได้'));
     document.head.appendChild(sc);
   })), Promise.resolve());
+}
+async function feeExportReceipts(){
+  const msg = document.getElementById('feeMsg'), c = feeCfg(), r = feeCompute(c);
+  msg.textContent = 'กำลังสร้างใบสำคัญ...';
+  try{
+    await feeLoadLibs(FEE_RCPT_LIBS);
+    const tpl = await fetch('lib/template-receipt.xlsx').then(x => { if(!x.ok) throw new Error('โหลดแบบฟอร์มไม่ได้'); return x.arrayBuffer(); });
+    const made = await FeeDocs.exportReceipts({ template: tpl, entries: r.paid, course: c.course, payerRank: c.bRank, payerName: c.bName });
+    msg.textContent = `✓ ดาวน์โหลดแล้ว ${made.length} ใบ — แผ่น "สรุป" มียอดรวม · เปิดตรวจใน Excel ก่อนพิมพ์`;
+  }catch(e){ console.error(e); msg.textContent = 'สร้างใบสำคัญไม่สำเร็จ: ' + e.message; }
 }
 async function feeExport(){
   const msg = document.getElementById('feeMsg'), c = feeCfg(), r = feeCompute(c);

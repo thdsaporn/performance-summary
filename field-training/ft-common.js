@@ -8,7 +8,7 @@
  * ใส่ URL ของ Web App (ลงท้าย /exec) ที่ได้จากการติดตั้ง google_apps_script/Code.gs
  * ถ้าเว้นว่าง ระบบจะทำงานแบบเดิม (เก็บข้อมูลเฉพาะในเบราว์เซอร์เครื่องนี้)
  */
-var FT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyLkQvV8yNgGgAqHz0P83LebMRn4trnSQiMG7v2ole3Va4QvxeLX2Ac75ZRN0w39iuQ/exec';
+var FT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyTx6m8I_gb5N4zbPU9DQNcoRHVhaQwB8xGn7ovU6iTYy0qkEGPXLU3jrJ_8p2kHhqj/exec';
 
 /* ------------------------------------------------------------------ */
 function ftEsc(s) {
@@ -555,7 +555,7 @@ function ftPrintOnly(el, landscape) {
 
 /* ===================== FT_SYNC ===================== */
 var FT_SYNC = (function () {
-  var STATE_KEY = 'police_field_training_sync_v1';
+  var STATE_KEY = 'police_field_training_sync_v2';
   var KEYS = { logs: 'police_field_training_logs_v1', roster: 'police_field_training_roster_v1', feedback: 'police_field_training_monthly_feedback_v1' };
   // ข้อมูลตัวอย่างเดิมในระบบ — ไม่อัปโหลดขึ้นที่เก็บกลาง
   var SAMPLE_LOG_IDS = /^l\d{1,2}$/;

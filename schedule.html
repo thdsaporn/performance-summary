@@ -666,7 +666,7 @@ let SETTINGS = {
 //  - ผู้แก้ไขใส่ "รหัสผู้แก้ไข" ครั้งเดียวต่อเครื่อง แล้วแก้ได้ตามปกติ การแก้จะส่งขึ้นระบบกลางอัตโนมัติ
 //  - ถ้า SCH_SYNC_URL ว่าง = ทำงานแบบเดิม (เก็บเฉพาะในเบราว์เซอร์นี้)
 // ============================================================
-const SCH_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyLkQvV8yNgGgAqHz0P83LebMRn4trnSQiMG7v2ole3Va4QvxeLX2Ac75ZRN0w39iuQ/exec';
+const SCH_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyTx6m8I_gb5N4zbPU9DQNcoRHVhaQwB8xGn7ovU6iTYy0qkEGPXLU3jrJ_8p2kHhqj/exec';
 
 // กล่องข้อความและรับรหัสผ่านแบบ In-Page (ทำงานได้ 100% ทุกเบราว์เซอร์ รวมถึง In-App Webview ที่ปิด prompt)
 function inPagePrompt(title, defaultValue = '', isPassword = false) {
@@ -729,7 +729,7 @@ function inPagePrompt(title, defaultValue = '', isPassword = false) {
 }
 
 const SCH = (function(){
-  const STATE_KEY = 'sch_sync_state_v1';
+  const STATE_KEY = 'sch_sync_state_v2';
   const EDIT_KEY = 'sch_edit_key_v1';
   const SETTINGS_KEY_ = 'nst2567-settings';
   const ENTRY_PREFIX = 'cur-entries-';

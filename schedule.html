@@ -2329,6 +2329,7 @@ function renderFeePanel(el){
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="feeExport()" ${r.total > 0 ? '' : 'disabled'}>ดาวน์โหลดบันทึกขออนุมัติยืมเงิน (Word)</button>
       <button class="btn btn-primary" onclick="feeExportReceipts()" ${r.paid.length ? '' : 'disabled'}>ดาวน์โหลดใบสำคัญรับเงิน (Excel)</button>
+      <button class="btn btn-primary" onclick="feeExportLoan()" ${r.total > 0 ? '' : 'disabled'}>ดาวน์โหลดสัญญาการยืมเงิน (Excel)</button>
       <span id="feeMsg" class="muted"></span>
     </div>
   </div>`;
@@ -2361,6 +2362,17 @@ function feeLoadLibs(libs){
     sc.onload = ok; sc.onerror = () => bad(new Error('โหลด ' + src + ' ไม่ได้'));
     document.head.appendChild(sc);
   })), Promise.resolve());
+}
+async function feeExportLoan(){
+  const msg = document.getElementById('feeMsg'), c = feeCfg(), r = feeCompute(c);
+  msg.textContent = 'กำลังสร้างสัญญาการยืมเงิน...';
+  try{
+    await feeLoadLibs(FEE_RCPT_LIBS);
+    const tpl = await fetch('lib/template-loan.xlsx').then(x => { if(!x.ok) throw new Error('โหลดแบบฟอร์มไม่ได้'); return x.arrayBuffer(); });
+    await FeeDocs.exportLoan({ template: tpl, course: c.course, total: r.total, period: feePeriod(c), shortDate: c.shortDate,
+      borrower: { rank: c.bRank, name: c.bName, position: c.bPos }, chief: { rank: c.chiefRank, position: c.chiefPos }, cmd: { rank: c.cmdRank, position: c.cmdPos } });
+    msg.textContent = '✓ ดาวน์โหลดสัญญาการยืมเงินแล้ว — เปิดตรวจใน Excel ก่อนพิมพ์';
+  }catch(e){ console.error(e); msg.textContent = 'สร้างสัญญาไม่สำเร็จ: ' + e.message; }
 }
 async function feeExportReceipts(){
   const msg = document.getElementById('feeMsg'), c = feeCfg(), r = feeCompute(c);

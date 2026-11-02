@@ -2321,7 +2321,8 @@ function renderFeePanel(el){
       <div class="field"><label>การเงินตรวจสอบ: ยศ</label>${inp('checkRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('checkName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('checkPos')}</div>
       <div class="field"><label>สว.กง.กบ.: ยศ</label>${inp('chiefRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('chiefName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('chiefPos')}</div>
       <div class="field"><label>ผู้อนุมัติ: ยศ</label>${inp('cmdRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('cmdName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('cmdPos')}</div>
-      <div class="field"><label><input type="checkbox" data-fee="thaiNum" ${c.thaiNum ? 'checked' : ''}> ใช้เลขไทย</label></div>
+      <div class="field"><label><input type="checkbox" data-fee="thaiNum" ${c.thaiNum ? 'checked' : ''}> ใช้เลขไทย (บันทึก)</label></div>
+      <div class="field wide"><label><input type="checkbox" data-fee="blankPayee" ${c.blankPayee ? 'checked' : ''}> ใบสำคัญ: เว้นยศ/ชื่อผู้รับเงินว่างทุกใบ (เขียนเอง) — ชื่อกลาง เช่น ครูฝึก/และคณะ เว้นว่างให้อัตโนมัติ</label></div>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="feeExport()" ${r.total > 0 ? '' : 'disabled'}>ดาวน์โหลดบันทึกขออนุมัติยืมเงิน (Word)</button>
@@ -2365,7 +2366,7 @@ async function feeExportReceipts(){
   try{
     await feeLoadLibs(FEE_RCPT_LIBS);
     const tpl = await fetch('lib/template-receipt.xlsx').then(x => { if(!x.ok) throw new Error('โหลดแบบฟอร์มไม่ได้'); return x.arrayBuffer(); });
-    const made = await FeeDocs.exportReceipts({ template: tpl, entries: r.paid, course: c.course, payerRank: c.bRank, payerName: c.bName });
+    const made = await FeeDocs.exportReceipts({ template: tpl, entries: r.paid, course: c.course, payerRank: c.bRank, payerName: c.bName, blankPayee: !!c.blankPayee });
     msg.textContent = `✓ ดาวน์โหลดแล้ว ${made.length} ใบ — แผ่น "สรุป" มียอดรวม · เปิดตรวจใน Excel ก่อนพิมพ์`;
   }catch(e){ console.error(e); msg.textContent = 'สร้างใบสำคัญไม่สำเร็จ: ' + e.message; }
 }

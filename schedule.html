@@ -2239,6 +2239,7 @@ function feeCfg(){
   let saved = {};
   try{ saved = JSON.parse(localStorage.getItem('sch_fee_cfg_' + cur.id) || '{}') || {}; }catch(e){}
   if(!base.docDate){ const n = new Date(); base.docDate = '       ' + THAI_MONTHS[n.getMonth()] + '  ' + (n.getFullYear() + 543); }
+  if(!base.shortDate){ const n = new Date(); base.shortDate = THAI_MONTHS_ABBR[n.getMonth()] + String(n.getFullYear() + 543).slice(-2); }
   return Object.assign(base, saved);
 }
 function feeSaveCfg(c){ try{ localStorage.setItem('sch_fee_cfg_' + activeCurriculum().id, JSON.stringify(c)); }catch(e){} }
@@ -2312,6 +2313,7 @@ function renderFeePanel(el){
       <div class="field"><label>โทร</label>${inp('phone')}</div>
       <div class="field"><label>ที่</label>${inp('docNo')}</div>
       <div class="field"><label>วันที่ (เว้นวัน)</label>${inp('docDate')}</div>
+      <div class="field"><label>วันที่ใต้ลงชื่อ (ย่อ)</label>${inp('shortDate')}</div>
       <div class="field wide"><label>ชื่อหลักสูตรในบันทึก</label>${inp('course')}</div>
       <div class="field wide"><label>เรียน (หน้า 1)</label>${inp('recipient1')}</div>
       <div class="field wide"><label>เรียน (หน้า 2)</label>${inp('recipient2')}</div>
@@ -2377,7 +2379,7 @@ async function feeExport(){
     await feeLoadLibs();
     await FeeDocs.exportMemo({
       org: c.org, phone: c.phone, docNo: c.docNo, docDate: c.docDate, course: c.course, intro: c.intro,
-      recipient1: c.recipient1, recipient2: c.recipient2, period: feePeriod(c), groups: r.groups, total: r.total, thaiNum: !!c.thaiNum,
+      recipient1: c.recipient1, recipient2: c.recipient2, period: feePeriod(c), shortDate: c.shortDate, groups: r.groups, total: r.total, thaiNum: !!c.thaiNum,
       borrower: { rank: c.bRank, name: c.bName, position: c.bPos },
       finance: { checkRank: c.checkRank, checkName: c.checkName, checkPos: c.checkPos, chiefRank: c.chiefRank, chiefName: c.chiefName,
                  chiefPos: c.chiefPos, cmdRank: c.cmdRank, cmdName: c.cmdName, cmdPos: c.cmdPos },

@@ -2231,7 +2231,7 @@ function feeDefaults(cur){
     checkRank: '', checkName: '', checkPos: 'ผบ.หมู่ กก.๕ บก.กฝ.บช.ตชด.',
     chiefRank: '', chiefName: '', chiefPos: 'สว.กก.๕ บก.กฝ.บช.ตชด.(กง.กบ.)',
     cmdRank: '', cmdName: '', cmdPos: 'ผกก.๕ บก.กฝ.บช.ตชด.',
-    thaiNum: true,
+    thaiDigits: false,
   };
 }
 function feeCfg(){
@@ -2323,7 +2323,7 @@ function renderFeePanel(el){
       <div class="field"><label>การเงินตรวจสอบ: ยศ</label>${inp('checkRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('checkName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('checkPos')}</div>
       <div class="field"><label>สว.กง.กบ.: ยศ</label>${inp('chiefRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('chiefName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('chiefPos')}</div>
       <div class="field"><label>ผู้อนุมัติ: ยศ</label>${inp('cmdRank')}</div><div class="field"><label>ชื่อ สกุล</label>${inp('cmdName')}</div><div class="field wide"><label>ตำแหน่ง</label>${inp('cmdPos')}</div>
-      <div class="field"><label><input type="checkbox" data-fee="thaiNum" ${c.thaiNum ? 'checked' : ''}> ใช้เลขไทย (บันทึก)</label></div>
+      <div class="field"><label><input type="checkbox" data-fee="thaiDigits" ${c.thaiDigits ? 'checked' : ''}> ใช้เลขไทย (บันทึก)</label></div>
       <div class="field wide"><label><input type="checkbox" data-fee="blankPayee" ${c.blankPayee ? 'checked' : ''}> ใบสำคัญ: เว้นยศ/ชื่อผู้รับเงินว่างทุกใบ (เขียนเอง) — ชื่อกลาง เช่น ครูฝึก/และคณะ เว้นว่างให้อัตโนมัติ</label></div>
     </div>
     <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -2391,7 +2391,7 @@ async function feeExport(){
     await feeLoadLibs();
     await FeeDocs.exportMemo({
       org: c.org, phone: c.phone, docNo: c.docNo, docDate: c.docDate, course: c.course, intro: c.intro,
-      recipient1: c.recipient1, recipient2: c.recipient2, period: feePeriod(c), shortDate: c.shortDate, groups: r.groups, total: r.total, thaiNum: !!c.thaiNum,
+      recipient1: c.recipient1, recipient2: c.recipient2, period: feePeriod(c), shortDate: c.shortDate, groups: r.groups, total: r.total, thaiNum: !!c.thaiDigits,
       borrower: { rank: c.bRank, name: c.bName, position: c.bPos },
       finance: { checkRank: c.checkRank, checkName: c.checkName, checkPos: c.checkPos, chiefRank: c.chiefRank, chiefName: c.chiefName,
                  chiefPos: c.chiefPos, cmdRank: c.cmdRank, cmdName: c.cmdName, cmdPos: c.cmdPos },

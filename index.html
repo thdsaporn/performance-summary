@@ -506,10 +506,17 @@
     section > .inner { width: 100%; }
     .sec-cover { min-height: calc(100vh - 100px); }
   }
+  /* ผลงานเด่น 5 ระบบ: แถวบน 3 ใบ แถวล่าง 2 ใบ */
+  @media screen and (min-width: 961px) {
+    #achievement .grid { grid-template-columns: repeat(6, 1fr) !important; }
+    #achievement .innov-card { grid-column: span 2 !important; }
+    #achievement .innov-card:nth-child(n+4) { grid-column: span 3 !important; }
+  }
   /* จอเตี้ย: ย่อส่วนผลงานเด่นให้จบในจอเดียว */
-  @media screen and (min-width: 961px) and (max-height: 760px) { #achievement { padding-top: 16px; padding-bottom: 16px; } #achievement .inner { zoom: .93; } }
-  @media screen and (min-width: 961px) and (max-height: 700px) { #achievement .inner { zoom: .85; } }
-  @media screen and (min-width: 961px) and (max-height: 640px) { #achievement { padding-top: 8px; padding-bottom: 8px; } #achievement .inner { zoom: .78; } }
+  @media screen and (min-width: 961px) and (max-height: 900px) { #achievement { padding-top: 16px; padding-bottom: 16px; } #achievement .inner { zoom: .86; } }
+  @media screen and (min-width: 961px) and (max-height: 760px) { #achievement .inner { zoom: .8; } }
+  @media screen and (min-width: 961px) and (max-height: 700px) { #achievement { padding-top: 8px; padding-bottom: 8px; } #achievement .inner { zoom: .74; } }
+  @media screen and (min-width: 961px) and (max-height: 640px) { #achievement .inner { zoom: .68; } }
 
   @media print {
     @page { size: A4 portrait; margin: 0; }
@@ -546,7 +553,8 @@
     #qa .grid { grid-template-columns: 1fr !important; gap: 6mm; }
     #qa .card { font-size: 16px; }
     #qa .metric-row { grid-template-columns: repeat(4, 1fr) !important; }
-    #achievement .grid { grid-template-columns: 1fr 1fr !important; gap: 5mm; }
+    #achievement .grid { grid-template-columns: 1fr 1fr !important; gap: 4mm; }
+    #achievement .innov-card:last-child { grid-column: 1 / -1 !important; }
     #summary .g3 { grid-template-columns: 1fr !important; gap: 5mm; }
     #summary .card { font-size: 17px; }
     .card, .innov-card, .exec-card { box-shadow: none !important; break-inside: avoid; }
@@ -558,7 +566,7 @@
     #work1 .inner { zoom: 1.3; }
     #work2 .inner { zoom: 1.2; }
     #qa .inner { zoom: 1.32; }
-    #achievement .inner { zoom: 1.22; }
+    #achievement .inner { zoom: 1.0; }
     #summary .inner { zoom: 1.45; }
   }
 /* === จบ แต่ละส่วนพอดี 1 หน้า === */
@@ -582,7 +590,7 @@
     <a href="#work1">งานสารบรรณ</a>
     <a href="#work2">การจัดการฝึก</a>
     <a href="#qa">ประกันคุณภาพ & วินัย</a>
-    <a href="#achievement">4 นวัตกรรมดิจิทัล</a>
+    <a href="#achievement">5 นวัตกรรมดิจิทัล</a>
     <a href="#summary">สรุปผลงาน</a>
   </nav>
   <div class="topbar-actions">
@@ -614,7 +622,7 @@
         </div>
         <div class="hero-actions">
           <a href="#achievement" class="btn-hero-primary">
-            🌟 ชม 4 นวัตกรรมดิจิทัล
+            🌟 ชม 5 นวัตกรรมดิจิทัล
           </a>
           <a href="#summary" class="btn-hero-outline">
             📊 ดูสรุปผลการปฏิบัติงาน
@@ -658,7 +666,7 @@
     <a href="#achievement" class="exec-card purple">
       <div class="exec-icon">💡</div>
       <div class="exec-info">
-        <div class="exec-val">4 นวัตกรรมดิจิทัล</div>
+        <div class="exec-val">5 นวัตกรรมดิจิทัล</div>
         <div class="exec-lbl">ผลงานริเริ่มพัฒนาด้วยตนเอง</div>
       </div>
     </a>
@@ -814,18 +822,18 @@
     </div>
   </section>
 
-  <!-- ============ ผลงานเด่น : นวัตกรรม 4 ระบบดิจิทัล (Showcase) ============ -->
+  <!-- ============ ผลงานเด่น : นวัตกรรม 5 ระบบดิจิทัล (Showcase) ============ -->
   <section class="sec alt" id="achievement">
     <div class="inner">
       <div class="s-head">
         <div class="s-num" style="background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:var(--navy-2);">★</div>
         <div>
-          <h2 class="s-title">ผลงานเด่น : นวัตกรรม 4 ระบบดิจิทัลสนับสนุนงานฝึกอบรม</h2>
+          <h2 class="s-title">ผลงานเด่น : นวัตกรรม 5 ระบบดิจิทัลสนับสนุนงานฝึกอบรม</h2>
           <div class="s-sub">ผลงานริเริ่มสร้างสรรค์ที่พัฒนาขึ้นด้วยตนเองนอกเหนือจากภารกิจประจำ เพื่อเพิ่มประสิทธิภาพ ลดขั้นตอนและระยะเวลาทำงาน</div>
         </div>
       </div>
 
-      <!-- 4 ระบบหลัก Showcase Cards -->
+      <!-- 5 ระบบหลัก Showcase Cards -->
       <div class="grid g2">
 
         <!-- ระบบที่ 1 -->
@@ -955,6 +963,34 @@
           </div>
         </div>
 
+        <!-- ระบบที่ 5 (โปรแกรมในเครื่อง ไม่มีลิงก์) -->
+        <div class="innov-card gold reveal" style="grid-column: 1 / -1;">
+          <div>
+            <div class="innov-top">
+              <div class="innov-title-wrap">
+                <div class="innov-icon-box">📨</div>
+                <div>
+                  <div class="innov-card-title">5. โปรแกรมช่วยส่งหนังสือ saraban</div>
+
+                </div>
+              </div>
+            </div>
+            <div class="innov-tag-row">
+              <span class="innov-tag">ใช้งานจริงแล้ว</span>
+              <span class="innov-tag">ส่งหลายหน่วยในครั้งเดียว</span>
+              <span class="innov-tag">ตรวจกับทะเบียนจริง</span>
+            </div>
+            <ul class="innov-features">
+              <li><b>ส่งหนังสือส่งภายในในระบบสารบรรณ ตร.:</b> กรอกข้อมูลและแนบไฟล์ในหน้าเดียว โปรแกรมทำขั้นตอนในระบบให้ทีละขั้น</li>
+              <li><b>เลือกผู้รับได้หลายหน่วย:</b> ส่งถึง / สำเนาถึง ทั้ง 4 ประเภทการส่ง ในครั้งเดียว และตรวจผู้รับกับไฟล์แนบกับทะเบียนจริงหลังส่ง</li>
+              <li><b>ใช้ร่วมกันในหน่วย:</b> หลายคนส่งพร้อมกันได้ (เข้าคิวทีละเรื่อง) ถ้าสะดุดกลางทางทำต่อจากเลขเดิมได้ ไม่สร้างเรื่องซ้ำ</li>
+            </ul>
+          </div>
+          <div class="innov-actions">
+            <span class="btn-demo outline" style="cursor:default;">🔒 ใช้งานในเครื่องของหน่วย</span>
+          </div>
+        </div>
+
       </div>
 
 
@@ -997,9 +1033,9 @@
             <div class="card-ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
-            <h3 class="card-title">ประกันคุณภาพ & นวัตกรรม 4 ระบบ</h3>
+            <h3 class="card-title">ประกันคุณภาพ & นวัตกรรม 5 ระบบ</h3>
           </div>
-          <p>ส่งมอบรายงานตัวชี้วัดที่ 2 ครบถ้วน ผลประเมินปีงบ 2568 ต่อเนื่อง 2569 ระดับดีมาก (5.00) พร้อมทั้งริเริ่มพัฒนานวัตกรรมดิจิทัล 4 ระบบขึ้นด้วยตนเองเพื่อสนับสนุนหน่วยงาน</p>
+          <p>ส่งมอบรายงานตัวชี้วัดที่ 2 ครบถ้วน ผลประเมินปีงบ 2568 ต่อเนื่อง 2569 ระดับดีมาก (5.00) พร้อมทั้งริเริ่มพัฒนานวัตกรรมดิจิทัล 5 ระบบขึ้นด้วยตนเองเพื่อสนับสนุนหน่วยงาน</p>
         </div>
       </div>
       <div class="thanks-box reveal">

@@ -987,6 +987,7 @@
             </ul>
           </div>
           <div class="innov-actions">
+            <button type="button" class="btn-demo gold" onclick="openVideoDemo()">▶ ดูวิดีโอสาธิต (1:18)</button>
             <span class="btn-demo outline" style="cursor:default;">🔒 ใช้งานในเครื่องของหน่วย</span>
           </div>
         </div>
@@ -1217,6 +1218,31 @@
     });
   }
 })();
+</script>
+<!-- วิดีโอสาธิตโปรแกรมช่วยส่งหนังสือ (ภาพจำลอง ข้อมูลตัวอย่าง) -->
+<div id="videoDemo" role="dialog" aria-modal="true" aria-label="วิดีโอสาธิตโปรแกรมช่วยส่งหนังสือ saraban"
+  style="display:none;position:fixed;inset:0;z-index:300;background:rgba(6,14,28,.88);align-items:center;justify-content:center;padding:4vw;"
+  onclick="if(event.target===this)closeVideoDemo()">
+  <div style="width:min(1100px,100%);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;color:#fff;margin-bottom:10px;">
+      <b style="font-family:'Prompt',sans-serif;font-size:16px;">วิดีโอสาธิต: โปรแกรมช่วยส่งหนังสือ saraban</b>
+      <button type="button" onclick="closeVideoDemo()" aria-label="ปิด" style="background:#dc2626;color:#fff;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:14px;flex:none;">✕</button>
+    </div>
+    <video id="videoDemoEl" controls preload="none" playsinline poster="./media/saraban-demo.jpg" src="./media/saraban-demo.mp4"
+      style="width:100%;display:block;border-radius:12px;background:#000;"></video>
+    <div style="color:#94a3b8;font-size:12.5px;margin-top:8px;">ภาพจำลองด้วยข้อมูลตัวอย่าง · เสียงพากย์ AI</div>
+  </div>
+</div>
+<script>
+  window.openVideoDemo = function () {
+    const m = document.getElementById('videoDemo'); m.style.display = 'flex'; document.body.style.overflow = 'hidden';
+    const v = document.getElementById('videoDemoEl'); v.currentTime = 0; v.play().catch(() => {});
+  };
+  window.closeVideoDemo = function () {
+    const v = document.getElementById('videoDemoEl'); v.pause();
+    document.getElementById('videoDemo').style.display = 'none'; document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('videoDemo').style.display === 'flex') closeVideoDemo(); });
 </script>
 </body>
 </html>
